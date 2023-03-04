@@ -1,0 +1,14 @@
+### login
+POST http://localhost:8020/ew-server/doLogin
+Content-Type: application/json
+
+{
+  "loginName": "142517@qq.com",
+  "password": "123456",
+  "ifRemember": "off"
+}
+###
+GET http://localhost:8020/ew-server/login
+
+
+
