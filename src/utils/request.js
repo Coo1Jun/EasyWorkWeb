@@ -72,9 +72,9 @@ service.interceptors.response.use(
     }
   },
   error => {
-    console.log('err' + error) // 用于调式
+    console.log('err =》 ' + error) // 用于调式
     Message({
-      message: error.msg,
+      message: '内部服务器错误',
       type: 'error',
       duration: 3 * 1000
     })
