@@ -1,32 +1,50 @@
 <template>
   <div class="navbar">
-    <hamburger :is-active="sidebar.opened" class="hamburger-container" @toggleClick="toggleSideBar" />
+    <hamburger
+      :is-active="sidebar.opened"
+      class="hamburger-container"
+      @toggleClick="toggleSideBar"
+    />
 
     <breadcrumb class="breadcrumb-container" />
 
     <div class="right-menu">
-      <el-dropdown class="avatar-container" trigger="click">
-        <div class="avatar-wrapper">
-          <img :src="userInfo && userInfo.portrait" class="user-avatar">
-          <i class="el-icon-caret-bottom" />
-        </div>
-        <el-dropdown-menu slot="dropdown" class="user-dropdown">
-          <router-link to="/">
+      <el-popover
+        v-model="visible"
+        class="avatar-container"
+        placement="bottom"
+        width="320"
+        trigger="click"
+        :visible-arrow="false"
+      >
+        <el-avatar
+          slot="reference"
+          :size="'large'"
+          :src="userInfo && userInfo.portrait"
+        />
+        <div @click="visible = false">
+          <el-row>
+            <router-link to="/">
+              <el-dropdown-item>
+                <i class="el-icon-house" />
+                主页
+              </el-dropdown-item>
+            </router-link>
+          </el-row>
+          <el-row>
             <el-dropdown-item>
-              主页
+              <i class="el-icon-user" />
+              账号资料设置
             </el-dropdown-item>
-          </router-link>
-          <a target="_blank" href="https://github.com/PanJiaChen/vue-admin-template/">
-            <el-dropdown-item>Github</el-dropdown-item>
-          </a>
-          <a target="_blank" href="https://panjiachen.github.io/vue-element-admin-site/#/">
-            <el-dropdown-item>Docs</el-dropdown-item>
-          </a>
-          <el-dropdown-item divided @click.native="logout">
-            <span style="display:block;">退出登录</span>
-          </el-dropdown-item>
-        </el-dropdown-menu>
-      </el-dropdown>
+          </el-row>
+          <el-row>
+            <el-dropdown-item style="color:red" divided @click.native="logout">
+              <i class="el-icon-right" />
+              退出登录
+            </el-dropdown-item>
+          </el-row>
+        </div>
+      </el-popover>
     </div>
   </div>
 </template>
@@ -41,16 +59,13 @@ export default {
     Breadcrumb,
     Hamburger
   },
-  data(){
+  data() {
     return {
-      
+      visible: false
     }
   },
   computed: {
-    ...mapGetters([
-      'sidebar',
-      'userInfo'
-    ])
+    ...mapGetters(['sidebar', 'userInfo'])
   },
   methods: {
     toggleSideBar() {
@@ -59,7 +74,7 @@ export default {
     async logout() {
       await this.$store.dispatch('user/logout')
       this.$router.push(`/login`)
-    },
+    }
     // async filePath(fileId) {
     //   if (fileId !== null) {
     //     const {data} = await getFilePath(fileId)
@@ -76,18 +91,18 @@ export default {
   overflow: hidden;
   position: relative;
   background: #fff;
-  box-shadow: 0 1px 4px rgba(0,21,41,.08);
+  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
 
   .hamburger-container {
     line-height: 46px;
     height: 100%;
     float: left;
     cursor: pointer;
-    transition: background .3s;
-    -webkit-tap-highlight-color:transparent;
+    transition: background 0.3s;
+    -webkit-tap-highlight-color: transparent;
 
     &:hover {
-      background: rgba(0, 0, 0, .025)
+      background: rgba(0, 0, 0, 0.025);
     }
   }
 
@@ -97,8 +112,9 @@ export default {
 
   .right-menu {
     float: right;
-    height: 100%;
+    height: 80%;
     line-height: 50px;
+    margin-top: 5px;
 
     &:focus {
       outline: none;
@@ -114,19 +130,18 @@ export default {
 
       &.hover-effect {
         cursor: pointer;
-        transition: background .3s;
+        transition: background 0.3s;
 
         &:hover {
-          background: rgba(0, 0, 0, .025)
+          background: rgba(0, 0, 0, 0.025);
         }
       }
     }
 
     .avatar-container {
       margin-right: 30px;
-
       .avatar-wrapper {
-        margin-top: 5px;
+        // margin-top: 5px;
         position: relative;
 
         .user-avatar {
@@ -145,6 +160,13 @@ export default {
         }
       }
     }
+  }
+}
+.my-icon {
+  &:hover {
+    // color: #66b1ff;
+    color: red;
+    fill: red;
   }
 }
 </style>
