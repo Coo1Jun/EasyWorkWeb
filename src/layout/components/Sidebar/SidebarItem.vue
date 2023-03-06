@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!item.hidden">
+  <div v-if="!hidden">
     <template v-if="hasOneShowingChild(item.children,item) && (!onlyOneChild.children||onlyOneChild.noShowingChildren)&&!item.alwaysShow">
       <app-link v-if="onlyOneChild.meta" :to="resolvePath(onlyOneChild.path)">
         <el-menu-item :index="resolvePath(onlyOneChild.path)" :class="{'submenu-title-noDropdown':!isNest}">
@@ -25,6 +25,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import path from 'path'
 import { isExternal } from '@/utils/validate'
 import Item from './Item'
@@ -54,7 +55,28 @@ export default {
     // To fix https://github.com/PanJiaChen/vue-admin-template/issues/237
     // TODO: refactor with render function
     this.onlyOneChild = null
-    return {}
+    return {
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'userInfo'
+    ]),
+    hidden() {
+      // 判断是否隐藏
+      if (this.item.hidden) {
+        return this.item.hidden
+      }
+      // 判断角色权限
+      if (this.roles) {
+        return !this.roles.includes(this.userInfo && this.userInfo.role)
+      }
+      return false
+    },
+    // 获取菜单配置的角色权限
+    roles() {
+      return this.item.meta && this.item.meta.roles
+    }
   },
   methods: {
     hasOneShowingChild(children = [], parent) {

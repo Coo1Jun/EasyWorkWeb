@@ -60,7 +60,7 @@ export const constantRoutes = [
     component: Layout,
     redirect: '/example/table',
     name: 'Example',
-    meta: { title: 'Example', icon: 'el-icon-s-help' },
+    meta: { title: 'Example', icon: 'el-icon-s-help', roles: ['admin'] },
     children: [
       {
         path: 'table',
@@ -81,7 +81,7 @@ export const constantRoutes = [
     component: Layout,
     redirect: '/example1/table1',
     name: 'Example',
-    meta: { title: 'Example1', icon: 'el-icon-s-help' },
+    meta: { title: 'Example1', icon: 'el-icon-s-help', roles: ['admin', 'user'] },
     children: [
       {
         path: 'table',
@@ -118,7 +118,8 @@ export const constantRoutes = [
     name: 'Nested',
     meta: {
       title: 'Nested',
-      icon: 'nested'
+      icon: 'nested',
+      roles: ['user']
     },
     children: [
       {
@@ -137,7 +138,7 @@ export const constantRoutes = [
             path: 'menu1-2',
             component: () => import('@/views/nested/menu1/menu1-2'),
             name: 'Menu1-2',
-            meta: { title: 'Menu1-2' },
+            meta: { title: 'Menu1-2', roles: ['admin'] },
             children: [
               {
                 path: 'menu1-2-1',
