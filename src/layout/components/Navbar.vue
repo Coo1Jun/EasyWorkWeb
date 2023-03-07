@@ -22,27 +22,39 @@
           :size="'large'"
           :src="userInfo && userInfo.portrait"
         />
-        <div @click="visible = false">
-          <el-row>
+        <div>
+          <div class="user-bg">
+            <div class="user-info">
+              <el-avatar :size="60" :src="userInfo && userInfo.portrait" />
+              <div>
+                <h1>{{ userInfo && userInfo.realName }}</h1>
+              </div>
+            </div>
+          </div>
+          <div @click="visible = false">
             <router-link to="/">
-              <el-dropdown-item>
+              <el-dropdown-item divided>
                 <i class="el-icon-house" />
                 主页
               </el-dropdown-item>
             </router-link>
-          </el-row>
-          <el-row>
+          </div>
+          <div @click="visible = false">
             <el-dropdown-item>
               <i class="el-icon-user" />
               账号资料设置
             </el-dropdown-item>
-          </el-row>
-          <el-row>
-            <el-dropdown-item style="color:red" divided @click.native="logout">
+          </div>
+          <div @click="visible = false">
+            <el-dropdown-item
+              style="color: #ff7575"
+              divided
+              @click.native="logout"
+            >
               <i class="el-icon-right" />
               退出登录
             </el-dropdown-item>
-          </el-row>
+          </div>
         </div>
       </el-popover>
     </div>
@@ -162,11 +174,24 @@ export default {
     }
   }
 }
-.my-icon {
-  &:hover {
-    // color: #66b1ff;
-    color: red;
-    fill: red;
+$bg-image: url("../../assets/background/user_bg.jpg");
+@mixin bg-image($image) {
+  background-image: $image;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+.user-bg {
+  width: 100%;
+  height: 260px;
+  padding-top: 70px;
+  display: flex;
+  justify-content: center; // 水平居中
+  align-items: center; // 垂直居中
+  @include bg-image($bg-image);
+  .user-info {
+    display: flex;
+    flex-direction: column;
   }
 }
 </style>
