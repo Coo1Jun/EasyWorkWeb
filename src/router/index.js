@@ -197,6 +197,11 @@ export const constantRoutes = [
   { path: '*', redirect: '/404', hidden: true }
 ]
 
+/**
+ * 需要根据用户角色动态加载的路由
+ */
+export const asyncRoutes = []
+
 const createRouter = () => new Router({
   // mode: 'history', // 需要服务支持
   scrollBehavior: () => ({ y: 0 }),

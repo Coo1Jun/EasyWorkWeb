@@ -194,4 +194,14 @@ $bg-image: url("../../assets/background/user_bg.jpg");
     flex-direction: column;
   }
 }
+// 设置 el-avatar 的鼠标指针效果
+.el-avatar {
+  cursor: pointer;
+
+  // 鼠标移动到 el-avatar 时的效果
+  &:hover {
+    cursor: pointer;
+  }
+}
+
 </style>
