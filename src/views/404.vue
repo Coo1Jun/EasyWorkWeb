@@ -23,7 +23,7 @@ export default {
   name: 'Page404',
   computed: {
     message() {
-      return '管理员说你不能进入这个页面...'
+      return '找不到页面或无权限访问...'
     }
   }
 }
