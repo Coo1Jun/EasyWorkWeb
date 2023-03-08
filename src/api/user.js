@@ -14,3 +14,21 @@ export function getInfo() {
     method: 'get'
   })
 }
+
+export function sendVerifyCode(email) {
+  return request({
+    url: '/api/ew-server/user/register/sendVerifyCode',
+    method: 'get',
+    params: {
+      email
+    }
+  })
+}
+
+export function register(data) {
+  return request({
+    url: '/api/ew-server/user/register',
+    method: 'post',
+    data
+  })
+}

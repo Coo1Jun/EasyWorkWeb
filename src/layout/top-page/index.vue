@@ -5,16 +5,19 @@
       <img class="logo" src="../../assets/logo/ew_logo.png">
     </div>
     <div class="container-main">
-      <Signin />
+      <Signin v-if="$route.name === 'Login'" />
+      <Signup v-else-if="$route.name === 'Signup'" />
     </div>
   </div>
 </template>
 <script>
 import Signin from './components/signin'
+import Signup from './components/signup'
 export default {
   name: 'TopPage',
   components: {
-    Signin
+    Signin,
+    Signup
   }
 }
 </script>

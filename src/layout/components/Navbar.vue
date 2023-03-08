@@ -24,11 +24,9 @@
         />
         <div>
           <div class="user-bg">
-            <div class="user-info">
-              <el-avatar :size="60" :src="userInfo && userInfo.portrait" />
-              <div>
-                <h1>{{ userInfo && userInfo.realName }}</h1>
-              </div>
+            <el-avatar :size="60" :src="userInfo && userInfo.portrait" />
+            <div>
+              <h1>{{ userInfo && userInfo.realName }}</h1>
             </div>
           </div>
           <div @click="visible = false">
@@ -182,17 +180,14 @@ $bg-image: url("../../assets/background/user_bg.jpg");
   background-position: center center;
 }
 .user-bg {
+  display: flex;
+  justify-content: center; /* 水平居中 */
+  align-items: center; /* 垂直居中 */
+  flex-direction: column; /* 垂直排列 */
   width: 100%;
   height: 260px;
   padding-top: 70px;
-  display: flex;
-  justify-content: center; // 水平居中
-  align-items: center; // 垂直居中
   @include bg-image($bg-image);
-  .user-info {
-    display: flex;
-    flex-direction: column;
-  }
 }
 // 设置 el-avatar 的鼠标指针效果
 .el-avatar {

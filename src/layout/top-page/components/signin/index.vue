@@ -108,7 +108,7 @@ export default {
       })
     },
     toRegister() {
-      this.$router.push({ path: '/dashboard' })
+      this.$router.push({ path: '/signup' })
     }
   }
 }

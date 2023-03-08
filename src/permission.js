@@ -9,7 +9,7 @@ import getPageTitle from '@/utils/get-page-title'
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
 const whiteList = ['/login'] // 无重定向白名单
-const excludePath = ['/register'] // 不进行校验的路径
+const excludePath = ['/signup'] // 不进行校验的路径
 
 router.beforeEach(async(to, from, next) => {
   // 启动进度条

@@ -45,11 +45,16 @@ export const constantRoutes = [
   },
   {
     path: '/login',
-    // component: () => import('@/views/login/index'),
+    name: 'Login',
     component: TopPage,
     hidden: true
   },
-
+  {
+    path: '/signup',
+    name: 'Signup',
+    component: TopPage,
+    hidden: true
+  },
   {
     path: '/404',
     component: () => import('@/views/404'),
