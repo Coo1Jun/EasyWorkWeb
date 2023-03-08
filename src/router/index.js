@@ -5,6 +5,7 @@ Vue.use(Router)
 
 /* Layout */
 import Layout from '@/layout'
+import TopPage from '@/layout/top-page'
 
 /**
  * 注意：子菜单仅在路由children.length>=1时出现
@@ -44,7 +45,8 @@ export const constantRoutes = [
   },
   {
     path: '/login',
-    component: () => import('@/views/login/index'),
+    // component: () => import('@/views/login/index'),
+    component: TopPage,
     hidden: true
   },
 

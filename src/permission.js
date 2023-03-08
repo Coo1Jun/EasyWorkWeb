@@ -8,14 +8,21 @@ import getPageTitle from '@/utils/get-page-title'
 
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
-const whiteList = ['/login'] // no redirect whitelist
+const whiteList = ['/login'] // 无重定向白名单
+const excludePath = ['/register'] // 不进行校验的路径
 
 router.beforeEach(async(to, from, next) => {
-  // start progress bar
+  // 启动进度条
   NProgress.start()
 
   // set page title
   document.title = getPageTitle(to.meta.title)
+  // 判断是否不进行校验
+  if (excludePath.includes(to.path)) {
+    next()
+    NProgress.done()
+    return
+  }
   // determine whether the user has logged in
   const hasToken = getToken()
 
