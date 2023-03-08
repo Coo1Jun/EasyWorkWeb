@@ -43,6 +43,7 @@ export const constantRoutes = [
       }
     ]
   },
+
   {
     path: '/login',
     name: 'Login',
@@ -55,6 +56,13 @@ export const constantRoutes = [
     component: TopPage,
     hidden: true
   },
+  {
+    path: '/forgot',
+    name: 'Forgot',
+    component: TopPage,
+    hidden: true
+  },
+
   {
     path: '/404',
     component: () => import('@/views/404'),

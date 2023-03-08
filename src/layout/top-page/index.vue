@@ -7,17 +7,20 @@
     <div class="container-main">
       <Signin v-if="$route.name === 'Login'" />
       <Signup v-else-if="$route.name === 'Signup'" />
+      <Forgot v-else-if="$route.name === 'Forgot'" />
     </div>
   </div>
 </template>
 <script>
 import Signin from './components/signin'
 import Signup from './components/signup'
+import Forgot from './components/forgot'
 export default {
   name: 'TopPage',
   components: {
     Signin,
-    Signup
+    Signup,
+    Forgot
   }
 }
 </script>

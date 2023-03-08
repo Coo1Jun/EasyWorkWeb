@@ -15,19 +15,25 @@ export function getInfo() {
   })
 }
 
-export function sendVerifyCode(email) {
+export function sendVerifyCode(params) {
   return request({
-    url: '/api/ew-server/user/register/sendVerifyCode',
+    url: '/api/ew-server/user/email/sendVerifyCode',
     method: 'get',
-    params: {
-      email
-    }
+    params
   })
 }
 
 export function register(data) {
   return request({
     url: '/api/ew-server/user/register',
+    method: 'post',
+    data
+  })
+}
+
+export function forgot(data) {
+  return request({
+    url: '/api/ew-server/user/change/password',
     method: 'post',
     data
   })

@@ -1,43 +1,30 @@
 <template>
   <el-card class="box-card">
     <el-form
-      ref="registerForm"
-      :model="registerForm"
+      ref="forgotForm"
+      :model="forgotForm"
       :rules="registerRules"
       auto-complete="on"
     >
-
       <div class="title">
-        注册
+        找回密码
       </div>
-      <div class="text">
-        用户名
-        <span style="font-size: 14px;color: #aaaaaa;margin-left: 5px">为了使您在工作中方便沟通，建议使用姓名</span>
-      </div>
-      <el-form-item prop="username">
-        <el-input
-          v-model="registerForm.username"
-          placeholder="请输入用户名"
-          auto-complete="on"
-          @keyup.enter.native="handleRegister"
-        />
-      </el-form-item>
       <div class="text">邮箱</div>
       <el-form-item prop="email">
         <el-input
-          v-model="registerForm.email"
+          v-model="forgotForm.email"
           placeholder="请输入邮箱"
           auto-complete="on"
-          @keyup.enter.native="handleRegister"
+          @keyup.enter.native="handleForgot"
         />
       </el-form-item>
       <div class="text">验证码</div>
       <el-form-item prop="code">
         <el-input
-          v-model="registerForm.code"
+          v-model="forgotForm.code"
           placeholder="请输入验证码"
           auto-complete="on"
-          @keyup.enter.native="handleRegister"
+          @keyup.enter.native="handleForgot"
         >
           <template>
             <el-button
@@ -50,38 +37,46 @@
           </template>
         </el-input>
       </el-form-item>
-      <div class="text">密码</div>
+      <div class="text">请输入新密码</div>
       <el-form-item prop="password">
         <el-input
-          v-model="registerForm.password"
+          v-model="forgotForm.password"
           placeholder="请输入密码"
           show-password
-          @keyup.enter.native="handleRegister"
+          @keyup.enter.native="handleForgot"
+        />
+      </el-form-item>
+      <div class="text">再次确认密码</div>
+      <el-form-item prop="confirmPwd">
+        <el-input
+          v-model="forgotForm.confirmPwd"
+          placeholder="再次确认密码"
+          show-password
+          @keyup.enter.native="handleForgot"
         />
       </el-form-item>
       <el-button
         :loading="loading"
         class="btn-signup"
         type="primary"
-        @click.native.prevent="handleRegister"
-      >注册</el-button>
+        @click.native.prevent="handleForgot"
+      >重置</el-button>
 
-      <span style="color: #aaaaaa;margin-right: 5px">或</span>
-      <el-link style="font-size: 16px" type="primary" @click="toLogin">登录</el-link>
+      <el-link style="font-size: 16px" type="primary" @click="toLogin">返回登录</el-link>
     </el-form>
   </el-card>
 </template>
 <script>
-import { sendVerifyCode, register } from '@/api/user'
+import { sendVerifyCode, forgot } from '@/api/user'
 import { Message } from 'element-ui'
 export default {
-  name: 'Signup',
+  name: 'Forgot',
   data() {
-    const reg = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-]+)+$/
+    const emailValid = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-]+)+$/
     const validateEmail = (rule, value, callback) => {
       if (!value) {
         callback(new Error('请输入邮箱'))
-      } else if (!reg.test(value)) {
+      } else if (!emailValid.test(value)) {
         callback(new Error('请输入正确的邮箱格式'))
       } else {
         callback()
@@ -98,9 +93,9 @@ export default {
         callback()
       }
     }
-    const validateUsername = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入用户名'))
+    const validateConfirmPwd = (rule, value, callback) => {
+      if (value !== this.forgotForm.password) {
+        callback(new Error('两次输入密码不一致'))
       } else {
         callback()
       }
@@ -115,18 +110,18 @@ export default {
       }
     }
     return {
-      registerForm: {
-        username: '',
+      forgotForm: {
         password: '',
+        confirmPwd: '',
         email: '',
         code: ''
       },
       registerRules: {
-        username: [
-          { required: true, trigger: 'blur', validator: validateUsername }
-        ],
         password: [
           { required: true, trigger: 'blur', validator: validatePassword }
+        ],
+        confirmPwd: [
+          { required: true, trigger: 'blur', validator: validateConfirmPwd }
         ],
         email: [
           { required: true, trigger: 'blur', validator: validateEmail }
@@ -155,21 +150,20 @@ export default {
     clearInterval(this.intervalId) // 清除定时器
   },
   methods: {
-    handleRegister() {
-      this.$refs.registerForm.validate(async(valid) => {
+    handleForgot() {
+      this.$refs.forgotForm.validate(async(valid) => {
         if (valid) {
           this.loading = true
-          const { data } = await register({
-            realName: this.registerForm.username,
-            password: this.registerForm.password,
-            email: this.registerForm.email,
-            code: this.registerForm.code
+          const { data } = await forgot({
+            password: this.forgotForm.password,
+            email: this.forgotForm.email,
+            code: this.forgotForm.code
           }).catch(() => {
             this.loading = false
           })
           if (data) {
             Message({
-              message: '注册成功',
+              message: '找回密码成功',
               type: 'success',
               duration: 3 * 1000
             })
@@ -186,13 +180,13 @@ export default {
       this.$router.push({ path: '/login' })
     },
     sendCode() {
-      this.$refs.registerForm.validateField('email', (errorMessage) => {
+      this.$refs.forgotForm.validateField('email', (errorMessage) => {
         if (errorMessage) {
           return false
         } else {
           sendVerifyCode({
-            email: this.registerForm.email,
-            type: 'register'
+            email: this.forgotForm.email,
+            type: 'forgot'
           }) // 发送验证码
           this.canSend = false
           this.intervalId = setInterval(() => {

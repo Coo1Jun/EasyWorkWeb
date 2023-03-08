@@ -37,7 +37,7 @@
 
       <span style="color: #aaaaaa;margin-right: 5px">或</span>
       <el-link style="font-size: 16px" type="primary" @click="toRegister">注册</el-link>
-      <el-link style="font-size: 16px;float: right" type="primary">忘记密码？</el-link>
+      <el-link style="font-size: 16px;float: right" type="primary" @click="toForgot">忘记密码？</el-link>
     </el-form>
   </el-card>
 </template>
@@ -109,6 +109,9 @@ export default {
     },
     toRegister() {
       this.$router.push({ path: '/signup' })
+    },
+    toForgot() {
+      this.$router.push({ path: '/forgot' })
     }
   }
 }
