@@ -25,7 +25,7 @@ export default {
   data() {
     return {
       title: 'Easy Work',
-      logo: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/ew_logo_bfcdd9.png'
+      logo: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/ew_logo_2568fd.png'
     }
   }
 }
@@ -46,7 +46,7 @@ export default {
   width: 100%;
   height: 70px;
   line-height: 50px;
-  background: #304156;
+  background: #DCDFE6;
   text-align: center;
   overflow: hidden;
 
@@ -65,7 +65,7 @@ export default {
     & .sidebar-title {
       display: inline-block;
       margin: 0;
-      color: #bfcdd9;
+      color: #2568fd;
       font-weight: 600;
       // line-height: 70px;
       font-size: 20px;
