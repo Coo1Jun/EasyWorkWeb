@@ -77,83 +77,133 @@ export const constantRoutes = [
       path: 'dashboard',
       name: 'Dashboard',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: '工作台', icon: 'el-icon-house' }
+      meta: { title: '工作台', icon: 'el-icon-s-home' }
     }]
   },
 
   {
-    path: '/mission',
+    path: '/example',
     component: Layout,
-    name: 'Mission',
-    children: [{
-      path: 'projects',
-      name: 'Projects',
-      component: () => import('@/views/404'),
-      meta: { title: '项目', icon: 'el-icon-document' }
-    }]
-  },
-
-  {
-    path: '/message',
-    component: Layout,
+    redirect: '/example/table',
+    name: 'Example',
+    meta: { title: 'Example', icon: 'el-icon-s-help', roles: ['admin'] },
     children: [
       {
-        path: 'chat',
-        name: 'Chat',
-        component: () => import('@/views/404'),
-        meta: { title: '消息', icon: 'el-icon-chat-dot-square' }
+        path: 'table',
+        name: 'Table',
+        component: () => import('@/views/table/index'),
+        meta: { title: 'Table', icon: 'table' }
+      },
+      {
+        path: 'tree',
+        name: 'Tree',
+        component: () => import('@/views/tree/index'),
+        meta: { title: 'Tree', icon: 'tree' }
+      }
+    ]
+  },
+  {
+    path: '/example1',
+    component: Layout,
+    redirect: '/example1/table1',
+    name: 'Example',
+    meta: { title: '项目', icon: 'el-icon-s-order', roles: ['admin', 'user'] },
+    children: [
+      {
+        path: 'table',
+        name: 'Table',
+        component: () => import('@/views/table/index'),
+        meta: { title: 'Table', icon: 'table' }
+      },
+      {
+        path: 'tree',
+        name: 'Tree',
+        component: () => import('@/views/tree/index'),
+        meta: { title: 'Tree', icon: 'tree' }
       }
     ]
   },
 
   {
-    path: '/calendar',
+    path: '/form',
     component: Layout,
     children: [
       {
-        path: 'my',
-        name: 'My',
-        component: () => import('@/views/404'),
-        meta: { title: '日历', icon: 'el-icon-date' }
+        path: 'index',
+        name: 'Form',
+        component: () => import('@/views/form/index'),
+        meta: { title: 'Form', icon: 'form' }
       }
     ]
   },
 
   {
-    path: '/drive',
+    path: '/nested',
     component: Layout,
+    redirect: '/nested/menu1',
+    name: 'Nested',
+    meta: {
+      title: 'Nested',
+      icon: 'nested',
+      roles: ['user']
+    },
     children: [
       {
-        path: 'personal',
-        name: 'Personal',
-        component: () => import('@/views/404'),
-        meta: { title: '网盘', icon: 'el-icon-folder-opened' }
+        path: 'menu1',
+        component: () => import('@/views/nested/menu1/index'), // Parent router-view
+        name: 'Menu1',
+        meta: { title: 'Menu1' },
+        children: [
+          {
+            path: 'menu1-1',
+            component: () => import('@/views/nested/menu1/menu1-1'),
+            name: 'Menu1-1',
+            meta: { title: 'Menu1-1' }
+          },
+          {
+            path: 'menu1-2',
+            component: () => import('@/views/nested/menu1/menu1-2'),
+            name: 'Menu1-2',
+            meta: { title: 'Menu1-2', roles: ['admin'] },
+            children: [
+              {
+                path: 'menu1-2-1',
+                component: () => import('@/views/nested/menu1/menu1-2/menu1-2-1'),
+                name: 'Menu1-2-1',
+                meta: { title: 'Menu1-2-1' }
+              },
+              {
+                path: 'menu1-2-2',
+                component: () => import('@/views/nested/menu1/menu1-2/menu1-2-2'),
+                name: 'Menu1-2-2',
+                meta: { title: 'Menu1-2-2' }
+              }
+            ]
+          },
+          {
+            path: 'menu1-3',
+            component: () => import('@/views/nested/menu1/menu1-3'),
+            name: 'Menu1-3',
+            meta: { title: 'Menu1-3' }
+          }
+        ]
+      },
+      {
+        path: 'menu2',
+        component: () => import('@/views/nested/menu2/index'),
+        name: 'Menu2',
+        meta: { title: 'menu2' }
       }
     ]
   },
 
   {
-    path: '/contacts',
+    path: 'external-link',
     component: Layout,
     children: [
       {
-        path: '',
-        name: 'Personal',
-        component: () => import('@/views/404'),
-        meta: { title: '通讯录', icon: 'el-icon-notebook-2' }
-      }
-    ]
-  },
-
-  {
-    path: '/console',
-    component: Layout,
-    children: [
-      {
-        path: '',
-        name: 'Personal',
-        component: () => import('@/views/404'),
-        meta: { title: '系统管理', icon: 'el-icon-setting' }
+        path: 'https://panjiachen.github.io/vue-element-admin-site/#/',
+        meta: { title: 'External Link', icon: 'link' }
       }
     ]
   },
