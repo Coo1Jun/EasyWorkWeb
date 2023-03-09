@@ -138,7 +138,7 @@ export const constantRoutes = [
     children: [
       {
         path: '',
-        name: 'Personal',
+        name: 'Contacts',
         component: () => import('@/views/404'),
         meta: { title: '通讯录', icon: 'el-icon-notebook-2' }
       }
@@ -151,7 +151,7 @@ export const constantRoutes = [
     children: [
       {
         path: '',
-        name: 'Personal',
+        name: 'Console',
         component: () => import('@/views/404'),
         meta: { title: '系统管理', icon: 'el-icon-setting' }
       }
