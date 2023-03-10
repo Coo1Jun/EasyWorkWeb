@@ -38,10 +38,12 @@
             </router-link>
           </div>
           <div @click="visible = false">
-            <el-dropdown-item>
-              <i class="el-icon-user" />
-              账号资料设置
-            </el-dropdown-item>
+            <router-link to="/console/account">
+              <el-dropdown-item>
+                <i class="el-icon-user" />
+                账号资料设置
+              </el-dropdown-item>
+            </router-link>
           </div>
           <div @click="visible = false">
             <el-dropdown-item

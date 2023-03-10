@@ -154,6 +154,13 @@ export const constantRoutes = [
         name: 'Console',
         component: () => import('@/views/404'),
         meta: { title: '系统管理', icon: 'el-icon-setting' }
+      },
+      {
+        path: 'account',
+        name: 'Account',
+        hidden: true,
+        component: () => import('@/views/account/index'),
+        meta: { title: '账户资料设置' }
       }
     ]
   },

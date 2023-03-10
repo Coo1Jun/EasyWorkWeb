@@ -38,3 +38,11 @@ export function forgot(data) {
     data
   })
 }
+
+export function editUserInfo(data) {
+  return request({
+    url: '/api/ew-server/user',
+    method: 'put',
+    data
+  })
+}
