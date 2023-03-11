@@ -33,8 +33,8 @@ export function register(data) {
 
 export function forgot(data) {
   return request({
-    url: '/api/ew-server/user/change/password',
-    method: 'post',
+    url: '/api/ew-server/user/change/forogt',
+    method: 'put',
     data
   })
 }
@@ -46,3 +46,20 @@ export function editUserInfo(data) {
     data
   })
 }
+
+export function editPassword(data) {
+  return request({
+    url: '/api/ew-server/user/edit/password',
+    method: 'put',
+    data
+  })
+}
+
+export function editEmail(data) {
+  return request({
+    url: '/api/ew-server/user/edit/email',
+    method: 'put',
+    data
+  })
+}
+

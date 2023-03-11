@@ -159,15 +159,19 @@ export default {
       this.$refs.registerForm.validate(async(valid) => {
         if (valid) {
           this.loading = true
-          const { data } = await register({
+          let success
+          await register({
             realName: this.registerForm.username,
             password: this.registerForm.password,
             email: this.registerForm.email,
             code: this.registerForm.code
+          }).then(response => {
+            success = response.success
           }).catch(() => {
             this.loading = false
+            success = false
           })
-          if (data) {
+          if (success) {
             Message({
               message: '注册成功',
               type: 'success',

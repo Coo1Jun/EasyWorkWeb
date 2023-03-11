@@ -136,7 +136,7 @@
         </div>
         <div class="other-item-body">
           你当前的邮箱是
-          <span style="color: #ff7575">{{ userInfo.email }}</span>
+          <span style="color: #ff7575">{{ userInfo && userInfo.email }}</span>
           ，修改邮箱时系统会发送验证码到新的邮箱上，然后输入验证码后完成修改。
         </div>
         <el-form
@@ -171,7 +171,7 @@
             </el-input>
           </el-form-item>
           <el-button
-            :loading="loading"
+            :loading="editEmailLoading"
             class="btn-save"
             type="primary"
             @click.native.prevent="handleBind"
@@ -185,7 +185,7 @@
 <script>
 import ImageCropper from '@/components/ImageCropper'
 import { mapGetters } from 'vuex'
-import { editUserInfo, sendVerifyCode } from '@/api/user'
+import { editUserInfo, sendVerifyCode, editPassword, editEmail } from '@/api/user'
 import { Notification } from 'element-ui'
 
 export default {
@@ -199,7 +199,7 @@ export default {
         callback()
       }
     }
-    // 检查密码是否包含数字和字母
+    // 检查密码是否包含数字和字母，且不少于8位
     const pwdValid = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/
     const validatePassword = (rule, value, callback) => {
       if (!value) {
@@ -243,6 +243,7 @@ export default {
       imagecropperKey: 0,
       loading: false,
       editPwdloading: false,
+      editEmailLoading: false,
       canSend: true,
       timeLeft: 60,
       profile: {
@@ -288,7 +289,7 @@ export default {
       'userInfo'
     ]),
     imageUrl() {
-      return this.userInfo.portrait
+      return this.userInfo && this.userInfo.portrait
     }
   },
   created() {
@@ -334,14 +335,22 @@ export default {
             requestData.description = this.profile.desc
           }
           if (Object.keys(requestData).length !== 1) {
-            const { data } = await editUserInfo(requestData).catch(() => {
-              this.loading = false
-            })
-            if (data) {
+            let success
+            await editUserInfo(requestData)
+              .then(response => {
+                success = response.success
+              }).catch(() => {
+                success = false
+                this.loading = false
+              })
+            // 请求成功success为true，失败data为false
+            if (success) {
               this.userInfo.realName = this.profile.name
               this.userInfo.birthDate = this.profile.birthday
               this.userInfo.sex = this.profile.sex
               this.userInfo.description = this.profile.desc
+            } else {
+              this.loading = false
             }
           } else {
             console.log('数据没有被修改')
@@ -360,10 +369,33 @@ export default {
       })
     },
     savePassword() {
-      this.$refs.editPassword.validate(valid => {
+      this.$refs.editPassword.validate(async(valid) => {
         if (valid) {
           this.editPwdloading = true
-          // todo
+          let success
+          await editPassword({
+            id: this.userInfo.userid,
+            oldPassword: this.editPassword.oldPassword,
+            newPassword: this.editPassword.newPassword
+          }).then(response => {
+            success = response.success
+          }).catch(() => {
+            this.editPwdloading = false
+            success = false
+          })
+          // 请求成功success为true
+          if (success) {
+            Notification({
+              type: 'success',
+              title: '更新密码成功',
+              duration: 3000
+            })
+            // 清空页面上的数据
+            this.editPassword = {
+              oldPassword: '',
+              newPassword: ''
+            }
+          }
           this.editPwdloading = false
         } else {
           this.editPwdloading = false
@@ -379,7 +411,7 @@ export default {
         } else {
           sendVerifyCode({
             email: this.editEmail.email,
-            type: 'editEmail'
+            type: 'change-email'
           }) // 发送验证码
           this.canSend = false
           this.intervalId = setInterval(() => {
@@ -389,7 +421,38 @@ export default {
       })
     },
     handleBind() {
-      // todo
+      this.$refs.editEmail.validate(async(valid) => {
+        if (valid) {
+          this.editEmailLoading = true
+          let success
+          await editEmail(this.editEmail)
+            .then(response => {
+              success = response.success
+            })
+            .catch(() => {
+              success = false
+            })
+          if (success) {
+            // 更新vuex
+            this.userInfo.email = this.editEmail.email
+            Notification({
+              type: 'success',
+              title: '更新邮箱成功',
+              duration: 3000
+            })
+            // 清空页面上的数据
+            this.editEmail = {
+              email: '',
+              code: ''
+            }
+          }
+          this.editEmailLoading = false
+        } else {
+          this.editEmailLoading = false
+          console.log('error submit!!')
+          return false
+        }
+      })
     }
   }
 }
