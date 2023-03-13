@@ -42,7 +42,14 @@
           :rules="profileRules"
         >
           <el-form-item label="用户名" prop="name">
-            <el-input v-model="profile.name" />
+            <el-popover
+              placement="top-start"
+              width="310"
+              trigger="hover"
+              content="为了使您在工作中方便沟通，建议使用姓名"
+            >
+              <el-input slot="reference" v-model="profile.name" />
+            </el-popover>
           </el-form-item>
           <el-form-item label="邮箱">
             <el-input v-model="profile.email" :disabled="true" />
