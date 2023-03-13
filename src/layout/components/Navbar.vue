@@ -57,6 +57,7 @@
           </div>
         </div>
       </el-popover>
+      <span class="user-avatar-name">{{ userInfo && userInfo.realName }}</span>
     </div>
   </div>
 </template>
@@ -124,9 +125,10 @@ export default {
 
   .right-menu {
     float: right;
-    height: 80%;
+    display: flex;
+    height: 100%;
     line-height: 50px;
-    margin-top: 5px;
+    margin-right: 25px;
 
     &:focus {
       outline: none;
@@ -151,7 +153,8 @@ export default {
     }
 
     .avatar-container {
-      margin-right: 30px;
+      margin-right: 10px;
+      margin-top: 5px;
       .avatar-wrapper {
         // margin-top: 5px;
         position: relative;
