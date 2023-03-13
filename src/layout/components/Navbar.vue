@@ -17,11 +17,17 @@
         trigger="click"
         :visible-arrow="false"
       >
-        <el-avatar
+        <div
           slot="reference"
-          :size="'large'"
-          :src="userInfo && userInfo.portrait"
-        />
+          style="display: flex;"
+        >
+          <el-avatar
+            :size="'large'"
+            :src="userInfo && userInfo.portrait"
+            style="margin-top: 5px;margin-right: 10px"
+          />
+          <span class="avatar-name">{{ userInfo && userInfo.realName }}</span>
+        </div>
         <div>
           <div class="user-bg">
             <el-avatar :size="60" :src="userInfo && userInfo.portrait" />
@@ -57,7 +63,6 @@
           </div>
         </div>
       </el-popover>
-      <span class="user-avatar-name">{{ userInfo && userInfo.realName }}</span>
     </div>
   </div>
 </template>
@@ -128,7 +133,7 @@ export default {
     display: flex;
     height: 100%;
     line-height: 50px;
-    margin-right: 25px;
+    margin-right: 20px;
 
     &:focus {
       outline: none;
@@ -154,7 +159,7 @@ export default {
 
     .avatar-container {
       margin-right: 10px;
-      margin-top: 5px;
+      // margin-top: 5px;
       .avatar-wrapper {
         // margin-top: 5px;
         position: relative;
@@ -203,5 +208,12 @@ $bg-image: url("../../assets/background/user_bg.jpg");
     cursor: pointer;
   }
 }
+.avatar-name {
+  cursor: pointer;
 
+  // 鼠标移动到 el-avatar 时的效果
+  &:hover {
+    cursor: pointer;
+  }
+}
 </style>
