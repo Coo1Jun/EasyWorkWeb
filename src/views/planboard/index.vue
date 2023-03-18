@@ -25,14 +25,16 @@
                 <div class="username">所有</div>
                 <div>{{ allCompletedTasks }} / {{ allTaskCount }}</div>
               </el-menu-item>
-              <el-menu-item v-for="user in planUsers" :key="user.id" :index="user.id">
-                <el-avatar
-                  :size="'large'"
-                  src="https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/e540756cb72f4164b8647bae5bfb3f4d.png"
-                />
-                <div class="username">{{ user.username }}</div>
-                <div>{{ user.completedTasks }} / {{ user.taskCount }}</div>
-              </el-menu-item>
+              <el-tooltip v-for="user in planUsers" :key="user.id" :content="user.username" placement="bottom" effect="light" :visible-arrow="false">
+                <el-menu-item :index="user.id">
+                  <el-avatar
+                    :size="'large'"
+                    src="https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/e540756cb72f4164b8647bae5bfb3f4d.png"
+                  />
+                  <div class="username">{{ user.username }}</div>
+                  <div>{{ user.completedTasks }} / {{ user.taskCount }}</div>
+                </el-menu-item>
+              </el-tooltip>
             </el-menu>
           </div>
           <div class="plan-task-summary">
@@ -99,7 +101,7 @@ export default {
         },
         {
           id: '3',
-          username: '小明3',
+          username: '小明发射点发射点发顺丰的3',
           taskCount: 40, // 任务总数
           completedTasks: 32 // 已经完成的任务
         },
