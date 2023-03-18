@@ -6,13 +6,13 @@ module.exports = {
    * @type {boolean} true | false
    * @description 是否需要tagsView
    */
-  tagsView: true,
+  tagsView: false,
 
   /**
    * @type {boolean} true | false
    * @description 是否固定header
    */
-  fixedHeader: false,
+  fixedHeader: true,
 
   /**
    * @type {boolean} true | false
