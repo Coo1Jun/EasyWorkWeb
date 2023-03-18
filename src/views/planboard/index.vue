@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <!-- 进度条 -->
-    <plan-navbar :progress="50" class="plan-navbar" />
+    <plan-navbar :progress="progress" class="plan-navbar" />
     <div class="plan-container">
       <!-- 左边的计划栏 -->
       <div class="sidebar">
@@ -17,17 +17,26 @@
         <!-- plan-avatar 所有人完成情况 -->
         <div v-if="planAvatarShow" v-horizontal-scroll class="plan-avatar">
           <div class="plan-avatar-average">
-            <div>4.6</div>
+            <div>{{ averageTasks }}</div>
             <div style="color: #909399;width:40px;text-align:center">人均</div>
           </div>
           <div>
-            <el-menu :default-active="activeIndex" mode="horizontal" :style="{width:12*100 + 'px'}" @select="handleSelect">
-              <el-menu-item v-for="i in 12" :key="i" :index="i">
+            <el-menu :default-active="'all'" mode="horizontal" :style="{width:userCount*100 + 100 + 'px'}" @select="handleSelect">
+              <el-menu-item index="all">
+                <el-avatar
+                  :size="'large'"
+                  src="https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/el_default_user.png"
+                />
+                <div class="username">所有</div>
+                <div>{{ allCompletedTasks }}/{{ allTaskCount }}</div>
+              </el-menu-item>
+              <el-menu-item v-for="user in planUsers" :key="user.id" :index="user.id">
                 <el-avatar
                   :size="'large'"
                   src="https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/e540756cb72f4164b8647bae5bfb3f4d.png"
                 />
-                <div class="username">李正帆</div>
+                <div class="username">{{ user.username }}</div>
+                <div>{{ user.completedTasks }}/{{ user.taskCount }}</div>
               </el-menu-item>
             </el-menu>
           </div>
@@ -66,6 +75,32 @@ export default {
   data() {
     return {
       planAvatarShow: true, // 完成情况卡片的展示
+      planUsers: [
+        {
+          id: '1',
+          username: '小明1',
+          taskCount: 10, // 任务总数
+          completedTasks: 4 // 已经完成的任务
+        },
+        {
+          id: '2',
+          username: '小明2',
+          taskCount: 10, // 任务总数
+          completedTasks: 0 // 已经完成的任务
+        },
+        {
+          id: '3',
+          username: '小明3',
+          taskCount: 40, // 任务总数
+          completedTasks: 32 // 已经完成的任务
+        },
+        {
+          id: '4',
+          username: '小明4',
+          taskCount: 30, // 任务总数
+          completedTasks: 10 // 已经完成的任务
+        }
+      ],
       data: [{
         label: '一级 1',
         children: [{
@@ -111,6 +146,23 @@ export default {
     haveTagsView() {
       // TagsView高 34px
       return this.$store.state.settings.tagsView
+    },
+    userCount() {
+      return this.planUsers ? this.planUsers.length : 0
+    },
+    allTaskCount() {
+      const count = this.planUsers ? this.planUsers.reduce((cur, user) => user.taskCount + cur, 0) : 0
+      console.log(count)
+      return count
+    },
+    allCompletedTasks() {
+      return this.planUsers ? this.planUsers.reduce((cur, user) => user.completedTasks + cur, 0) : 0
+    },
+    averageTasks() {
+      return parseFloat((this.allTaskCount / this.userCount).toFixed(1))
+    },
+    progress() {
+      return Math.ceil(this.allCompletedTasks / this.allTaskCount * 100)
     }
   },
   methods: {
@@ -177,6 +229,7 @@ export default {
       white-space: nowrap; /* 禁止文本换行 */
       overflow: hidden; /* 隐藏溢出的文本 */
       text-overflow: ellipsis; /* 显示省略号 */
+      margin: 10px 0;
     }
   }
 }
