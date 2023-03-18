@@ -33,7 +33,7 @@ export function register(data) {
 
 export function forgot(data) {
   return request({
-    url: '/api/ew-server/user/change/forogt',
+    url: '/api/ew-server/user/change/forgot',
     method: 'put',
     data
   })
