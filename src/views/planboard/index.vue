@@ -6,29 +6,24 @@
       <!-- 左边的计划栏 -->
       <div class="sidebar">
         <el-tree :data="data" :props="defaultProps" @node-click="handleNodeClick" />
-        <el-tree :data="data" :props="defaultProps" @node-click="handleNodeClick" />
-        <el-tree :data="data" :props="defaultProps" @node-click="handleNodeClick" />
-        <el-tree :data="data" :props="defaultProps" @node-click="handleNodeClick" />
-        <el-tree :data="data" :props="defaultProps" @node-click="handleNodeClick" />
-        <el-tree :data="data" :props="defaultProps" @node-click="handleNodeClick" />
       </div>
       <!-- 右边的卡片内容 -->
       <div class="content">
         <!-- plan-avatar 所有人完成情况 -->
-        <div v-if="planAvatarShow" v-horizontal-scroll class="plan-avatar">
+        <div v-if="planAvatarShow" class="plan-avatar">
           <div class="plan-avatar-average">
             <div>{{ averageTasks }}</div>
-            <div style="color: #909399;width:40px;text-align:center">人均</div>
+            <div style="color: #909399;width:80px;text-align:center">人均卡片</div>
           </div>
-          <div>
-            <el-menu :default-active="'all'" mode="horizontal" :style="{width:userCount*100 + 100 + 'px'}" @select="handleSelect">
+          <div v-horizontal-scroll class="plan-completed">
+            <el-menu default-active="all" mode="horizontal" :style="{width:userCount*100 + 100 + 'px'}" @select="handleSelect">
               <el-menu-item index="all">
                 <el-avatar
                   :size="'large'"
                   src="https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/el_default_user.png"
                 />
                 <div class="username">所有</div>
-                <div>{{ allCompletedTasks }}/{{ allTaskCount }}</div>
+                <div>{{ allCompletedTasks }} / {{ allTaskCount }}</div>
               </el-menu-item>
               <el-menu-item v-for="user in planUsers" :key="user.id" :index="user.id">
                 <el-avatar
@@ -36,9 +31,23 @@
                   src="https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/e540756cb72f4164b8647bae5bfb3f4d.png"
                 />
                 <div class="username">{{ user.username }}</div>
-                <div>{{ user.completedTasks }}/{{ user.taskCount }}</div>
+                <div>{{ user.completedTasks }} / {{ user.taskCount }}</div>
               </el-menu-item>
             </el-menu>
+          </div>
+          <div class="plan-task-summary">
+            <div>
+              <div>{{ 14 }}天</div>
+              <div style="color: #909399;width:80px;">剩余时间</div>
+            </div>
+            <div>
+              <div>{{ remainingTasks }}</div>
+              <div style="color: #909399;width:80px;">剩余卡片</div>
+            </div>
+            <div>
+              <div>{{ 0 }}</div>
+              <div style="color: #909399;width:80px;">延期卡片</div>
+            </div>
           </div>
         </div>
         <div class="plan-avatar-btn">
@@ -163,6 +172,9 @@ export default {
     },
     progress() {
       return Math.ceil(this.allCompletedTasks / this.allTaskCount * 100)
+    },
+    remainingTasks() {
+      return this.allTaskCount - this.allCompletedTasks
     }
   },
   methods: {
@@ -191,19 +203,22 @@ export default {
 .plan-avatar {
   background-color: #f6f8fa;
   display: flex;
-  overflow-y: hidden;
+  // overflow-y: hidden;
   align-items: center; /* 垂直居中 */
-  overflow-x: auto;
+  // overflow-x: auto;
   width: 100%;
 }
 .plan-avatar-average {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 20px;
-  background-color: #ebebeb;
+  // background-color: #ebebeb;
   // flex-wrap: nowrap;
-  padding: 30px;
+  padding: 30px 10px;
+}
+.plan-completed {
+  overflow-y: hidden;
+  overflow-x: auto;
 }
 .plan-avatar-btn {
   padding: 0 50%;
@@ -229,12 +244,21 @@ export default {
       white-space: nowrap; /* 禁止文本换行 */
       overflow: hidden; /* 隐藏溢出的文本 */
       text-overflow: ellipsis; /* 显示省略号 */
-      margin: 10px 0;
+      margin: 15px 0;
     }
   }
 }
 .el-menu--horizontal>.el-menu-item {
-  height: 100px;
+  height: 120px;
   line-height: inherit;
+  margin-bottom: 5px;
+}
+.plan-task-summary {
+  float: right;
+  display: flex;
+  align-items: center;
+  padding: 30px 5px;
+  text-align:center;
+  margin-left: auto;
 }
 </style>
