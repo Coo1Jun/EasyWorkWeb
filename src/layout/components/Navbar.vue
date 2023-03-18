@@ -1,85 +1,81 @@
 <template>
-  <sticky :z-index="10">
-    <div class="navbar">
-      <hamburger
-        :is-active="sidebar.opened"
-        class="hamburger-container"
-        @toggleClick="toggleSideBar"
-      />
+  <div class="navbar">
+    <hamburger
+      :is-active="sidebar.opened"
+      class="hamburger-container"
+      @toggleClick="toggleSideBar"
+    />
 
-      <breadcrumb class="breadcrumb-container" />
+    <breadcrumb class="breadcrumb-container" />
 
-      <div class="right-menu">
-        <el-popover
-          v-model="visible"
-          class="avatar-container"
-          placement="bottom"
-          width="320"
-          trigger="click"
-          :visible-arrow="false"
+    <div class="right-menu">
+      <el-popover
+        v-model="visible"
+        class="avatar-container"
+        placement="bottom"
+        width="320"
+        trigger="click"
+        :visible-arrow="false"
+      >
+        <div
+          slot="reference"
+          style="display: flex;"
         >
-          <div
-            slot="reference"
-            style="display: flex;"
-          >
-            <el-avatar
-              :size="'large'"
-              :src="userInfo && userInfo.portrait"
-              style="margin-top: 5px;margin-right: 10px"
-            />
-            <span class="avatar-name">{{ userInfo && userInfo.realName }}</span>
+          <el-avatar
+            :size="'large'"
+            :src="userInfo && userInfo.portrait"
+            style="margin-top: 5px;margin-right: 10px"
+          />
+          <span class="avatar-name">{{ userInfo && userInfo.realName }}</span>
+        </div>
+        <div>
+          <div class="user-bg">
+            <el-avatar :size="60" :src="userInfo && userInfo.portrait" />
+            <div>
+              <h1>{{ userInfo && userInfo.realName }}</h1>
+            </div>
           </div>
-          <div>
-            <div class="user-bg">
-              <el-avatar :size="60" :src="userInfo && userInfo.portrait" />
-              <div>
-                <h1>{{ userInfo && userInfo.realName }}</h1>
-              </div>
-            </div>
-            <div @click="visible = false">
-              <router-link to="/">
-                <el-dropdown-item divided>
-                  <i class="el-icon-house" />
-                  主页
-                </el-dropdown-item>
-              </router-link>
-            </div>
-            <div @click="visible = false">
-              <router-link to="/console/account">
-                <el-dropdown-item>
-                  <i class="el-icon-user" />
-                  账号资料设置
-                </el-dropdown-item>
-              </router-link>
-            </div>
-            <div @click="visible = false">
-              <el-dropdown-item
-                style="color: #ff7575"
-                divided
-                @click.native="logout"
-              >
-                <i class="el-icon-right" />
-                退出登录
+          <div @click="visible = false">
+            <router-link to="/">
+              <el-dropdown-item divided>
+                <i class="el-icon-house" />
+                主页
               </el-dropdown-item>
-            </div>
+            </router-link>
           </div>
-        </el-popover>
-      </div>
+          <div @click="visible = false">
+            <router-link to="/console/account">
+              <el-dropdown-item>
+                <i class="el-icon-user" />
+                账号资料设置
+              </el-dropdown-item>
+            </router-link>
+          </div>
+          <div @click="visible = false">
+            <el-dropdown-item
+              style="color: #ff7575"
+              divided
+              @click.native="logout"
+            >
+              <i class="el-icon-right" />
+              退出登录
+            </el-dropdown-item>
+          </div>
+        </div>
+      </el-popover>
     </div>
-  </sticky>
+  </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
-import Sticky from '@/components/Sticky'
 
 export default {
   components: {
     Breadcrumb,
-    Hamburger,
-    Sticky
+    Hamburger
   },
   data() {
     return {
