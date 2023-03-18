@@ -88,7 +88,7 @@ export const constantRoutes = [
     children: [{
       path: 'projects',
       name: 'Projects',
-      component: () => import('@/views/404'),
+      component: () => import('@/views/planboard'),
       meta: { title: '项目', icon: 'el-icon-document' }
     }]
   },
