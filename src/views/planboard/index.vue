@@ -25,7 +25,16 @@
                 <div class="username">所有</div>
                 <div>{{ allCompletedTasks }} / {{ allTaskCount }}</div>
               </el-menu-item>
-              <el-tooltip v-for="user in planUsers" :key="user.id" :content="user.username" placement="bottom" effect="light" :visible-arrow="false">
+              <el-tooltip
+                v-for="user in planUsers"
+                :key="user.id"
+                :content="user.username"
+                placement="bottom"
+                effect="light"
+                :visible-arrow="false"
+                transition="none"
+                :enterable="false"
+              >
                 <el-menu-item :index="user.id">
                   <el-avatar
                     :size="'large'"
