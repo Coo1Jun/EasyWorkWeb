@@ -1,10 +1,5 @@
 <template>
   <div class="navbar">
-    <div class="navbar-plan-item">
-      <el-button class="btn" type="primary">
-        新建计划
-      </el-button>
-    </div>
     <div class="navbar-progress-item">
       <div class="progress">
         <el-progress :text-inside="true" :stroke-width="20" :percentage="progress" status="success" />
@@ -36,13 +31,6 @@ export default {
   background-color: #fff;
   border-top: 1px solid #e7eaee;
   border-bottom: 1px solid #e7eaee;
-}
-.navbar-plan-item {
-  height: 100%;
-  width: 16%;
-  display: flex;
-  align-items: center; /* 垂直居中 */
-  border-right: 1px solid #d8dce5;
 }
 .navbar-progress-item {
   height: 100%;

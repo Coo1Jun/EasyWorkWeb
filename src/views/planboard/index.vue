@@ -1,14 +1,27 @@
 <template>
   <div class="container">
-    <!-- 进度条 -->
-    <plan-navbar :progress="progress" class="plan-navbar" />
     <div class="plan-container">
       <!-- 左边的计划栏 -->
       <div class="sidebar">
-        <el-tree :data="data" :props="defaultProps" @node-click="handleNodeClick" />
+        <div class="navbar-plan-item">
+          <el-button class="btn" type="primary">
+            新建计划
+          </el-button>
+        </div>
+        <el-tree
+          ref="planTree"
+          :data="data"
+          node-key="id"
+          highlight-current
+          :props="defaultProps"
+          @node-click="handleNodeClick"
+          @node-contextmenu="handleContextmenu"
+        />
       </div>
       <!-- 右边的卡片内容 -->
       <div class="content">
+        <!-- 进度条 -->
+        <plan-navbar :progress="progress" class="plan-navbar" />
         <!-- plan-avatar 所有人完成情况 -->
         <div v-if="planAvatarShow" class="plan-avatar">
           <div class="plan-avatar-average">
@@ -70,6 +83,10 @@
         </div>
       </div>
     </div>
+    <ul v-show="visible" :style="{left:left+'px',top:top+'px'}" class="contextmenu">
+      <li @click="appendPlan">新建计划</li>
+      <li style="color: red" @click="delPlan">删除</li>
+    </ul>
   </div>
 
 </template>
@@ -95,6 +112,11 @@ export default {
   data() {
     return {
       planAvatarShow: true, // 完成情况卡片的展示
+      visible: false,
+      top: 0,
+      left: 0,
+      curData: null,
+      curNode: null,
       planUsers: [
         {
           id: '1',
@@ -122,37 +144,47 @@ export default {
         }
       ],
       data: [{
+        id: 1,
         label: '一级 1',
         children: [{
+          id: 4,
           label: '二级 1-1',
           children: [{
+            id: 9,
             label: '三级 1-1-1'
+          }, {
+            id: 10,
+            label: '三级 1-1-2'
           }]
         }]
       }, {
+        id: 2,
         label: '一级 2',
         children: [{
-          label: '二级 2-1',
-          children: [{
-            label: '三级 2-1-1'
-          }]
+          id: 5,
+          label: '二级 2-1'
         }, {
-          label: '二级 2-2',
-          children: [{
-            label: '三级 2-2-1'
-          }]
+          id: 6,
+          label: '二级 2-2'
         }]
       }, {
+        id: 3,
         label: '一级 3',
         children: [{
-          label: '二级 3-1',
-          children: [{
-            label: '三级 3-1-1'
-          }]
+          id: 7,
+          label: '二级 3-1'
         }, {
+          id: 8,
           label: '二级 3-2',
           children: [{
+            id: 11,
             label: '三级 3-2-1'
+          }, {
+            id: 12,
+            label: '三级 3-2-2'
+          }, {
+            id: 13,
+            label: '三级 3-2-3'
           }]
         }]
       }],
@@ -171,9 +203,7 @@ export default {
       return this.planUsers ? this.planUsers.length : 0
     },
     allTaskCount() {
-      const count = this.planUsers ? this.planUsers.reduce((cur, user) => user.taskCount + cur, 0) : 0
-      console.log(count)
-      return count
+      return this.planUsers ? this.planUsers.reduce((cur, user) => user.taskCount + cur, 0) : 0
     },
     allCompletedTasks() {
       return this.planUsers ? this.planUsers.reduce((cur, user) => user.completedTasks + cur, 0) : 0
@@ -188,9 +218,69 @@ export default {
       return this.allTaskCount - this.allCompletedTasks
     }
   },
+  watch: {
+    visible(value) {
+      if (value) {
+        document.body.addEventListener('click', this.closeMenu)
+      } else {
+        document.body.removeEventListener('click', this.closeMenu)
+      }
+    }
+  },
   methods: {
     handleSelect(key, keyPath) {
       console.log(key, keyPath)
+    },
+    handleNodeClick(data, node) {
+      console.log('当前节点是数据是', data)
+      console.log('当前节点是', node)
+      if (node.isLeaf) {
+        console.log('当前选中的是叶子节点')
+      } else {
+        console.log('当前选中的不是叶子节点')
+      }
+      this.closeMenu()
+    },
+    handleContextmenu(event, data, node) {
+      this.curData = data
+      this.curNode = node
+      const offsetLeft = this.$el.getBoundingClientRect().left // 表示获取组件根元素左边缘相对于视口左边缘的距离，也就是组件根元素在视口中的相对位置的左边距。
+      const left = event.pageX - offsetLeft + 15 // 15: margin right
+      this.left = left
+      this.top = event.pageY
+      this.visible = true
+    },
+    closeMenu() {
+      this.visible = false
+    },
+    appendPlan() {
+      this.$refs.planTree.append({
+        id: 13,
+        label: '新建的计划'
+      }, this.curNode)
+      this.$message({
+        type: 'success',
+        message: '新建成功!'
+      })
+    },
+    delPlan() {
+      this.$confirm('此操作将永久删除该计划及其任务, 是否继续?', '警告', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$refs.planTree.remove(this.curNode)
+        // todo 发请求给后端
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
     }
   }
 }
@@ -226,6 +316,7 @@ export default {
   // background-color: #ebebeb;
   // flex-wrap: nowrap;
   padding: 30px 10px;
+  margin: 30px 0; // 用于撑开整个卡片栏
 }
 .plan-completed {
   overflow-y: hidden;
@@ -271,5 +362,38 @@ export default {
   padding: 30px 5px;
   text-align:center;
   margin-left: auto;
+}
+.contextmenu {
+  margin: 0;
+  background: #fff;
+  z-index: 3000;
+  position: absolute;
+  list-style-type: none;
+  padding: 5px 0;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #333;
+  box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, .3);
+  li {
+    margin: 0;
+    padding: 7px 16px;
+    cursor: pointer;
+    &:hover {
+      background: #eee;
+    }
+  }
+}
+.btn {
+  padding: 5px 15px;
+  margin-left: 10px;
+}
+.navbar-plan-item {
+  height: 40px;
+  display: flex;
+  align-items: center; /* 垂直居中 */
+  border-bottom: 1px solid #e7eaee;
+  border-top: 1px solid #e7eaee;
+  border-right: 1px solid #e7eaee;
 }
 </style>
