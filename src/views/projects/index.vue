@@ -30,6 +30,7 @@
         :data="tableData"
         style="width: 100%"
         :default-sort="{prop: 'date', order: 'descending'}"
+        stripe
       >
         <el-table-column
           prop="projectName"
@@ -51,6 +52,7 @@
           label="更新时间"
           sortable
           width="250"
+          :formatter="formatterDate"
         />
       </el-table>
     </div>
@@ -58,6 +60,7 @@
       title="新建项目"
       :visible.sync="addProjectVisible"
       width="500px"
+      @closed="closeDialog"
     >
       <el-form
         ref="projectInfo"
@@ -76,20 +79,20 @@
         <el-form-item label="项目标识" prop="tab">
           <el-input v-model="projectInfo.tab" placeholder="大写字母和数字，15个字符以内" />
         </el-form-item>
-        <el-form-item label="描述">
+        <el-form-item label="描述" prop="description">
           <el-input v-model="projectInfo.description" type="textarea" placeholder="请输入项目描述" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="addProjectVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addProjectVisible = false">确 定</el-button>
+        <el-button type="primary" @click="addProject">确 定</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-
+import { mapGetters } from 'vuex'
 export default {
   name: 'Projects',
   components: { },
@@ -115,6 +118,8 @@ export default {
         callback()
       } else if (!reg.test(value)) {
         callback(new Error('英文字母/数字/下划线/连接线（不超过15字符）'))
+      } else if (this.existTab(value)) {
+        callback(new Error('该标识已被项目/项目集使用，请改用其他标识'))
       } else {
         callback()
       }
@@ -186,6 +191,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['userInfo']),
     projectCount() {
       return this.tableData.length
     }
@@ -199,8 +205,8 @@ export default {
     this.tableData = this.basicData
   },
   methods: {
-    formatter(row, column, cellValue) {
-      return row.address
+    formatterDate(row, column, cellValue) {
+      return cellValue
     },
     handleInput() {
       if (this.keyword === '') {
@@ -208,6 +214,54 @@ export default {
         return
       }
       this.tableData = this.basicData.filter(data => data.projectName.includes(this.keyword))
+    },
+    existTab(value) {
+      return this.basicData.filter(data => data.tab === value).length > 0
+    },
+    addProject() {
+      this.$refs.projectInfo.validate(valid => {
+        if (valid) {
+          this.addProjectVisible = false
+
+          // todo向后端发请求
+
+          const maxId = this.basicData.reduce((maxId, data) => (data.id > maxId ? data.id : maxId), 0) + 1
+
+          const date = new Date()
+          const year = date.getFullYear()
+          const month = date.getMonth() + 1
+          const day = date.getDate()
+          const hours = date.getHours()
+          const minutes = date.getMinutes()
+          const seconds = date.getSeconds()
+          // 在月份和日期前面补零
+          const formattedMonth = String(month).padStart(2, '0')
+          const formattedDay = String(day).padStart(2, '0')
+          const formattedHours = String(hours).padStart(2, '0')
+          const formattedMinutes = String(minutes).padStart(2, '0')
+          const formattedSeconds = String(seconds).padStart(2, '0')
+          const newDate = `${year}-${formattedMonth}-${formattedDay} ${formattedHours}:${formattedMinutes}:${formattedSeconds}`
+          this.basicData.push({
+            id: maxId,
+            projectName: this.projectInfo.projectName,
+            tab: this.projectInfo.tab,
+            createBy: this.userInfo.realName,
+            updateTime: newDate
+          })
+          this.handleInput()
+          this.$message({
+            message: '添加成功',
+            type: 'success',
+            duration: 3000 // 持续时间为 3 秒
+          })
+        } else {
+          return false
+        }
+      })
+    },
+    closeDialog() {
+      // 关闭dialog重置表单
+      this.$refs.projectInfo.resetFields()
     }
   }
 }

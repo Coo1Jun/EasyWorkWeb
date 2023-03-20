@@ -160,12 +160,9 @@ export const constantRoutes = [
     path: '/console',
     name: 'Console',
     component: Layout,
+    redirect: '/console/department',
     meta: { title: '管理后台', icon: 'el-icon-setting' },
     children: [
-      {
-        path: '',
-        redirect: '/console/department'
-      },
       {
         path: 'account',
         name: 'Account',
