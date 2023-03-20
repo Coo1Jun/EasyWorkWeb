@@ -85,12 +85,23 @@ export const constantRoutes = [
     path: '/mission',
     component: Layout,
     name: 'Mission',
-    children: [{
-      path: 'projects',
-      name: 'Projects',
-      component: () => import('@/views/planboard'),
-      meta: { title: '项目', icon: 'el-icon-document' }
-    }]
+    redirect: '/mission/projects',
+    meta: { title: '项目', icon: 'el-icon-document' },
+    children: [
+      {
+        hidden: true,
+        path: 'projects',
+        name: 'Projects',
+        component: () => import('@/views/projects/index')
+      },
+      {
+        hidden: true,
+        path: 'projects/details',
+        name: 'Details',
+        component: () => import('@/views/planboard/index'),
+        meta: { title: '概览' }
+      }
+    ]
   },
 
   {
@@ -147,13 +158,13 @@ export const constantRoutes = [
 
   {
     path: '/console',
+    name: 'Console',
     component: Layout,
+    meta: { title: '管理后台', icon: 'el-icon-setting' },
     children: [
       {
         path: '',
-        name: 'Console',
-        component: () => import('@/views/404'),
-        meta: { title: '系统管理', icon: 'el-icon-setting' }
+        redirect: '/console/department'
       },
       {
         path: 'account',
@@ -161,6 +172,21 @@ export const constantRoutes = [
         hidden: true,
         component: () => import('@/views/account/index'),
         meta: { title: '账户资料设置' }
+      },
+      {
+        path: 'department',
+        name: 'Department',
+        component: () => import('@/views/department/index'),
+        meta: { title: '部门', icon: 'department' },
+        children: [
+          {
+            hidden: true,
+            path: 'member',
+            name: 'Member',
+            component: () => import('@/views/department/member/index'),
+            meta: { title: '成员' }
+          }
+        ]
       }
     ]
   },
