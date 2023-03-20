@@ -262,7 +262,7 @@ export default {
       },
       profileRules: {
         name: [
-          { required: true, trigger: 'blur', validator: validateName }
+          { required: false, trigger: 'blur', validator: validateName }
         ]
       },
       editPassword: {
