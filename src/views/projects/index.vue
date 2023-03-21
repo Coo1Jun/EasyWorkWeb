@@ -29,8 +29,9 @@
       <el-table
         :data="tableData"
         style="width: 100%"
-        :default-sort="{prop: 'date', order: 'descending'}"
         stripe
+        row-class-name="row-hand"
+        @row-click="handleRowClick"
       >
         <el-table-column
           prop="projectName"
@@ -93,6 +94,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
+
 export default {
   name: 'Projects',
   components: { },
@@ -262,6 +264,15 @@ export default {
     closeDialog() {
       // 关闭dialog重置表单
       this.$refs.projectInfo.resetFields()
+    },
+    handleRowClick(row, column, event) {
+      console.log(row)
+      console.log(column)
+      console.log(event)
+      // 将当前选择的项目id放在vuex里
+      this.$store.dispatch('project/setCurProject', row.id)
+      // 跳转到/mission/projects/details
+      this.$router.push('/mission/projects/details')
     }
   }
 }
@@ -281,5 +292,8 @@ export default {
 .search-result {
   color: #999999;
   margin-left: 30px;
+}
+::v-deep .row-hand {
+  cursor: pointer;
 }
 </style>

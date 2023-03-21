@@ -94,6 +94,7 @@
 <script>
 import PlanNavbar from '@/components/PlanNavbar'
 import Vue from 'vue'
+import { mapGetters } from 'vuex'
 // 鼠标滚轮控制横向滚动条
 Vue.directive('horizontal-scroll', {
   inserted: function(el) {
@@ -195,6 +196,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['curProId']),
     haveTagsView() {
       // TagsView高 34px
       return this.$store.state.settings.tagsView
@@ -226,6 +228,16 @@ export default {
         document.body.removeEventListener('click', this.closeMenu)
       }
     }
+  },
+  mounted() {
+    // 获取到向前选择项目的id
+    console.log(this.curProId)
+    // 如果id为空，说明没选，跳转到/mission/projects
+    if (!this.curProId) {
+      this.$router.push('/mission/projects')
+      return
+    }
+    // todo 向后端请求，根据项目id查询所有计划
   },
   methods: {
     handleSelect(key, keyPath) {
