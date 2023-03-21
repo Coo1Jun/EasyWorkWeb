@@ -8,6 +8,8 @@ import 'element-ui/lib/theme-chalk/index.css'
 
 import '@/styles/index.scss' // global css
 
+import '@wangeditor/editor/dist/css/style.css' // 富文本编辑器
+
 import App from './App'
 import store from './store'
 import router from './router'
