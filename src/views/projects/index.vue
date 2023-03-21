@@ -193,7 +193,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['userInfo']),
+    ...mapGetters(['userInfo', 'curProId']),
     projectCount() {
       return this.tableData.length
     }
@@ -205,6 +205,18 @@ export default {
   },
   mounted() {
     this.tableData = this.basicData
+  },
+  beforeRouteEnter(to, from, next) {
+    next(vm => {
+      // 如果不是由项目概览页面跳转来的，且项目id不为空，直接跳转到
+      if (from.name !== 'Details' && vm.curProId) {
+        next({ path: '/mission/projects/details' })
+      } else {
+        // 否则则进入到当前组件，且设置curProId为空
+        vm.$store.dispatch('project/setCurProject', null)
+        next()
+      }
+    })
   },
   methods: {
     formatterDate(row, column, cellValue) {
