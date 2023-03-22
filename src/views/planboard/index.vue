@@ -4,7 +4,7 @@
       <!-- 左边的计划栏 -->
       <div class="sidebar">
         <div class="navbar-plan-item">
-          <el-button class="btn" type="primary">
+          <el-button class="btn" type="primary" @click="addPlanVisible = true">
             新建计划
           </el-button>
         </div>
@@ -83,10 +83,49 @@
         </div>
       </div>
     </div>
+
     <ul v-show="visible" :style="{left:left+'px',top:top+'px'}" class="contextmenu">
-      <li @click="appendPlan">新建计划</li>
+      <li @click="addPlanVisible = true">新建计划</li>
       <li style="color: red" @click="delPlan">删除</li>
     </ul>
+
+    <el-dialog
+      title="新建计划"
+      :visible.sync="addPlanVisible"
+      width="90%"
+      top="4vh"
+      @closed="closePlanDialog"
+    >
+      <div class="plan-dialog-container">
+        <div class="plan-dialog-content">
+          <div v-if="addPlanVisible" style="border: 1px solid #eee;">
+            <Toolbar
+              style="border-bottom: 1px solid #eee"
+              :editor="editor"
+              :default-config="toolbarConfig"
+              :mode="mode"
+            />
+            <Editor
+              v-model="html"
+              style="height: 300px; overflow-y: hidden;"
+              :default-config="editorConfig"
+              :mode="mode"
+              @onCreated="onCreated"
+            />
+          </div>
+          <el-input v-for="i in 20" :key="i" placeholder="请输入内容" />
+          <div>hello</div>
+        </div>
+        <div class="plan-dialog-attribute">
+          <el-input v-for="i in 20" :key="i" placeholder="请输入内容" />
+          <div>hello</div>
+        </div>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="addPlanVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addProject">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 
 </template>
@@ -95,6 +134,9 @@
 import PlanNavbar from '@/components/PlanNavbar'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
+import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
+import config from '@/config/wangEditor'
+
 // 鼠标滚轮控制横向滚动条
 Vue.directive('horizontal-scroll', {
   inserted: function(el) {
@@ -109,15 +151,26 @@ Vue.directive('horizontal-scroll', {
 
 export default {
   name: 'Planboard',
-  components: { PlanNavbar },
+  components: { PlanNavbar, Editor, Toolbar },
   data() {
+    const { editorConfig, toolbarConfig } = config
     return {
       planAvatarShow: true, // 完成情况卡片的展示
+      // === 鼠标右键计划列表start
       visible: false,
       top: 0,
       left: 0,
+      // === 鼠标右键计划列表end
+      // ===富文本编辑器start
+      editor: null,
+      html: '',
+      toolbarConfig,
+      editorConfig,
+      mode: 'default', // or 'simple'
+      // ===富文本编辑器end
       curData: null,
       curNode: null,
+      addPlanVisible: false,
       planUsers: [
         {
           id: '1',
@@ -230,14 +283,16 @@ export default {
     }
   },
   mounted() {
-    // 获取到向前选择项目的id
-    console.log(this.curProId)
+    // 获取到当前选择项目的id
     // 如果id为空，说明没选，跳转到/mission/projects
     if (!this.curProId) {
       this.$router.push('/mission/projects')
       return
     }
     // todo 向后端请求，根据项目id查询所有计划
+  },
+  beforeDestroy() {
+    this.closeEditor()
   },
   methods: {
     handleSelect(key, keyPath) {
@@ -266,6 +321,7 @@ export default {
       this.visible = false
     },
     appendPlan() {
+      this.addPlanVisible = true
       this.$refs.planTree.append({
         id: 13,
         label: '新建的计划'
@@ -293,6 +349,22 @@ export default {
           message: '已取消删除'
         })
       })
+    },
+    closePlanDialog() {
+      console.log('关闭新建计划')
+      console.log(this.html)
+      this.html = ''
+    },
+    addProject() {
+
+    },
+    onCreated(editor) {
+      this.editor = Object.seal(editor) // 一定要用 Object.seal() ，否则会报错
+    },
+    closeEditor() {
+      const editor = this.editor
+      if (editor == null) return
+      editor.destroy() // 组件销毁时，及时销毁编辑器
     }
   }
 }
@@ -408,4 +480,25 @@ export default {
   border-top: 1px solid #e7eaee;
   border-right: 1px solid #e7eaee;
 }
+::v-deep .el-dialog__body {
+  padding: 30px 20px 0;
+}
+.plan-dialog-container {
+  display: flex;
+  height: 510px;
+}
+.plan-dialog-content {
+  width: 66%;
+  margin-right: 10px;
+  // overflow-y: hidden;
+  overflow-x: hidden;
+  // overflow: auto;
+}
+.plan-dialog-attribute {
+  width: 34%;
+  margin-left: 10px;
+  overflow-y: hidden;
+  overflow: auto;
+}
+
 </style>
