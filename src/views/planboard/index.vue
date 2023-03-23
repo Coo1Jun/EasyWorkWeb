@@ -4,7 +4,11 @@
       <!-- 左边的计划栏 -->
       <div class="sidebar">
         <div class="navbar-plan-item">
-          <el-button class="btn" type="primary" @click="addPlanVisible = true">
+          <el-button
+            class="btn"
+            type="primary"
+            @click="addWorkItemVisible = true"
+          >
             新建计划
           </el-button>
         </div>
@@ -26,10 +30,17 @@
         <div v-if="planAvatarShow" class="plan-avatar">
           <div class="plan-avatar-average">
             <div>{{ averageTasks }}</div>
-            <div style="color: #909399;width:80px;text-align:center">人均卡片</div>
+            <div style="color: #909399; width: 80px; text-align: center">
+              人均卡片
+            </div>
           </div>
           <div v-horizontal-scroll class="plan-completed">
-            <el-menu default-active="all" mode="horizontal" :style="{width:userCount*100 + 100 + 'px'}" @select="handleSelect">
+            <el-menu
+              default-active="all"
+              mode="horizontal"
+              :style="{ width: userCount * 100 + 100 + 'px' }"
+              @select="handleSelect"
+            >
               <el-menu-item index="all">
                 <el-avatar
                   :size="'large'"
@@ -62,43 +73,73 @@
           <div class="plan-task-summary">
             <div>
               <div>{{ 14 }}天</div>
-              <div style="color: #909399;width:80px;">剩余时间</div>
+              <div style="color: #909399; width: 80px">剩余时间</div>
             </div>
             <div>
               <div>{{ remainingTasks }}</div>
-              <div style="color: #909399;width:80px;">剩余卡片</div>
+              <div style="color: #909399; width: 80px">剩余卡片</div>
             </div>
             <div>
               <div>{{ 0 }}</div>
-              <div style="color: #909399;width:80px;">延期卡片</div>
+              <div style="color: #909399; width: 80px">延期卡片</div>
             </div>
           </div>
         </div>
         <div class="plan-avatar-btn">
-          <button v-if="planAvatarShow" @click="planAvatarShow = !planAvatarShow"><i class="el-icon-arrow-up" /></button>
-          <button v-if="!planAvatarShow" @click="planAvatarShow = !planAvatarShow"><i class="el-icon-arrow-down" /></button>
+          <button
+            v-if="planAvatarShow"
+            @click="planAvatarShow = !planAvatarShow"
+          >
+            <i class="el-icon-arrow-up" />
+          </button>
+          <button
+            v-if="!planAvatarShow"
+            @click="planAvatarShow = !planAvatarShow"
+          >
+            <i class="el-icon-arrow-down" />
+          </button>
         </div>
-        <div class="plan-content">
-          plan-content
-        </div>
+        <div class="plan-content">plan-content</div>
       </div>
     </div>
 
-    <ul v-show="visible" :style="{left:left+'px',top:top+'px'}" class="contextmenu">
-      <li @click="addPlanVisible = true">新建计划</li>
+    <ul
+      v-show="visible"
+      :style="{ left: left + 'px', top: top + 'px' }"
+      class="contextmenu"
+    >
+      <li @click="addWorkItemVisible = true">新建计划</li>
       <li style="color: red" @click="delPlan">删除</li>
     </ul>
 
     <el-dialog
       title="新建计划"
-      :visible.sync="addPlanVisible"
+      :visible.sync="addWorkItemVisible"
       width="90%"
       top="4vh"
       @closed="closePlanDialog"
     >
       <div class="plan-dialog-container">
+        <!-- 左边内容区 -->
         <div class="plan-dialog-content">
-          <div v-if="addPlanVisible" style="border: 1px solid #eee;">
+          <!-- 标题 -->
+          <div>
+            <el-form
+              ref="newWorkItem"
+              :model="newWorkItem"
+              label-width="80px"
+              label-position="top"
+            >
+              <el-form-item label="标题">
+                <el-input
+                  v-model="newWorkItem.title"
+                  placeholder="请输入标题"
+                />
+              </el-form-item>
+            </el-form>
+          </div>
+          <!-- 富文本编辑器 -->
+          <div v-if="addWorkItemVisible" style="border: 1px solid #eee">
             <Toolbar
               style="border-bottom: 1px solid #eee"
               :editor="editor"
@@ -107,27 +148,121 @@
             />
             <Editor
               v-model="html"
-              style="height: 300px; overflow-y: hidden;"
+              style="height: 300px; overflow-y: hidden"
               :default-config="editorConfig"
               :mode="mode"
               @onCreated="onCreated"
             />
           </div>
-          <el-input v-for="i in 20" :key="i" placeholder="请输入内容" />
-          <div>hello</div>
+          <div class="file-upload">
+            <el-upload
+              class="upload-demo"
+              :action="uploadUrl"
+              :on-preview="handlePreview"
+              :on-remove="handleRemove"
+              :on-success="uploadSuccess"
+              :on-error="uploadError"
+              multiple
+              :file-list="defaultFileList"
+            >
+              <el-badge :hidden="newWorkItem.fileIdList.length === 0" :value="newWorkItem.fileIdList.length" class="item" type="primary">
+                <span style="margin-right: 10px">附件</span>
+              </el-badge>
+              <el-button style="margin-left: 15px" size="mini" icon="el-icon-plus" circle />
+            </el-upload>
+          </div>
         </div>
+        <!-- 右边属性区 -->
         <div class="plan-dialog-attribute">
-          <el-input v-for="i in 20" :key="i" placeholder="请输入内容" />
-          <div>hello</div>
+          <el-form
+            ref="newWorkItem"
+            :model="newWorkItem"
+            label-width="80px"
+            label-position="top"
+          >
+            <el-form-item label="所属项目" prop="parentProId">
+              <el-select
+                v-model="newWorkItem.parentProId"
+                placeholder="请选择项目"
+                style="width: 100%"
+                filterable
+              >
+                <el-option
+                  v-for="p in projects"
+                  :key="p.id"
+                  :label="p.name"
+                  :value="p.id"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="工作项类型" prop="workType">
+              <el-select
+                v-model="newWorkItem.workType"
+                placeholder="请选择工作项类型"
+                style="width: 100%"
+              >
+                <el-option label="Epic" value="Epic" />
+                <el-option label="Feature" value="Feature" />
+                <el-option label="Story" value="Story" />
+                <el-option label="Task" value="Task" />
+                <el-option label="Bug" value="Bug" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="负责人" prop="principals">
+              <el-select
+                v-model="newWorkItem.principals"
+                placeholder="请选择负责人"
+                style="width: 100%"
+                multiple
+                filterable
+              >
+                <el-option
+                  v-for="m in members"
+                  :key="m.id"
+                  :label="m.name"
+                  :value="m.id"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="完成时间" prop="duration">
+              <el-date-picker
+                v-model="newWorkItem.duration"
+                type="daterange"
+                range-separator="至"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+                value-format="yyyy-MM-dd"
+                style="width: 100%"
+              />
+            </el-form-item>
+            <el-form-item label="优先级" prop="priority">
+              <el-rate
+                v-model="newWorkItem.priority"
+                show-text
+                :texts="['最低', '较低', '普通', '较高', '最高']"
+                :colors=" { 1: '#73d897', 3: { value: '#6698ff', excluded: true }, 4: { value: '#f6c659', excluded: true }, 5: { value: '#ff9f73', excluded: true }, 6: '#ff7575' }"
+                @change="priorityCheck"
+              />
+            </el-form-item>
+            <el-form-item label="风险" prop="risk">
+              <el-rate
+                v-model="newWorkItem.risk"
+                show-text
+                :texts="['低', '中', '高']"
+                :colors=" { 1: '#73d897', 3: { value: '#f6c659', excluded: true }, 4: '#ff7575' }"
+                :max="3"
+                @change="riskCheck"
+              />
+            </el-form-item>
+          </el-form>
         </div>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="addPlanVisible = false">取 消</el-button>
+        <el-button @click="addWorkItemVisible = false">取 消</el-button>
         <el-button type="primary" @click="addProject">确 定</el-button>
       </div>
     </el-dialog>
   </div>
-
 </template>
 
 <script>
@@ -136,6 +271,7 @@ import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import config from '@/config/wangEditor'
+import { uploadUrl } from '@/api/file'
 
 // 鼠标滚轮控制横向滚动条
 Vue.directive('horizontal-scroll', {
@@ -155,6 +291,15 @@ export default {
   data() {
     const { editorConfig, toolbarConfig } = config
     return {
+      members: [{ id: 1, name: '李正帆' }, { id: 2, name: '李正帆测试1' }, { id: 3, name: '李正帆测试2' }], // 团队成员
+      projects: [{ id: 1, name: '项目1' }, { id: 2, name: '项目2' }, { id: 3, name: '项目3' }], // 所有项目
+      uploadUrl,
+      defaultFileList: [
+        // {
+        //   name: 'hello.png',
+        //   url: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/121ffeea3ca84124a8547ebccc0d3c83.png'
+        // }
+      ],
       planAvatarShow: true, // 完成情况卡片的展示
       // === 鼠标右键计划列表start
       visible: false,
@@ -170,7 +315,12 @@ export default {
       // ===富文本编辑器end
       curData: null,
       curNode: null,
-      addPlanVisible: false,
+      // dialog新建工作项 start
+      addWorkItemVisible: false,
+      riskColor: '',
+      riskActiveClass: '',
+      priorityActiveClass: '',
+      // dialog新建工作项 end
       planUsers: [
         {
           id: '1',
@@ -197,55 +347,93 @@ export default {
           completedTasks: 10 // 已经完成的任务
         }
       ],
-      data: [{
-        id: 1,
-        label: '一级 1',
-        children: [{
-          id: 4,
-          label: '二级 1-1',
-          children: [{
-            id: 9,
-            label: '三级 1-1-1'
-          }, {
-            id: 10,
-            label: '三级 1-1-2'
-          }]
-        }]
-      }, {
-        id: 2,
-        label: '一级 2',
-        children: [{
-          id: 5,
-          label: '二级 2-1'
-        }, {
-          id: 6,
-          label: '二级 2-2'
-        }]
-      }, {
-        id: 3,
-        label: '一级 3',
-        children: [{
-          id: 7,
-          label: '二级 3-1'
-        }, {
-          id: 8,
-          label: '二级 3-2',
-          children: [{
-            id: 11,
-            label: '三级 3-2-1'
-          }, {
-            id: 12,
-            label: '三级 3-2-2'
-          }, {
-            id: 13,
-            label: '三级 3-2-3'
-          }]
-        }]
-      }],
+      data: [
+        {
+          id: 1,
+          label: '一级 1',
+          children: [
+            {
+              id: 4,
+              label: '二级 1-1',
+              children: [
+                {
+                  id: 9,
+                  label: '三级 1-1-1'
+                },
+                {
+                  id: 10,
+                  label: '三级 1-1-2'
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: 2,
+          label: '一级 2',
+          children: [
+            {
+              id: 5,
+              label: '二级 2-1'
+            },
+            {
+              id: 6,
+              label: '二级 2-2'
+            }
+          ]
+        },
+        {
+          id: 3,
+          label: '一级 3',
+          children: [
+            {
+              id: 7,
+              label: '二级 3-1'
+            },
+            {
+              id: 8,
+              label: '二级 3-2',
+              children: [
+                {
+                  id: 11,
+                  label: '三级 3-2-1'
+                },
+                {
+                  id: 12,
+                  label: '三级 3-2-2'
+                },
+                {
+                  id: 13,
+                  label: '三级 3-2-3'
+                }
+              ]
+            }
+          ]
+        }
+      ],
       defaultProps: {
         children: 'children',
         label: 'label'
-      }
+      },
+      // 新建工作项：新建计划、新建卡片等等 start
+      newWorkItem: {
+        title: '', // 标题
+        desc: '', // 描述
+        fileIdList: [], // 附件
+        parentProId: '', // 所属项目
+        parentWorkItemId: '', // 除了Epic，其他工作项类型都有所属，比如Feature所属Epic下
+        workType: '', // 工作项类型：Epic、Feature、Story、Task、Bug
+        principals: [], // 负责人
+        duration: null, // 持续时间
+        startTime: '', // 开始时间
+        endTime: '', // 结束时间
+        priority: 0, // 优先级
+        risk: 0, // 风险
+        severity: '' // 严重程度 Bug类别
+      },
+      riskOldValue: 0,
+      priorityOldValue: 0
+      // 新建工作项：新建计划、新建卡片等等 end
     }
   },
   computed: {
@@ -258,16 +446,20 @@ export default {
       return this.planUsers ? this.planUsers.length : 0
     },
     allTaskCount() {
-      return this.planUsers ? this.planUsers.reduce((cur, user) => user.taskCount + cur, 0) : 0
+      return this.planUsers
+        ? this.planUsers.reduce((cur, user) => user.taskCount + cur, 0)
+        : 0
     },
     allCompletedTasks() {
-      return this.planUsers ? this.planUsers.reduce((cur, user) => user.completedTasks + cur, 0) : 0
+      return this.planUsers
+        ? this.planUsers.reduce((cur, user) => user.completedTasks + cur, 0)
+        : 0
     },
     averageTasks() {
       return parseFloat((this.allTaskCount / this.userCount).toFixed(1))
     },
     progress() {
-      return Math.ceil(this.allCompletedTasks / this.allTaskCount * 100)
+      return Math.ceil((this.allCompletedTasks / this.allTaskCount) * 100)
     },
     remainingTasks() {
       return this.allTaskCount - this.allCompletedTasks
@@ -321,11 +513,14 @@ export default {
       this.visible = false
     },
     appendPlan() {
-      this.addPlanVisible = true
-      this.$refs.planTree.append({
-        id: 13,
-        label: '新建的计划'
-      }, this.curNode)
+      this.addWorkItemVisible = true
+      this.$refs.planTree.append(
+        {
+          id: 13,
+          label: '新建的计划'
+        },
+        this.curNode
+      )
       this.$message({
         type: 'success',
         message: '新建成功!'
@@ -336,28 +531,28 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(() => {
-        this.$refs.planTree.remove(this.curNode)
-        // todo 发请求给后端
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
-        })
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        })
       })
+        .then(() => {
+          this.$refs.planTree.remove(this.curNode)
+          // todo 发请求给后端
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          })
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
     },
     closePlanDialog() {
       console.log('关闭新建计划')
       console.log(this.html)
       this.html = ''
     },
-    addProject() {
-
-    },
+    addProject() {},
     onCreated(editor) {
       this.editor = Object.seal(editor) // 一定要用 Object.seal() ，否则会报错
     },
@@ -365,19 +560,58 @@ export default {
       const editor = this.editor
       if (editor == null) return
       editor.destroy() // 组件销毁时，及时销毁编辑器
+    },
+    handlePreview(file) {
+      console.log(file)
+      console.log(this.newWorkItem.fileIdList)
+    },
+    handleRemove(file, fileList) {
+      console.log(file)
+      console.log(fileList)
+      this.newWorkItem.fileIdList = this.newWorkItem.fileIdList.filter(id => id !== file.response.data.id)
+    },
+    uploadSuccess(response, file, fileList) {
+      this.newWorkItem.fileIdList.push(response.data.id)
+    },
+    uploadError() {
+      this.$message({
+        type: 'error',
+        message: '附件上传失败，请稍后重试！',
+        duration: 3000
+      })
+    },
+    riskCheck(value) {
+      if (value !== 0) {
+        if (value === this.riskOldValue) {
+          this.newWorkItem.risk = 0
+          this.riskOldValue = 0
+        } else {
+          this.riskOldValue = value
+        }
+      }
+    },
+    priorityCheck(value) {
+      if (value !== 0) {
+        if (value === this.priorityOldValue) {
+          this.newWorkItem.priority = 0
+          this.priorityOldValue = 0
+        } else {
+          this.priorityOldValue = value
+        }
+      }
     }
   }
 }
 </script>
 
 <style scoped lang="scss">
-.container{
+.container {
   padding-bottom: 40px;
 }
 
 .plan-container {
   width: 100%;
-  display: flex
+  display: flex;
 }
 .sidebar {
   width: 16%;
@@ -417,14 +651,14 @@ export default {
   background-color: #f6f8fa;
   // width: 3000px;
   border: none;
-  .el-menu-item{
+  .el-menu-item {
     // width: 100px;
     // overflow: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    .username{
+    .username {
       width: 60px;
       text-align: center;
       white-space: nowrap; /* 禁止文本换行 */
@@ -434,7 +668,7 @@ export default {
     }
   }
 }
-.el-menu--horizontal>.el-menu-item {
+.el-menu--horizontal > .el-menu-item {
   height: 120px;
   line-height: inherit;
   margin-bottom: 5px;
@@ -444,7 +678,7 @@ export default {
   display: flex;
   align-items: center;
   padding: 30px 5px;
-  text-align:center;
+  text-align: center;
   margin-left: auto;
 }
 .contextmenu {
@@ -458,7 +692,7 @@ export default {
   font-size: 12px;
   font-weight: 400;
   color: #333;
-  box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, .3);
+  box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.3);
   li {
     margin: 0;
     padding: 7px 16px;
@@ -481,15 +715,19 @@ export default {
   border-right: 1px solid #e7eaee;
 }
 ::v-deep .el-dialog__body {
-  padding: 30px 20px 0;
+  padding: 10px 20px 0;
+}
+::v-deep .el-form-item__label {
+  padding: 0;
 }
 .plan-dialog-container {
   display: flex;
-  height: 510px;
+  height: 530px;
 }
 .plan-dialog-content {
   width: 66%;
   margin-right: 10px;
+  padding-right: 20px;
   // overflow-y: hidden;
   overflow-x: hidden;
   // overflow: auto;
@@ -497,8 +735,14 @@ export default {
 .plan-dialog-attribute {
   width: 34%;
   margin-left: 10px;
+  padding-right: 10px;
   overflow-y: hidden;
   overflow: auto;
 }
-
+.file-upload {
+  margin-top: 10px;
+}
+::v-deep .el-rate__icon {
+  font-size: 30px;
+}
 </style>
