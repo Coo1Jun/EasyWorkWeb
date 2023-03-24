@@ -193,7 +193,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['userInfo', 'curProId']),
+    ...mapGetters(['userInfo', 'curProject']),
     projectCount() {
       return this.tableData.length
     }
@@ -209,10 +209,10 @@ export default {
   beforeRouteEnter(to, from, next) {
     next(vm => {
       // 如果不是由项目概览页面跳转来的，且项目id不为空，直接跳转到
-      if (from.name !== 'Details' && vm.curProId) {
+      if (from.name !== 'Details' && vm.curProject && vm.curProject.id) {
         next({ path: '/mission/projects/details' })
       } else {
-        // 否则则进入到当前组件，且设置curProId为空
+        // 否则则进入到当前组件，且设置curPro为空
         vm.$store.dispatch('project/setCurProject', null)
         next()
       }
@@ -282,7 +282,7 @@ export default {
       console.log(column)
       console.log(event)
       // 将当前选择的项目id放在vuex里
-      this.$store.dispatch('project/setCurProject', row.id)
+      this.$store.dispatch('project/setCurProject', row)
       // 跳转到/mission/projects/details
       this.$router.push('/mission/projects/details')
     }
