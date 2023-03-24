@@ -5,10 +5,8 @@ editorConfig.MENU_CONF['uploadImage'] = {
 
   // 小于该值就插入 base64 格式（而不上传），默认为 0
   // 这里不走服务端地址，因此把图片都渲染成base64，设置大小为2M
-  // base64LimitSize: 2 * 1024 * 1024
+  base64LimitSize: Number.MAX_SAFE_INTEGER
 
-  // 打开，将所有的上传图片都转为base64
-  uploadImgShowBase64: true
 }
 
 const toolbarConfig = {}
