@@ -7,7 +7,7 @@
           <el-button
             class="btn"
             type="primary"
-            @click="openPlanDialog"
+            @click="openPlanSetDialog"
           >
             新建计划集
           </el-button>
@@ -115,7 +115,7 @@
       :style="{ left: left + 'px', top: top + 'px' }"
       class="contextmenu"
     >
-      <li v-if="curData && !curData.isPlanSet" @click="addWorkItemVisible = false">新建计划集</li>
+      <li v-if="curData && !curData.isPlanSet" @click="openPlanSetDialog">新建计划集</li>
       <li v-if="curData && !curData.isPlanSet" @click="openPlanDialog">新建计划</li>
       <li v-if="curData && curData.isPlanSet" @click="addWorkItemVisible = false">查看</li>
       <li style="color: red" @click="delPlan">删除</li>
@@ -193,7 +193,7 @@
           >
             <el-form-item label="所属项目" prop="parentProId">
               <el-input
-                :value="curProject.projectName"
+                :value="curProject && curProject.projectName"
                 placeholder="请输入内容"
                 disabled
               />
@@ -300,7 +300,38 @@
       </div>
     </el-dialog>
     <!-- 新建计划集dialog -->
-
+    <el-dialog
+      title="新建计划集"
+      :visible.sync="newPlanSetVisiable"
+      width="30%"
+      @closed="closePlanDialog"
+    >
+      <el-form
+        ref="newPlanSet"
+        :model="newPlanSet"
+        label-width="80px"
+        label-position="top"
+      >
+        <el-form-item label="所属计划集" prop="parentPlanSetIds">
+          <el-cascader
+            v-model="newPlanSet.parentPlanSetIds"
+            :options="parentPlanSet"
+            :props="planSetProps"
+            style="width: 100%"
+          />
+        </el-form-item>
+        <el-form-item label="标题">
+          <el-input
+            v-model="newPlanSet.title"
+            placeholder="请输入标题"
+          />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="newPlanSetVisiable = false">取 消</el-button>
+        <el-button type="primary" @click="addProject">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -473,6 +504,13 @@ export default {
         value: 'id',
         label: 'label'
       },
+      // 新建计划集 start
+      newPlanSetVisiable: false,
+      newPlanSet: {
+        parentPlanSetIds: '', // 所属父计划集
+        title: '' // 标题
+      },
+      // 新建计划集 end
       // 新建工作项：新建计划、新建卡片等等 start
       newWorkItem: {
         title: '', // 标题
@@ -698,6 +736,9 @@ export default {
       this.newWorkItem.workType = ''
       this.workDialog.isEpic = false
       this.workDialog.parentWorkItemTitle = '所属Epic'
+    },
+    openPlanSetDialog() {
+      this.newPlanSetVisiable = true
     }
   }
 }
