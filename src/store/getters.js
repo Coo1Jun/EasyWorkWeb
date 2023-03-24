@@ -8,6 +8,6 @@ const getters = {
   // avatar: state => state.user.avatar,
   // name: state => state.user.name
   userInfo: state => state.user.userInfo,
-  curProId: state => state.project.proId
+  curProject: state => state.project.projectInfo
 }
 export default getters

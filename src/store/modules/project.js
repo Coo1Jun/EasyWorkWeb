@@ -1,7 +1,7 @@
 
 const getDefaultState = () => {
   return {
-    proId: null
+    projectInfo: null
   }
 }
 
@@ -9,15 +9,15 @@ const state = getDefaultState()
 
 const mutations = {
   SET_CUR_PROJECT: (state, data) => {
-    state.proId = data
+    state.projectInfo = data
   }
 }
 
 const actions = {
 
   // 设置当前所选项目的id
-  setCurProject({ commit }, proId) {
-    commit('SET_CUR_PROJECT', proId)
+  setCurProject({ commit }, projectInfo) {
+    commit('SET_CUR_PROJECT', projectInfo)
   }
 }
 
