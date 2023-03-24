@@ -7,7 +7,14 @@
           <el-button
             class="btn"
             type="primary"
-            @click="addWorkItemVisible = true"
+            @click="openPlanDialog"
+          >
+            新建计划集
+          </el-button>
+          <el-button
+            class="btn"
+            type="primary"
+            @click="openPlanDialog"
           >
             新建计划
           </el-button>
@@ -25,7 +32,7 @@
       <!-- 右边的卡片内容 -->
       <div class="content">
         <!-- 进度条 -->
-        <plan-navbar :progress="progress" class="plan-navbar" />
+        <plan-navbar :progress="progress" class="plan-navbar" @openDialog="openWorkItemDialog" />
         <!-- plan-avatar 所有人完成情况 -->
         <div v-if="planAvatarShow" class="plan-avatar">
           <div class="plan-avatar-average">
@@ -108,12 +115,15 @@
       :style="{ left: left + 'px', top: top + 'px' }"
       class="contextmenu"
     >
-      <li @click="addWorkItemVisible = true">新建计划</li>
+      <li v-if="curData && !curData.isPlanSet" @click="addWorkItemVisible = false">新建计划集</li>
+      <li v-if="curData && !curData.isPlanSet" @click="openPlanDialog">新建计划</li>
+      <li v-if="curData && curData.isPlanSet" @click="addWorkItemVisible = false">查看</li>
       <li style="color: red" @click="delPlan">删除</li>
     </ul>
 
+    <!-- 新建工作项dialog -->
     <el-dialog
-      title="新建计划"
+      :title="workDialog.title"
       :visible.sync="addWorkItemVisible"
       width="90%"
       top="4vh"
@@ -123,7 +133,7 @@
         <!-- 左边内容区 -->
         <div class="plan-dialog-content">
           <!-- 标题 -->
-          <div>
+          <div class="work-tiem-title">
             <el-form
               ref="newWorkItem"
               :model="newWorkItem"
@@ -139,6 +149,7 @@
             </el-form>
           </div>
           <!-- 富文本编辑器 -->
+          <div style="margin-bottom: 10px">描述</div>
           <div v-if="addWorkItemVisible" style="border: 1px solid #eee">
             <Toolbar
               style="border-bottom: 1px solid #eee"
@@ -200,8 +211,9 @@
                 v-model="newWorkItem.workType"
                 placeholder="请选择工作项类型"
                 style="width: 100%"
+                :disabled="workDialog.isEpic"
               >
-                <el-option label="Epic" value="Epic" />
+                <!-- <el-option label="Epic" value="Epic" /> -->
                 <el-option label="Feature" value="Feature" />
                 <el-option label="Story" value="Story" />
                 <el-option label="Task" value="Task" />
@@ -262,6 +274,8 @@
         <el-button type="primary" @click="addProject">确 定</el-button>
       </div>
     </el-dialog>
+    <!-- 新建计划集dialog -->
+
   </div>
 </template>
 
@@ -351,18 +365,22 @@ export default {
         {
           id: 1,
           label: '一级 1',
+          isPlanSet: false,
           children: [
             {
               id: 4,
               label: '二级 1-1',
+              isPlanSet: false,
               children: [
                 {
                   id: 9,
-                  label: '三级 1-1-1'
+                  label: '三级 1-1-1',
+                  isPlanSet: true
                 },
                 {
                   id: 10,
-                  label: '三级 1-1-2'
+                  label: '三级 1-1-2',
+                  isPlanSet: true
                 }
               ]
             }
@@ -371,40 +389,49 @@ export default {
         {
           id: 2,
           label: '一级 2',
+          isPlanSet: false,
           children: [
             {
               id: 5,
-              label: '二级 2-1'
+              label: '二级 2-1',
+              isPlanSet: true
             },
             {
               id: 6,
-              label: '二级 2-2'
+              label: '二级 2-2',
+              isPlanSet: true
             }
           ]
         },
         {
           id: 3,
           label: '一级 3',
+          isPlanSet: false,
           children: [
             {
               id: 7,
-              label: '二级 3-1'
+              label: '二级 3-1',
+              isPlanSet: true
             },
             {
               id: 8,
               label: '二级 3-2',
+              isPlanSet: false,
               children: [
                 {
                   id: 11,
-                  label: '三级 3-2-1'
+                  label: '三级 3-2-1',
+                  isPlanSet: true
                 },
                 {
                   id: 12,
-                  label: '三级 3-2-2'
+                  label: '三级 3-2-2',
+                  isPlanSet: true
                 },
                 {
                   id: 13,
-                  label: '三级 3-2-3'
+                  label: '三级 3-2-3',
+                  isPlanSet: true
                 }
               ]
             }
@@ -413,7 +440,8 @@ export default {
       ],
       defaultProps: {
         children: 'children',
-        label: 'label'
+        label: 'label',
+        isLeaf: 'isPlanSet'
       },
       // 新建工作项：新建计划、新建卡片等等 start
       newWorkItem: {
@@ -432,12 +460,18 @@ export default {
         severity: '' // 严重程度 Bug类别
       },
       riskOldValue: 0,
-      priorityOldValue: 0
+      priorityOldValue: 0,
       // 新建工作项：新建计划、新建卡片等等 end
+      // 新建工作项 dialog属性 start
+      workDialog: {
+        title: '',
+        isEpic: false
+      }
+      // 新建工作项 dialog属性 end
     }
   },
   computed: {
-    ...mapGetters(['curProId']),
+    ...mapGetters(['curProject']),
     haveTagsView() {
       // TagsView高 34px
       return this.$store.state.settings.tagsView
@@ -477,7 +511,7 @@ export default {
   mounted() {
     // 获取到当前选择项目的id
     // 如果id为空，说明没选，跳转到/mission/projects
-    if (!this.curProId) {
+    if (!(this.curProject && this.curProject.id)) {
       this.$router.push('/mission/projects')
       return
     }
@@ -503,24 +537,28 @@ export default {
     handleContextmenu(event, data, node) {
       this.curData = data
       this.curNode = node
+      // 计算鼠标右键菜单的位置 start
       const offsetLeft = this.$el.getBoundingClientRect().left // 表示获取组件根元素左边缘相对于视口左边缘的距离，也就是组件根元素在视口中的相对位置的左边距。
       const left = event.pageX - offsetLeft + 15 // 15: margin right
       this.left = left
       this.top = event.pageY
+      // 计算鼠标右键菜单的位置 end
       this.visible = true
+      console.log(data)
+      console.log(node)
     },
     closeMenu() {
       this.visible = false
     },
     appendPlan() {
       this.addWorkItemVisible = true
-      this.$refs.planTree.append(
-        {
-          id: 13,
-          label: '新建的计划'
-        },
-        this.curNode
-      )
+      // this.$refs.planTree.append(
+      //   {
+      //     id: 13,
+      //     label: '新建的计划'
+      //   },
+      //   this.curNode
+      // )
       this.$message({
         type: 'success',
         message: '新建成功!'
@@ -599,6 +637,18 @@ export default {
           this.priorityOldValue = value
         }
       }
+    },
+    openPlanDialog() {
+      this.workDialog.title = '新建计划'
+      this.addWorkItemVisible = true
+      this.newWorkItem.workType = 'Epic'
+      this.workDialog.isEpic = true
+    },
+    openWorkItemDialog() {
+      this.workDialog.title = '新建卡片'
+      this.addWorkItemVisible = true
+      this.newWorkItem.workType = ''
+      this.workDialog.isEpic = false
     }
   }
 }
@@ -715,17 +765,17 @@ export default {
   border-right: 1px solid #e7eaee;
 }
 ::v-deep .el-dialog__body {
-  padding: 10px 20px 0;
+  padding: 0px 20px 0px;
 }
 ::v-deep .el-form-item__label {
   padding: 0;
 }
 .plan-dialog-container {
   display: flex;
-  height: 530px;
+  height: 540px;
 }
 .plan-dialog-content {
-  width: 66%;
+  width: 70%;
   margin-right: 10px;
   padding-right: 20px;
   // overflow-y: hidden;
@@ -733,7 +783,7 @@ export default {
   // overflow: auto;
 }
 .plan-dialog-attribute {
-  width: 34%;
+  width: 30%;
   margin-left: 10px;
   padding-right: 10px;
   overflow-y: hidden;
@@ -744,5 +794,10 @@ export default {
 }
 ::v-deep .el-rate__icon {
   font-size: 30px;
+}
+.work-tiem-title {
+  ::v-deep .el-form-item {
+    margin-bottom: 10px;
+  }
 }
 </style>
