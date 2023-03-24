@@ -106,7 +106,7 @@
             <i class="el-icon-arrow-down" />
           </button>
         </div>
-        <div class="plan-content">plan-content</div>
+        <PlanCard />
       </div>
     </div>
 
@@ -337,6 +337,7 @@
 
 <script>
 import PlanNavbar from '@/components/PlanNavbar'
+import PlanCard from '@/components/PlanCard'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
@@ -357,7 +358,7 @@ Vue.directive('horizontal-scroll', {
 
 export default {
   name: 'Planboard',
-  components: { PlanNavbar, Editor, Toolbar },
+  components: { PlanNavbar, Editor, Toolbar, PlanCard },
   data() {
     const { editorConfig, toolbarConfig } = config
     return {
