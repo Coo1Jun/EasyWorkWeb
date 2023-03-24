@@ -21,7 +21,7 @@
         </div>
         <el-tree
           ref="planTree"
-          :data="data"
+          :data="planSet"
           node-key="id"
           highlight-current
           :props="defaultProps"
@@ -197,6 +197,14 @@
                 placeholder="请输入内容"
                 disabled
               />
+            </el-form-item>
+            <el-form-item v-if="workDialog.isEpic" label="所属计划集" prop="parentPlanSetIds">
+              <el-cascader
+                v-model="newWorkItem.parentPlanSetIds"
+                :options="parentPlanSet"
+                :props="planSetProps"
+                style="width: 100%"
+              />
               <!-- <el-select
                 v-model="newWorkItem.parentProId"
                 placeholder="请选择项目"
@@ -221,6 +229,20 @@
                 <el-option label="Story" value="Story" />
                 <el-option label="Task" value="Task" />
                 <el-option label="Bug" value="Bug" />
+              </el-select>
+            </el-form-item>
+            <el-form-item v-if="!workDialog.isEpic" :label="workDialog.parentWorkItemTitle" prop="parentWorkItemId">
+              <el-select
+                v-model="newWorkItem.parentWorkItemId"
+                placeholder="请选择标题"
+                style="width: 100%"
+                filterable
+              >
+                <!-- 当前项目、Epic（计划）是知道的，所以应该遍历当前Epic下对应的父工作项 -->
+                <!-- <el-option
+                  :label="curProject.projectName"
+                  :value="curProject.id"
+                /> -->
               </el-select>
             </el-form-item>
             <el-form-item label="负责人" prop="principals">
@@ -364,7 +386,7 @@ export default {
           completedTasks: 10 // 已经完成的任务
         }
       ],
-      data: [
+      planSet: [
         {
           id: 1,
           label: '一级 1',
@@ -446,12 +468,18 @@ export default {
         label: 'label',
         isLeaf: 'isPlanSet'
       },
+      planSetProps: {
+        children: 'children',
+        value: 'id',
+        label: 'label'
+      },
       // 新建工作项：新建计划、新建卡片等等 start
       newWorkItem: {
         title: '', // 标题
         desc: '', // 描述
         fileIdList: [], // 附件
         parentProId: '', // 所属项目
+        parentPlanSetIds: [], // 所属计划集,数组的元素分别是一级一级往下传递，比如['a','b','c']表示，计划集为 a/b/c
         parentWorkItemId: '', // 除了Epic，其他工作项类型都有所属，比如Feature所属Epic下
         workType: '', // 工作项类型：Epic、Feature、Story、Task、Bug
         principals: [], // 负责人
@@ -468,7 +496,8 @@ export default {
       // 新建工作项 dialog属性 start
       workDialog: {
         title: '',
-        isEpic: false
+        isEpic: false,
+        parentWorkItemTitle: ''
       }
       // 新建工作项 dialog属性 end
     }
@@ -500,6 +529,9 @@ export default {
     },
     remainingTasks() {
       return this.allTaskCount - this.allCompletedTasks
+    },
+    parentPlanSet() {
+      return null
     }
   },
   watch: {
@@ -508,6 +540,19 @@ export default {
         document.body.addEventListener('click', this.closeMenu)
       } else {
         document.body.removeEventListener('click', this.closeMenu)
+      }
+    },
+    'newWorkItem.workType'(value) {
+      switch (value) {
+        case 'Story':
+          this.workDialog.parentWorkItemTitle = '所属Feature'
+          break
+        case 'Task':
+        case 'Bug':
+          this.workDialog.parentWorkItemTitle = '所属Story'
+          break
+        default:
+          this.workDialog.parentWorkItemTitle = '所属Epic'
       }
     }
   },
@@ -652,6 +697,7 @@ export default {
       this.addWorkItemVisible = true
       this.newWorkItem.workType = ''
       this.workDialog.isEpic = false
+      this.workDialog.parentWorkItemTitle = '所属Epic'
     }
   }
 }
