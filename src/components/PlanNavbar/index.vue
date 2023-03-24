@@ -4,7 +4,7 @@
       <div class="progress">
         <el-progress :text-inside="true" :stroke-width="20" :percentage="progress" status="success" />
       </div>
-      <el-button class="btn" type="primary">
+      <el-button class="btn" type="primary" @click="newWorkItem">
         新建卡片
       </el-button>
     </div>
@@ -18,6 +18,15 @@ export default {
     progress: {
       type: Number,
       default: 0
+    }
+  },
+  beforeDestroy() {
+    // 解绑事件
+    this.$off('openDialog')
+  },
+  methods: {
+    newWorkItem() {
+      this.$emit('openDialog')
     }
   }
 }
