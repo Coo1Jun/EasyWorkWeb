@@ -192,19 +192,22 @@
             label-position="top"
           >
             <el-form-item label="所属项目" prop="parentProId">
-              <el-select
+              <el-input
+                :value="curProject.projectName"
+                placeholder="请输入内容"
+                disabled
+              />
+              <!-- <el-select
                 v-model="newWorkItem.parentProId"
                 placeholder="请选择项目"
                 style="width: 100%"
                 filterable
               >
                 <el-option
-                  v-for="p in projects"
-                  :key="p.id"
-                  :label="p.name"
-                  :value="p.id"
+                  :label="curProject.projectName"
+                  :value="curProject.id"
                 />
-              </el-select>
+              </el-select> -->
             </el-form-item>
             <el-form-item label="工作项类型" prop="workType">
               <el-select
