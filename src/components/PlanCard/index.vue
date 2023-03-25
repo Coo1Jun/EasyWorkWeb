@@ -7,12 +7,20 @@
       tooltip-effect="light"
       default-expand-all
       :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
+      :indent="8"
+      @cell-dblclick="cellDoubleCli"
     >
+      <el-table-column type="index" :width="20">
+        <template slot-scope="scope">
+          <div class="priority" />
+        </template>
+      </el-table-column>
       <el-table-column
         prop="number"
         label="编号"
         show-overflow-tooltip
-        :min-width="30"
+        :width="60"
+        type="index"
       >
         <template slot-scope="scope">
           <span style="color: #1890ff">{{ scope.row.number }}</span>
@@ -21,13 +29,34 @@
       <el-table-column
         prop="title"
         label="标题"
+        :min-width="250"
         show-overflow-tooltip
-      />
+      >
+        <template slot-scope="scope">
+          <input
+            v-if="(scope.row.id + scope.column.id) === workItemEditor.cellId"
+            ref="titleInput"
+            v-model="workItemEditor.title"
+            class="title-input"
+            @blur="cellBlur"
+          >
+          <span v-else>{{ scope.row.title }}</span>
+        </template>
+      </el-table-column>
+      <!-- <el-table-column>
+        <template slot-scope="scope">
+          <el-button size="mini" icon="el-icon-edit" circle @click="test(scope)" />
+        </template>
+      </el-table-column> -->
       <el-table-column
         prop="principals"
         label="负责人"
         show-overflow-tooltip
-      />
+      >
+        <template slot-scope="scope">
+          <span>{{ scope.row.principals[0] && scope.row.principals[0].name }}</span>
+        </template>
+      </el-table-column>
       <el-table-column
         prop="workTime"
         label="估算工时"
@@ -78,94 +107,141 @@ export default {
   },
   data() {
     return {
+      workItemEditor: {
+        cellId: '',
+        title: '',
+        principals: [],
+        state: ''
+      },
       workItem: [
         {
           id: '1',
-          number: '1', // 编号
+          number: '1111', // 编号
           title: '特性1',
-          principals: [], // 负责人
+          principals: [{ id: '', name: '李正帆' }], // 负责人
           workTime: '14', // 工时
           workType: 'Feature', // 工作项类型：Epic、Feature、Story、Task、Bug
-          state: '新建' // 流程状态
+          state: '新建', // 流程状态
+          priority: 1,
+          children: [
+            {
+              id: '5',
+              number: '22222', // 编号
+              title: '故事1',
+              principals: [{ id: '', name: '李正帆' }], // 负责人
+              workTime: '14', // 工时
+              workType: 'Story', // 工作项类型：Epic、Feature、Story、Task、Bug
+              state: '新建', // 流程状态
+              priority: 2,
+              children: [
+                {
+                  id: '8',
+                  number: '11111', // 编号
+                  title: '任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任务1',
+                  principals: [{ id: '', name: '李正帆' }], // 负责人
+                  workTime: '14', // 工时
+                  workType: 'Task', // 工作项类型：Epic、Feature、Story、Task、Bug
+                  state: '新建', // 流程状态
+                  priority: 3
+                }
+              ]
+            },
+            {
+              id: '6',
+              number: '2223', // 编号
+              title: '故事3',
+              principals: [], // 负责人
+              workTime: '14', // 工时
+              workType: 'Story', // 工作项类型：Epic、Feature、Story、Task、Bug
+              state: '新建', // 流程状态
+              priority: 4
+            }
+          ]
         },
         {
-          id: '1',
+          id: '2',
           number: '2', // 编号
-          title: '特性1',
+          title: '特性2',
           principals: [], // 负责人
           workTime: '14', // 工时
           workType: 'Feature', // 工作项类型：Epic、Feature、Story、Task、Bug
-          state: '新建' // 流程状态
+          state: '新建', // 流程状态
+          priority: 5,
+          children: [
+            {
+              id: '7',
+              number: '22', // 编号
+              title: '故事4',
+              principals: [], // 负责人
+              workTime: '14', // 工时
+              workType: 'Story', // 工作项类型：Epic、Feature、Story、Task、Bug
+              state: '新建' // 流程状态
+            }
+          ]
         },
         {
-          id: '1',
+          id: '3',
           number: '3', // 编号
-          title: '特性1',
+          title: '特性3',
           principals: [], // 负责人
           workTime: '14', // 工时
           workType: 'Feature', // 工作项类型：Epic、Feature、Story、Task、Bug
           state: '新建' // 流程状态
         },
         {
-          id: '1',
+          id: '4',
           number: '4444', // 编号
-          title: '特性1',
+          title: '特性4',
           principals: [], // 负责人
           workTime: '14', // 工时
           workType: 'Feature', // 工作项类型：Epic、Feature、Story、Task、Bug
           state: '新建' // 流程状态
         }
-      ],
-      tableData: [{
-        id: 1,
-        date: '2016-05-02',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        id: 2,
-        date: '2016-05-04',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1517 弄'
-      }, {
-        id: 3,
-        date: '2016-05-01',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1519 弄',
-        children: [{
-          id: 31,
-          date: '2016-05-01',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1519 弄'
-        }, {
-          id: 32,
-          date: '2016-05-01',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1519 弄'
-        }]
-      }, {
-        id: 4,
-        date: '2016-05-03',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1516 弄'
-      }]
+      ]
     }
   },
   beforeDestroy() {
   },
   methods: {
+    cellDoubleCli(row, column, cell, event) {
+      console.log(row)
+      console.log(column)
+      console.log(cell)
+      console.log(event)
+      this.workItemEditor.cellId = row.id + column.id
+      this.workItemEditor.title = row.title
+      // this.$refs.titleInput.focus()
+      this.$nextTick(() => {
+        this.$refs.titleInput.focus()
+      })
+    },
+    test(scope) {
+      console.log(scope)
+    },
+    cellBlur() {
+      this.workItemEditor.cellId = ''
+    }
   }
 }
 </script>
 
 <style scoped>
-/* 隐藏按钮 */
-.edit-btn {
-  display: none;
+::v-deep .el-table td, .el-table th {
+  padding: 0;
+  height: 45px;
 }
-
-/* 鼠标移动到单元格上，显示按钮 */
-.cell:hover .edit-btn {
-  display: inline-block;
+input {
+  outline: none;
+  border: 1px solid #999999;
+  padding: 5px;
+  border-radius: 4px;
 }
-
+.title-input {
+  width: 80%;
+}
+.priority{
+  background-color: #1890ff;
+  height: 45px;
+  width: 4px;
+}
 </style>
