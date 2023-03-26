@@ -12,7 +12,7 @@
     >
       <el-table-column type="index" :width="20">
         <template slot-scope="scope">
-          <div class="priority" />
+          <div class="priority" :style="{backgroundColor: (scope.row.priority ? (priorityColor[scope.row.priority] ? priorityColor[scope.row.priority] : '#73d897') : '#73d897') }" />
         </template>
       </el-table-column>
       <el-table-column
@@ -107,6 +107,13 @@ export default {
   },
   data() {
     return {
+      priorityColor: {
+        1: '#73d897',
+        2: '#6698ff',
+        3: '#f6c659',
+        4: '#ff9f73',
+        5: '#ff7575'
+      },
       workItemEditor: {
         cellId: '',
         title: '',
@@ -240,7 +247,7 @@ input {
   width: 80%;
 }
 .priority{
-  background-color: #1890ff;
+  /* background-color: #1890ff; */
   height: 45px;
   width: 4px;
 }
