@@ -34,7 +34,7 @@
       >
         <template slot-scope="scope">
           <input
-            v-if="(scope.row.id + scope.column.id) === workItemEditor.cellId"
+            v-if="(scope.row.id + scope.row.title) === workItemEditor.cellId"
             ref="titleInput"
             v-model="workItemEditor.title"
             class="title-input"
@@ -43,11 +43,11 @@
           <span v-else>{{ scope.row.title }}</span>
         </template>
       </el-table-column>
-      <!-- <el-table-column>
+      <el-table-column :width="30" class-name="edit-title-btn">
         <template slot-scope="scope">
-          <el-button size="mini" icon="el-icon-edit" circle @click="test(scope)" />
+          <el-button size="mini" class="edit-btn" icon="el-icon-edit" circle @click="editTitle(scope)" />
         </template>
-      </el-table-column> -->
+      </el-table-column>
       <el-table-column
         prop="principals"
         label="负责人"
@@ -215,15 +215,13 @@ export default {
       console.log(column)
       console.log(cell)
       console.log(event)
-      this.workItemEditor.cellId = row.id + column.id
-      this.workItemEditor.title = row.title
-      // this.$refs.titleInput.focus()
+    },
+    editTitle(scope) {
+      this.workItemEditor.cellId = scope.row.id + scope.row.title
+      this.workItemEditor.title = scope.row.title
       this.$nextTick(() => {
         this.$refs.titleInput.focus()
       })
-    },
-    test(scope) {
-      console.log(scope)
     },
     cellBlur() {
       this.workItemEditor.cellId = ''
@@ -250,5 +248,14 @@ input {
   /* background-color: #1890ff; */
   height: 45px;
   width: 4px;
+}
+::v-deep .edit-title-btn .cell {
+  padding: 0;
+}
+.edit-btn {
+  display: none;
+}
+.el-table__row:hover .edit-btn {
+  display: inline-block;
 }
 </style>
