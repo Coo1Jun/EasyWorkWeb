@@ -245,13 +245,13 @@
                 /> -->
               </el-select>
             </el-form-item>
-            <el-form-item label="负责人" prop="principals">
+            <el-form-item label="负责人" prop="principal">
               <el-select
-                v-model="newWorkItem.principals"
+                v-model="newWorkItem.principal"
                 placeholder="请选择负责人"
                 style="width: 100%"
-                multiple
                 filterable
+                clearable
               >
                 <el-option
                   v-for="m in members"
@@ -521,7 +521,7 @@ export default {
         parentPlanSetIds: [], // 所属计划集,数组的元素分别是一级一级往下传递，比如['a','b','c']表示，计划集为 a/b/c
         parentWorkItemId: '', // 除了Epic，其他工作项类型都有所属，比如Feature所属Epic下
         workType: '', // 工作项类型：Epic、Feature、Story、Task、Bug
-        principals: [], // 负责人
+        principal: '', // 负责人
         duration: null, // 持续时间
         startTime: '', // 开始时间
         endTime: '', // 结束时间
