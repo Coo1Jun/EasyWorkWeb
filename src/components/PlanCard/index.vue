@@ -8,7 +8,6 @@
       default-expand-all
       :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
       :indent="8"
-      border
       @cell-click="cellClick"
     >
       <el-table-column type="index" :width="20">
@@ -186,7 +185,7 @@ export default {
                   principal: { id: '2', name: '李正帆' }, // 负责人
                   workTime: '14', // 工时
                   workType: 'Task', // 工作项类型：Epic、Feature、Story、Task、Bug
-                  state: '新建', // 流程状态
+                  state: '开发中', // 流程状态
                   priority: 3
                 },
                 {
@@ -298,6 +297,8 @@ export default {
     principalChange(value) {
       console.log('负责人修改：', value)
       // todo发请求
+
+      this.workItemEditor.principal = ''
     },
     principalOption(visible) {
       // 下拉框出现/隐藏时触发,出现则为 true，隐藏则为 false
@@ -307,6 +308,9 @@ export default {
     },
     stateChange(value) {
       console.log('状态修改为：', value)
+      // todo发请求
+
+      this.workItemEditor.state = ''
     }
   }
 }
