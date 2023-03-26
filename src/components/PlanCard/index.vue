@@ -8,7 +8,8 @@
       default-expand-all
       :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
       :indent="8"
-      @cell-dblclick="cellDoubleCli"
+      border
+      @cell-click="cellClick"
     >
       <el-table-column type="index" :width="20">
         <template slot-scope="scope">
@@ -38,7 +39,7 @@
             ref="titleInput"
             v-model="workItemEditor.title"
             class="title-input"
-            @blur="cellBlur"
+            @blur="titleCellBlur"
           >
           <span v-else>{{ scope.row.title }}</span>
         </template>
@@ -49,12 +50,31 @@
         </template>
       </el-table-column>
       <el-table-column
-        prop="principals"
+        prop="principal"
         label="负责人"
-        show-overflow-tooltip
+        :width="140"
+        class-name="principals"
       >
         <template slot-scope="scope">
-          <span>{{ scope.row.principals[0] && scope.row.principals[0].name }}</span>
+          <el-select
+            v-if="(scope.row.id + scope.column.label) === workItemEditor.cellId"
+            ref="principalSelect"
+            v-model="workItemEditor.principal"
+            placeholder="请选择负责人"
+            style="width: 100%"
+            filterable
+            clearable
+            @change="principalChange"
+            @visible-change="principalOption"
+          >
+            <el-option
+              v-for="m in members"
+              :key="m.id"
+              :label="m.name"
+              :value="m.id"
+            />
+          </el-select>
+          <span v-else>{{ scope.row.principal && scope.row.principal.name }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -107,6 +127,8 @@ export default {
   },
   data() {
     return {
+      value: '',
+      members: [{ id: 1, name: '李正帆' }, { id: 2, name: '李正帆测试1' }, { id: 3, name: '李正帆测试222222' }], // 团队成员
       priorityColor: {
         1: '#73d897',
         2: '#6698ff',
@@ -117,7 +139,7 @@ export default {
       workItemEditor: {
         cellId: '',
         title: '',
-        principals: [],
+        principal: '',
         state: ''
       },
       workItem: [
@@ -125,7 +147,7 @@ export default {
           id: '1',
           number: '1111', // 编号
           title: '特性1',
-          principals: [{ id: '', name: '李正帆' }], // 负责人
+          principal: { id: '1', name: '李正帆1' }, // 负责人
           workTime: '14', // 工时
           workType: 'Feature', // 工作项类型：Epic、Feature、Story、Task、Bug
           state: '新建', // 流程状态
@@ -135,7 +157,7 @@ export default {
               id: '5',
               number: '22222', // 编号
               title: '故事1',
-              principals: [{ id: '', name: '李正帆' }], // 负责人
+              principal: { id: '2', name: '李正帆2' }, // 负责人
               workTime: '14', // 工时
               workType: 'Story', // 工作项类型：Epic、Feature、Story、Task、Bug
               state: '新建', // 流程状态
@@ -145,7 +167,7 @@ export default {
                   id: '8',
                   number: '11111', // 编号
                   title: '任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任务1',
-                  principals: [{ id: '', name: '李正帆' }], // 负责人
+                  principal: { id: '2', name: '李正帆' }, // 负责人
                   workTime: '14', // 工时
                   workType: 'Task', // 工作项类型：Epic、Feature、Story、Task、Bug
                   state: '新建', // 流程状态
@@ -157,7 +179,7 @@ export default {
               id: '6',
               number: '2223', // 编号
               title: '故事3',
-              principals: [], // 负责人
+              principal: {}, // 负责人
               workTime: '14', // 工时
               workType: 'Story', // 工作项类型：Epic、Feature、Story、Task、Bug
               state: '新建', // 流程状态
@@ -169,7 +191,7 @@ export default {
           id: '2',
           number: '2', // 编号
           title: '特性2',
-          principals: [], // 负责人
+          principal: {}, // 负责人
           workTime: '14', // 工时
           workType: 'Feature', // 工作项类型：Epic、Feature、Story、Task、Bug
           state: '新建', // 流程状态
@@ -179,7 +201,7 @@ export default {
               id: '7',
               number: '22', // 编号
               title: '故事4',
-              principals: [], // 负责人
+              principal: {}, // 负责人
               workTime: '14', // 工时
               workType: 'Story', // 工作项类型：Epic、Feature、Story、Task、Bug
               state: '新建' // 流程状态
@@ -190,7 +212,7 @@ export default {
           id: '3',
           number: '3', // 编号
           title: '特性3',
-          principals: [], // 负责人
+          principal: {}, // 负责人
           workTime: '14', // 工时
           workType: 'Feature', // 工作项类型：Epic、Feature、Story、Task、Bug
           state: '新建' // 流程状态
@@ -199,7 +221,7 @@ export default {
           id: '4',
           number: '4444', // 编号
           title: '特性4',
-          principals: [], // 负责人
+          principal: {}, // 负责人
           workTime: '14', // 工时
           workType: 'Feature', // 工作项类型：Epic、Feature、Story、Task、Bug
           state: '新建' // 流程状态
@@ -210,12 +232,6 @@ export default {
   beforeDestroy() {
   },
   methods: {
-    cellDoubleCli(row, column, cell, event) {
-      console.log(row)
-      console.log(column)
-      console.log(cell)
-      console.log(event)
-    },
     editTitle(scope) {
       this.workItemEditor.cellId = scope.row.id + scope.row.title
       this.workItemEditor.title = scope.row.title
@@ -223,8 +239,32 @@ export default {
         this.$refs.titleInput.focus()
       })
     },
-    cellBlur() {
+    titleCellBlur() {
       this.workItemEditor.cellId = ''
+      console.log('title修改：', this.workItemEditor.title)
+      // todo 发请求
+    },
+    cellClick(row, column, cell, event) {
+      // 如果是点击title的编辑按钮，则跳过
+      if (column.className === 'edit-title-btn') return
+      if (column.label && column.label === '负责人') {
+        this.workItemEditor.cellId = row.id + column.label
+        // this.workItemEditor.principal = row.principal
+        this.$nextTick(() => {
+          this.$refs.principalSelect.focus()
+        })
+      }
+    },
+    principalChange(value) {
+      console.log('负责人修改：', value)
+      this.workItemEditor.cellId = ''
+      // todo发请求
+    },
+    principalOption(visible) {
+      // 下拉框出现/隐藏时触发,出现则为 true，隐藏则为 false
+      if (!visible) {
+        this.workItemEditor.cellId = ''
+      }
     }
   }
 }
@@ -257,5 +297,13 @@ input {
 }
 .el-table__row:hover .edit-btn {
   display: inline-block;
+}
+::v-deep .principals .cell {
+  padding: 0;
+  padding-left: 10px;
+}
+::v-deep .el-input__inner {
+  border: none;
+  padding: 0 30px 0 0;
 }
 </style>
