@@ -52,8 +52,9 @@
       <el-table-column
         prop="principal"
         label="负责人"
-        :width="140"
+        :width="100"
         class-name="principals"
+        show-overflow-tooltip
       >
         <template slot-scope="scope">
           <el-select
@@ -79,42 +80,53 @@
       </el-table-column>
       <el-table-column
         prop="workTime"
+        label="剩余时间"
+        show-overflow-tooltip
+        :width="80"
+      />
+      <el-table-column
+        prop="workTime"
         label="估算工时"
         show-overflow-tooltip
+        :width="80"
       />
       <el-table-column
         prop="workType"
         label="卡片类型"
         show-overflow-tooltip
+        :width="80"
       />
       <el-table-column
         prop="state"
         label="流程状态"
-        show-overflow-tooltip
-      />
-      <!-- <el-table-column
-        prop="date"
-        label="日期"
-        sortable
-        width="180"
+        :width="80"
       >
         <template slot-scope="scope">
-          {{ scope.row.date }}
-          <span class="cell">
-            <el-button class="edit-btn" size="mini" icon="el-icon-edit" circle />
-          </span>
+          <el-select
+            v-if="(scope.row.id + scope.column.label) === workItemEditor.cellId"
+            ref="stateSelect"
+            v-model="workItemEditor.state"
+            style="width: 100%"
+            filterable
+            @visible-change="principalOption"
+            @change="stateChange"
+          >
+            <el-option
+              v-for="(s, index) in states"
+              :key="index"
+              :label="s"
+              :value="s"
+            />
+          </el-select>
+          <span v-else>{{ scope.row.state }}</span>
         </template>
       </el-table-column>
-      <el-table-column
-        prop="name"
-        label="姓名"
-        sortable
-        width="180"
-      />
-      <el-table-column
-        prop="address"
-        label="地址"
-      /> -->
+      <!-- 占位 使table不太靠近右边 -->
+      <el-table-column :width="30">
+        <template>
+          <span />
+        </template>
+      </el-table-column>
     </el-table>
   </div>
 </template>
@@ -129,6 +141,10 @@ export default {
     return {
       value: '',
       members: [{ id: 1, name: '李正帆' }, { id: 2, name: '李正帆测试1' }, { id: 3, name: '李正帆测试222222' }], // 团队成员
+      defaultStates: ['新建', '开发中', '已完成', '关闭'],
+      taskStates: ['新建', '开发中', '已完成', '已取消'],
+      BugStates: ['新建', '复现中', '进行中', '已完成', '未复现'],
+      states: [],
       priorityColor: {
         1: '#73d897',
         2: '#6698ff',
@@ -147,7 +163,7 @@ export default {
           id: '1',
           number: '1111', // 编号
           title: '特性1',
-          principal: { id: '1', name: '李正帆1' }, // 负责人
+          principal: { id: '1', name: '李正帆111111111' }, // 负责人
           workTime: '14', // 工时
           workType: 'Feature', // 工作项类型：Epic、Feature、Story、Task、Bug
           state: '新建', // 流程状态
@@ -172,6 +188,16 @@ export default {
                   workType: 'Task', // 工作项类型：Epic、Feature、Story、Task、Bug
                   state: '新建', // 流程状态
                   priority: 3
+                },
+                {
+                  id: '9',
+                  number: '11411', // 编号
+                  title: '【bug】发现了问题',
+                  principal: { id: '2', name: '李正帆' }, // 负责人
+                  workTime: '14', // 工时
+                  workType: 'Bug', // 工作项类型：Epic、Feature、Story、Task、Bug
+                  state: '新建', // 流程状态
+                  priority: 5
                 }
               ]
             },
@@ -254,10 +280,23 @@ export default {
           this.$refs.principalSelect.focus()
         })
       }
+      if (column.label && column.label === '流程状态') {
+        if (row.workType === 'Feature' || row.workType === 'Story') {
+          this.states = this.defaultStates
+        } else if (row.workType === 'Task') {
+          this.states = this.taskStates
+        } else if (row.workType === 'Bug') {
+          this.states = this.BugStates
+        }
+        this.workItemEditor.cellId = row.id + column.label
+        this.workItemEditor.principal = row.principal
+        this.$nextTick(() => {
+          this.$refs.stateSelect.focus()
+        })
+      }
     },
     principalChange(value) {
       console.log('负责人修改：', value)
-      this.workItemEditor.cellId = ''
       // todo发请求
     },
     principalOption(visible) {
@@ -265,6 +304,9 @@ export default {
       if (!visible) {
         this.workItemEditor.cellId = ''
       }
+    },
+    stateChange(value) {
+      console.log('状态修改为：', value)
     }
   }
 }
