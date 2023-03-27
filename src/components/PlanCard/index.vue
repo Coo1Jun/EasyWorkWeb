@@ -274,7 +274,10 @@ export default {
       console.log('title修改：', this.workItemEditor.title)
       // todo 发请求
     },
+    // 跳过表示不处理这次的点击事件
     cellClick(row, column, cell, event) {
+      // 如果点击title的input框，则跳过
+      if (cell.querySelector('.title-input')) return
       // 如果是点击title的编辑按钮，则跳过
       if (column.className === 'edit-title-btn') return
       if (column.label && column.label === '负责人') {
