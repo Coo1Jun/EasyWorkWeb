@@ -31,6 +31,7 @@
         label="标题"
         :min-width="250"
         show-overflow-tooltip
+        class-name="title"
       >
         <template slot-scope="scope">
           <input
@@ -99,6 +100,7 @@
         prop="state"
         label="流程状态"
         :width="80"
+        class-name="state"
       >
         <template slot-scope="scope">
           <el-select
@@ -127,18 +129,21 @@
         </template>
       </el-table-column>
     </el-table>
+    <CardPreview :visable="workItemVisible" @set-visable="setWorkItemVisible" />
   </div>
 </template>
 
 <script>
+import CardPreview from '@/components/CardPreview'
 export default {
   name: 'PlanCard',
+  components: { CardPreview },
   props: {
 
   },
   data() {
     return {
-      value: '',
+      workItemVisible: false,
       members: [{ id: 1, name: '李正帆' }, { id: 2, name: '李正帆测试1' }, { id: 3, name: '李正帆测试222222' }], // 团队成员
       defaultStates: ['新建', '开发中', '已完成', '关闭'],
       taskStates: ['新建', '开发中', '已完成', '已取消'],
@@ -293,6 +298,11 @@ export default {
           this.$refs.stateSelect.focus()
         })
       }
+      if (column.label && column.label === '标题') {
+        console.log(row)
+        console.log(column)
+        this.workItemVisible = true
+      }
     },
     principalChange(value) {
       console.log('负责人修改：', value)
@@ -311,6 +321,9 @@ export default {
       // todo发请求
 
       this.workItemEditor.state = ''
+    },
+    setWorkItemVisible(value) {
+      this.workItemVisible = value
     }
   }
 }
@@ -351,5 +364,8 @@ input {
 ::v-deep .el-input__inner {
   border: none;
   padding: 0 30px 0 0;
+}
+::v-deep .title, ::v-deep .principals, ::v-deep .state{
+  cursor: pointer;
 }
 </style>
