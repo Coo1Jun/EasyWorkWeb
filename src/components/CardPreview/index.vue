@@ -156,10 +156,6 @@
         </el-collapse>
       </div>
     </div>
-    <div slot="footer" class="dialog-footer">
-      <el-button @click="closeDialog">取 消</el-button>
-      <el-button type="primary">保 存</el-button>
-    </div>
   </el-dialog>
 </template>
 
@@ -240,6 +236,7 @@ export default {
   methods: {
     closeDialog() {
       this.$emit('set-visable', false)
+      this.cancelEditing()
     },
     priorityCheck(value) {
       if (value !== 0) {
@@ -332,7 +329,7 @@ export default {
 <style scoped>
 .cp-container {
   display: flex;
-  height: 480px;
+  height: 520px;
 }
 .cp-content {
   width: 70%;
