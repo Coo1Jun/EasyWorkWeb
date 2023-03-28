@@ -1,7 +1,10 @@
 
 const getDefaultState = () => {
   return {
-    projectInfo: null
+    projectInfo: null,
+    defaultStates: ['新建', '开发中', '已完成', '关闭'],
+    TaskStates: ['新建', '开发中', '已完成', '已取消'],
+    BugStates: ['新建', '复现中', '进行中', '已完成', '未复现']
   }
 }
 

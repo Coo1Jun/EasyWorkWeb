@@ -8,6 +8,9 @@ const getters = {
   // avatar: state => state.user.avatar,
   // name: state => state.user.name
   userInfo: state => state.user.userInfo,
-  curProject: state => state.project.projectInfo
+  curProject: state => state.project.projectInfo,
+  defaultStates: state => state.project.defaultStates,
+  TaskStates: state => state.project.TaskStates,
+  BugStates: state => state.project.BugStates
 }
 export default getters
