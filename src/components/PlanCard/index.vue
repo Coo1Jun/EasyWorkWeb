@@ -337,7 +337,7 @@ export default {
   padding: 0;
   height: 45px;
 }
-input {
+.title input {
   outline: none;
   border: 1px solid #999999;
   padding: 5px;
@@ -364,10 +364,10 @@ input {
   padding: 0;
   padding-left: 10px;
 }
-::v-deep .el-input__inner {
+/* ::v-deep .principals .el-input__inner {
   border: none;
   padding: 0 30px 0 0;
-}
+} */
 ::v-deep .title, ::v-deep .principals, ::v-deep .state{
   cursor: pointer;
 }
