@@ -3,6 +3,7 @@
     :visible.sync="workItemVisible"
     width="90%"
     top="4vh"
+    :close-on-press-escape="false"
     @closed="closeDialog"
   >
     <div class="container">
@@ -94,7 +95,6 @@ export default {
   },
   watch: {
     visable(newVal) {
-      console.log(newVal)
       this.workItemVisible = newVal
     }
   },

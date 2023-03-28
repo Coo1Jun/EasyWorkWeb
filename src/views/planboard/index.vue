@@ -127,6 +127,7 @@
       :visible.sync="addWorkItemVisible"
       width="90%"
       top="4vh"
+      :close-on-press-escape="false"
       @closed="closePlanDialog"
     >
       <div class="plan-dialog-container">
