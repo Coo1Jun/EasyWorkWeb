@@ -10,7 +10,7 @@
     <div class="cp-container">
       <!-- 左边 -->
       <div class="cp-content">
-        <div>
+        <div class="cp-content-input">
           <el-input
             ref="titleInput"
             v-model="workItem.title"
@@ -340,6 +340,9 @@ export default {
   margin-right: 10px;
   padding-right: 20px;
   overflow-x: hidden;
+}
+.cp-content-input .el-input{
+  font-size: 20px;
 }
 .cp-attribute {
   width: 30%;
