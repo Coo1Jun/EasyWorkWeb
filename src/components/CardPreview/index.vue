@@ -236,7 +236,14 @@ export default {
   methods: {
     closeDialog() {
       this.$emit('set-visable', false)
-      this.cancelEditing()
+      // 如果处于编辑状态，则保存
+      if (this.editorVisable) {
+        if (this.workItem.desc !== this.workItem.oldDesc) {
+          this.saveDesc()
+        } else {
+          this.cancelEditing()
+        }
+      }
     },
     priorityCheck(value) {
       if (value !== 0) {
