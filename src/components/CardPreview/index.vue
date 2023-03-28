@@ -1,19 +1,30 @@
 <template>
   <el-dialog
+    :title="workItem.workType"
     :visible.sync="workItemVisible"
     width="90%"
     top="4vh"
     :close-on-press-escape="false"
     @closed="closeDialog"
   >
-    <div class="container">
+    <div class="cp-container">
       <!-- 左边 -->
-      <div class="content">hello</div>
+      <div class="cp-content">
+        <div>
+          <el-input
+            ref="titleInput"
+            v-model="workItem.title"
+            placeholder="请输入标题"
+            @blur="workItemTitleBlur"
+          />
+        </div>
+
+      </div>
       <!-- 右边 -->
-      <div class="attribute">
+      <div class="cp-attribute">
         <el-collapse v-model="collapseActiveName">
           <el-collapse-item title="属性" name="1">
-            <div class="attribute-item">
+            <div class="cp-attribute-item">
               <div style="width: 120px;font-size: 14px">优先级</div>
               <el-rate
                 v-model="workItem.priority"
@@ -23,7 +34,7 @@
                 @change="priorityCheck"
               />
             </div>
-            <div class="attribute-item">
+            <div class="cp-attribute-item">
               <div style="width: 120px;font-size: 14px">风险</div>
               <el-rate
                 v-model="workItem.risk"
@@ -82,14 +93,16 @@ export default {
   },
   data() {
     return {
-      workItemVisible: false,
+      workItemVisible: true,
       collapseActiveName: ['1', '2'], // collapse默认展开的菜单
       priorityOldValue: 0, // 优先级的旧值
       riskOldValue: 0, // 优先级的旧值
       workItem: {
-        title: '',
+        title: '任务111111',
+        oldTitle: '',
         priority: 0,
-        risk: 0
+        risk: 0,
+        workType: 'Task'
       }
     }
   },
@@ -128,34 +141,51 @@ export default {
         }
       }
       // todo 发请求 改风险等级
+    },
+    workItemTitleBlur() {
+      console.log('标题改为', this.workItem.title)
+      if (!this.workItem.title) {
+        this.$message({
+          type: 'error',
+          message: '标题不能为空！',
+          duration: 3000
+        })
+        // 当标题为空并且失去焦点时，将工作项的title旧值赋值上
+        this.workItem.title = this.workItem.oldTitle
+        this.$refs.titleInput.focus()
+      } else {
+        // 保存旧值
+        this.workItem.oldTitle = this.workItem.title
+        // todo 发请求，改标题
+      }
     }
   }
 }
 </script>
 
 <style scoped>
-.container {
+.cp-container {
   display: flex;
-  height: 540px;
+  height: 480px;
 }
-.content {
+.cp-content {
   width: 70%;
   width: 70%;
   margin-right: 10px;
   padding-right: 20px;
   overflow-x: hidden;
 }
-.attribute {
+.cp-attribute {
   width: 30%;
   margin-left: 10px;
   padding-right: 10px;
   overflow-y: hidden;
   overflow: auto;
 }
-.attribute .basic-info div {
+.cp-attribute .basic-info div {
   margin: 15px 0;
 }
-.attribute span {
+.cp-attribute span {
   font-size: 14px;
   /* 让span成为行内块元素，就可以设置宽度，并且可以设置垂直居中 */
   display: inline-block;
@@ -167,7 +197,7 @@ export default {
 .el-collapse {
   border: none;
 }
-.attribute-item {
+.cp-attribute-item {
   display: flex;
   margin: 15px 0;
 }
