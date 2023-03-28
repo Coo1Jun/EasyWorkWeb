@@ -121,91 +121,92 @@
       <li style="color: red" @click="delPlan">删除</li>
     </ul>
 
-    <!-- 新建工作项dialog -->
-    <el-dialog
-      :title="workDialog.title"
-      :visible.sync="addWorkItemVisible"
-      width="90%"
-      top="4vh"
-      :close-on-press-escape="false"
-      @closed="closePlanDialog"
-    >
-      <div class="plan-dialog-container">
-        <!-- 左边内容区 -->
-        <div class="plan-dialog-content">
-          <!-- 标题 -->
-          <div class="work-tiem-title">
+    <div class="deepDialog">
+      <!-- 新建工作项dialog -->
+      <el-dialog
+        :title="workDialog.title"
+        :visible.sync="addWorkItemVisible"
+        width="90%"
+        top="4vh"
+        :close-on-press-escape="false"
+        @closed="closePlanDialog"
+      >
+        <div class="plan-dialog-container">
+          <!-- 左边内容区 -->
+          <div class="plan-dialog-content">
+            <!-- 标题 -->
+            <div class="work-tiem-title">
+              <el-form
+                ref="newWorkItem"
+                :model="newWorkItem"
+                label-width="80px"
+                label-position="top"
+              >
+                <el-form-item label="标题">
+                  <el-input
+                    v-model="newWorkItem.title"
+                    placeholder="请输入标题"
+                  />
+                </el-form-item>
+              </el-form>
+            </div>
+            <!-- 富文本编辑器 -->
+            <div style="margin-bottom: 10px">描述</div>
+            <div v-if="addWorkItemVisible" style="border: 1px solid #eee">
+              <Toolbar
+                style="border-bottom: 1px solid #eee"
+                :editor="editor"
+                :default-config="toolbarConfig"
+                :mode="mode"
+              />
+              <Editor
+                v-model="html"
+                style="height: 300px; overflow-y: hidden"
+                :default-config="editorConfig"
+                :mode="mode"
+                @onCreated="onCreated"
+              />
+            </div>
+            <div class="file-upload">
+              <el-upload
+                class="upload-demo"
+                :action="uploadUrl"
+                :on-preview="handlePreview"
+                :on-remove="handleRemove"
+                :on-success="uploadSuccess"
+                :on-error="uploadError"
+                multiple
+                :file-list="defaultFileList"
+              >
+                <el-badge :hidden="newWorkItem.fileIdList.length === 0" :value="newWorkItem.fileIdList.length" class="item" type="primary">
+                  <span style="margin-right: 10px">附件</span>
+                </el-badge>
+                <el-button style="margin-left: 15px" size="mini" icon="el-icon-plus" circle />
+              </el-upload>
+            </div>
+          </div>
+          <!-- 右边属性区 -->
+          <div class="plan-dialog-attribute">
             <el-form
               ref="newWorkItem"
               :model="newWorkItem"
               label-width="80px"
               label-position="top"
             >
-              <el-form-item label="标题">
+              <el-form-item label="所属项目" prop="parentProId">
                 <el-input
-                  v-model="newWorkItem.title"
-                  placeholder="请输入标题"
+                  :value="curProject && curProject.projectName"
+                  placeholder="请输入内容"
+                  disabled
                 />
               </el-form-item>
-            </el-form>
-          </div>
-          <!-- 富文本编辑器 -->
-          <div style="margin-bottom: 10px">描述</div>
-          <div v-if="addWorkItemVisible" style="border: 1px solid #eee">
-            <Toolbar
-              style="border-bottom: 1px solid #eee"
-              :editor="editor"
-              :default-config="toolbarConfig"
-              :mode="mode"
-            />
-            <Editor
-              v-model="html"
-              style="height: 300px; overflow-y: hidden"
-              :default-config="editorConfig"
-              :mode="mode"
-              @onCreated="onCreated"
-            />
-          </div>
-          <div class="file-upload">
-            <el-upload
-              class="upload-demo"
-              :action="uploadUrl"
-              :on-preview="handlePreview"
-              :on-remove="handleRemove"
-              :on-success="uploadSuccess"
-              :on-error="uploadError"
-              multiple
-              :file-list="defaultFileList"
-            >
-              <el-badge :hidden="newWorkItem.fileIdList.length === 0" :value="newWorkItem.fileIdList.length" class="item" type="primary">
-                <span style="margin-right: 10px">附件</span>
-              </el-badge>
-              <el-button style="margin-left: 15px" size="mini" icon="el-icon-plus" circle />
-            </el-upload>
-          </div>
-        </div>
-        <!-- 右边属性区 -->
-        <div class="plan-dialog-attribute">
-          <el-form
-            ref="newWorkItem"
-            :model="newWorkItem"
-            label-width="80px"
-            label-position="top"
-          >
-            <el-form-item label="所属项目" prop="parentProId">
-              <el-input
-                :value="curProject && curProject.projectName"
-                placeholder="请输入内容"
-                disabled
-              />
-            </el-form-item>
-            <el-form-item v-if="workDialog.isEpic" label="所属计划集" prop="parentPlanSetIds">
-              <el-cascader
-                v-model="newWorkItem.parentPlanSetIds"
-                :options="parentPlanSet"
-                :props="planSetProps"
-                style="width: 100%"
-              />
+              <el-form-item v-if="workDialog.isEpic" label="所属计划集" prop="parentPlanSetIds">
+                <el-cascader
+                  v-model="newWorkItem.parentPlanSetIds"
+                  :options="parentPlanSet"
+                  :props="planSetProps"
+                  style="width: 100%"
+                />
               <!-- <el-select
                 v-model="newWorkItem.parentProId"
                 placeholder="请选择项目"
@@ -217,122 +218,125 @@
                   :value="curProject.id"
                 />
               </el-select> -->
-            </el-form-item>
-            <el-form-item label="工作项类型" prop="workType">
-              <el-select
-                v-model="newWorkItem.workType"
-                placeholder="请选择工作项类型"
-                style="width: 100%"
-                :disabled="workDialog.isEpic"
-              >
-                <!-- <el-option label="Epic" value="Epic" /> -->
-                <el-option label="Feature" value="Feature" />
-                <el-option label="Story" value="Story" />
-                <el-option label="Task" value="Task" />
-                <el-option label="Bug" value="Bug" />
-              </el-select>
-            </el-form-item>
-            <el-form-item v-if="!workDialog.isEpic" :label="workDialog.parentWorkItemTitle" prop="parentWorkItemId">
-              <el-select
-                v-model="newWorkItem.parentWorkItemId"
-                placeholder="请选择标题"
-                style="width: 100%"
-                filterable
-              >
+              </el-form-item>
+              <el-form-item label="工作项类型" prop="workType">
+                <el-select
+                  v-model="newWorkItem.workType"
+                  placeholder="请选择工作项类型"
+                  style="width: 100%"
+                  :disabled="workDialog.isEpic"
+                >
+                  <!-- <el-option label="Epic" value="Epic" /> -->
+                  <el-option label="Feature" value="Feature" />
+                  <el-option label="Story" value="Story" />
+                  <el-option label="Task" value="Task" />
+                  <el-option label="Bug" value="Bug" />
+                </el-select>
+              </el-form-item>
+              <el-form-item v-if="!workDialog.isEpic" :label="workDialog.parentWorkItemTitle" prop="parentWorkItemId">
+                <el-select
+                  v-model="newWorkItem.parentWorkItemId"
+                  placeholder="请选择标题"
+                  style="width: 100%"
+                  filterable
+                >
                 <!-- 当前项目、Epic（计划）是知道的，所以应该遍历当前Epic下对应的父工作项 -->
                 <!-- <el-option
                   :label="curProject.projectName"
                   :value="curProject.id"
                 /> -->
-              </el-select>
-            </el-form-item>
-            <el-form-item label="负责人" prop="principal">
-              <el-select
-                v-model="newWorkItem.principal"
-                placeholder="请选择负责人"
-                style="width: 100%"
-                filterable
-                clearable
-              >
-                <el-option
-                  v-for="m in members"
-                  :key="m.id"
-                  :label="m.name"
-                  :value="m.id"
+                </el-select>
+              </el-form-item>
+              <el-form-item label="负责人" prop="principal">
+                <el-select
+                  v-model="newWorkItem.principal"
+                  placeholder="请选择负责人"
+                  style="width: 100%"
+                  filterable
+                  clearable
+                >
+                  <el-option
+                    v-for="m in members"
+                    :key="m.id"
+                    :label="m.name"
+                    :value="m.id"
+                  />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="完成时间" prop="duration">
+                <el-date-picker
+                  v-model="newWorkItem.duration"
+                  type="daterange"
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  value-format="yyyy-MM-dd"
+                  style="width: 100%"
                 />
-              </el-select>
-            </el-form-item>
-            <el-form-item label="完成时间" prop="duration">
-              <el-date-picker
-                v-model="newWorkItem.duration"
-                type="daterange"
-                range-separator="至"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
-                value-format="yyyy-MM-dd"
-                style="width: 100%"
-              />
-            </el-form-item>
-            <el-form-item label="优先级" prop="priority">
-              <el-rate
-                v-model="newWorkItem.priority"
-                show-text
-                :texts="['最低', '较低', '普通', '较高', '最高']"
-                :colors=" { 1: '#73d897', 3: { value: '#6698ff', excluded: true }, 4: { value: '#f6c659', excluded: true }, 5: { value: '#ff9f73', excluded: true }, 6: '#ff7575' }"
-                @change="priorityCheck"
-              />
-            </el-form-item>
-            <el-form-item label="风险" prop="risk">
-              <el-rate
-                v-model="newWorkItem.risk"
-                show-text
-                :texts="['低', '中', '高']"
-                :colors=" { 1: '#73d897', 3: { value: '#f6c659', excluded: true }, 4: '#ff7575' }"
-                :max="3"
-                @change="riskCheck"
-              />
-            </el-form-item>
-          </el-form>
+              </el-form-item>
+              <el-form-item label="优先级" prop="priority">
+                <el-rate
+                  v-model="newWorkItem.priority"
+                  show-text
+                  :texts="['最低', '较低', '普通', '较高', '最高']"
+                  :colors=" { 1: '#73d897', 3: { value: '#6698ff', excluded: true }, 4: { value: '#f6c659', excluded: true }, 5: { value: '#ff9f73', excluded: true }, 6: '#ff7575' }"
+                  @change="priorityCheck"
+                />
+              </el-form-item>
+              <el-form-item label="风险" prop="risk">
+                <el-rate
+                  v-model="newWorkItem.risk"
+                  show-text
+                  :texts="['低', '中', '高']"
+                  :colors=" { 1: '#73d897', 3: { value: '#f6c659', excluded: true }, 4: '#ff7575' }"
+                  :max="3"
+                  @change="riskCheck"
+                />
+              </el-form-item>
+            </el-form>
+          </div>
         </div>
-      </div>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="addWorkItemVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addProject">确 定</el-button>
-      </div>
-    </el-dialog>
-    <!-- 新建计划集dialog -->
-    <el-dialog
-      title="新建计划集"
-      :visible.sync="newPlanSetVisiable"
-      width="30%"
-      @closed="closePlanDialog"
-    >
-      <el-form
-        ref="newPlanSet"
-        :model="newPlanSet"
-        label-width="80px"
-        label-position="top"
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="addWorkItemVisible = false">取 消</el-button>
+          <el-button type="primary" @click="addProject">确 定</el-button>
+        </div>
+      </el-dialog>
+    </div>
+    <div class="deepDialog">
+      <!-- 新建计划集dialog -->
+      <el-dialog
+        title="新建计划集"
+        :visible.sync="newPlanSetVisiable"
+        width="30%"
+        @closed="closePlanDialog"
       >
-        <el-form-item label="所属计划集" prop="parentPlanSetIds">
-          <el-cascader
-            v-model="newPlanSet.parentPlanSetIds"
-            :options="parentPlanSet"
-            :props="planSetProps"
-            style="width: 100%"
-          />
-        </el-form-item>
-        <el-form-item label="标题">
-          <el-input
-            v-model="newPlanSet.title"
-            placeholder="请输入标题"
-          />
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="newPlanSetVisiable = false">取 消</el-button>
-        <el-button type="primary" @click="addProject">确 定</el-button>
-      </div>
-    </el-dialog>
+        <el-form
+          ref="newPlanSet"
+          :model="newPlanSet"
+          label-width="80px"
+          label-position="top"
+        >
+          <el-form-item label="所属计划集" prop="parentPlanSetIds">
+            <el-cascader
+              v-model="newPlanSet.parentPlanSetIds"
+              :options="parentPlanSet"
+              :props="planSetProps"
+              style="width: 100%"
+            />
+          </el-form-item>
+          <el-form-item label="标题">
+            <el-input
+              v-model="newPlanSet.title"
+              placeholder="请输入标题"
+            />
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="newPlanSetVisiable = false">取 消</el-button>
+          <el-button type="primary" @click="addProject">确 定</el-button>
+        </div>
+      </el-dialog>
+    </div>
   </div>
 </template>
 
@@ -856,7 +860,7 @@ export default {
   border-top: 1px solid #e7eaee;
   border-right: 1px solid #e7eaee;
 }
-::v-deep .el-dialog__body {
+::v-deep .deepDialog * .el-dialog__body {
   padding: 0px 20px 0px;
 }
 ::v-deep .el-form-item__label {
