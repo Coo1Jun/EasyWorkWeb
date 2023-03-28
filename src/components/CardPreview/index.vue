@@ -96,8 +96,22 @@
               </div>
               <div v-else v-html="workItem.desc" />
             </el-tab-pane>
-            <el-tab-pane label="附件" name="attachment">配置管理</el-tab-pane>
-            <el-tab-pane label="子工作项" name="subWorkItem">配置管理</el-tab-pane>
+            <el-tab-pane :label="tabPaneFileLabel" name="attachment">
+              <el-upload
+                class="upload-demo"
+                :action="uploadUrl"
+                :on-preview="handlePreview"
+                :on-remove="handleRemove"
+                :on-success="uploadSuccess"
+                :on-error="uploadError"
+                multiple
+                :file-list="defaultFileList"
+              >
+                <span>附件</span>
+                <el-button style="margin-left: 10px" size="mini" icon="el-icon-plus" circle />
+              </el-upload>
+            </el-tab-pane>
+            <el-tab-pane :label="tabPaneSubWorkLabel" name="subWorkItem">配置管理</el-tab-pane>
           </el-tabs>
         </div>
       </div>
@@ -163,6 +177,7 @@
 import { mapGetters } from 'vuex'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import config from '@/config/wangEditor'
+import { uploadUrl } from '@/api/file'
 export default {
   name: 'CardPreview',
   components: { Editor, Toolbar },
@@ -175,6 +190,8 @@ export default {
   data() {
     const { editorConfig, toolbarConfig } = config
     return {
+      uploadUrl,
+      defaultFileList: [],
       members: [{ id: '1', name: '李正帆' }, { id: '2', name: '李正帆测试1' }, { id: '3', name: '李正帆测试22222222222222222222222' }], // 团队成员
       workItemVisible: true,
       collapseActiveName: ['1', '2'], // collapse默认展开的菜单
@@ -208,7 +225,21 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['defaultStates', 'TaskStates', 'BugStates'])
+    ...mapGetters(['defaultStates', 'TaskStates', 'BugStates']),
+    tabPaneFileLabel() {
+      let label = '附件'
+      if (this.workItem.fileIdList && this.workItem.fileIdList.length > 0) {
+        label += '(' + this.workItem.fileIdList.length + ')'
+      }
+      return label
+    },
+    tabPaneSubWorkLabel() {
+      let label = '子工作项'
+      if (this.workItem.children && this.workItem.children.length > 0) {
+        label += '(' + this.workItem.children.length + ')'
+      }
+      return label
+    }
   },
   watch: {
     visable(newVal) {
@@ -328,6 +359,25 @@ export default {
       const editor = this.editor
       if (editor == null) return
       editor.destroy() // 组件销毁时，及时销毁编辑器
+    },
+    handlePreview(file) {
+      console.log(file)
+      console.log(this.workItem.fileIdList)
+    },
+    handleRemove(file, fileList) {
+      console.log(file)
+      console.log(fileList)
+      this.workItem.fileIdList = this.workItem.fileIdList.filter(id => id !== file.response.data.id)
+    },
+    uploadSuccess(response, file, fileList) {
+      this.workItem.fileIdList.push(response.data.id)
+    },
+    uploadError() {
+      this.$message({
+        type: 'error',
+        message: '附件上传失败，请稍后重试！',
+        duration: 3000
+      })
     }
   }
 }
