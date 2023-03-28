@@ -18,6 +18,7 @@
             @blur="workItemTitleBlur"
           />
         </div>
+        <!-- 负责人、流程状态、完成时间 -->
         <div class="cp-content-attribute">
           <div>
             <div style="margin-bottom: 10px;">负责人</div>
@@ -66,7 +67,39 @@
             />
           </div>
         </div>
-
+        <!--  -->
+        <div>
+          <el-tabs v-model="tabsActiveName" @tab-click="handleTabClick">
+            <el-tab-pane label="基本信息" name="basicInfo">
+              <div style="margin-bottom: 10px">
+                <span>描述</span>
+                <el-link v-if="!editorVisable" style="color: #409eff;margin-left: 20px" @click="editDesc">编辑</el-link>
+                <el-link v-if="editorVisable" style="color: #409eff;margin-left: 20px" @click="saveDesc">保存</el-link>
+                <el-link v-if="workItem.desc !== workItem.oldDesc" style="color: #409eff;margin-left: 20px" @click="cancelEditing">取消编辑</el-link>
+              </div>
+              <div v-if="editorVisable">
+                <div v-if="workItemVisible" style="border: 1px solid #eee">
+                  <Toolbar
+                    style="border-bottom: 1px solid #eee"
+                    :editor="editor"
+                    :default-config="toolbarConfig"
+                    :mode="mode"
+                  />
+                  <Editor
+                    v-model="workItem.desc"
+                    style="height: 300px; overflow-y: hidden"
+                    :default-config="editorConfig"
+                    :mode="mode"
+                    @onCreated="onCreated"
+                  />
+                </div>
+              </div>
+              <div v-else v-html="workItem.desc" />
+            </el-tab-pane>
+            <el-tab-pane label="附件" name="attachment">配置管理</el-tab-pane>
+            <el-tab-pane label="子工作项" name="subWorkItem">配置管理</el-tab-pane>
+          </el-tabs>
+        </div>
       </div>
       <!-- 右边 -->
       <div class="cp-attribute">
@@ -132,8 +165,11 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
+import config from '@/config/wangEditor'
 export default {
   name: 'CardPreview',
+  components: { Editor, Toolbar },
   props: {
     visable: {
       type: Boolean,
@@ -141,13 +177,23 @@ export default {
     }
   },
   data() {
+    const { editorConfig, toolbarConfig } = config
     return {
       members: [{ id: '1', name: '李正帆' }, { id: '2', name: '李正帆测试1' }, { id: '3', name: '李正帆测试22222222222222222222222' }], // 团队成员
       workItemVisible: true,
       collapseActiveName: ['1', '2'], // collapse默认展开的菜单
+      tabsActiveName: 'basicInfo', // tabs默认展开的菜单
       priorityOldValue: 0, // 优先级的旧值
       riskOldValue: 0, // 优先级的旧值
       states: [], // 流程状态
+      // ===富文本编辑器start
+      editorVisable: false,
+      editor: null,
+      html: '',
+      toolbarConfig,
+      editorConfig,
+      mode: 'default', // or 'simple'
+      // ===富文本编辑器end
       workItem: {
         title: '任务111111',
         oldTitle: '',
@@ -158,7 +204,10 @@ export default {
         state: '', // 状态
         startTime: '', // 开始时间
         endTime: '', // 结束时间
-        duration: [] // 完成时间，有两个值，第一个为开始时间，第二个为结束时间
+        duration: [], // 完成时间，有两个值，第一个为开始时间，第二个为结束时间
+        fileIdList: [], // 附件
+        desc: '<h1>Hello, world!</h1>', // 描述
+        oldDesc: '' // 描述的旧值，用于取消编辑时
       }
     }
   },
@@ -171,6 +220,8 @@ export default {
     }
   },
   mounted() {
+    // 保存描述的旧值
+    this.workItem.oldDesc = this.workItem.desc
     // 判断当前的workType，选择对应的states
     if (this.workItem.workType === 'Feature' || this.workItem.workType === 'Story') {
       this.states = this.defaultStates
@@ -183,6 +234,8 @@ export default {
   beforeDestroy() {
     // 解绑所有自定义事件
     this.$off()
+    // 销毁富文本编辑器
+    this.closeEditor()
   },
   methods: {
     closeDialog() {
@@ -242,6 +295,35 @@ export default {
       console.log('当前开始时间为', this.workItem.startTime)
       console.log('当前结束时间为', this.workItem.endTime)
       // todo 发请求 修改完成时间
+    },
+    editDesc() {
+      this.editorVisable = true
+      // 保存旧值
+      this.workItem.oldDesc = this.workItem.desc
+    },
+    saveDesc() {
+      console.log('描述改为：', this.workItem.desc)
+      // todo发请求 修改描述
+
+      // 保存旧值
+      this.workItem.oldDesc = this.workItem.desc
+      this.editorVisable = false
+    },
+    cancelEditing() {
+      this.editorVisable = false
+      // 恢复旧值
+      this.workItem.desc = this.workItem.oldDesc
+    },
+    handleTabClick(tab, event) {
+      console.log(tab, event)
+    },
+    onCreated(editor) {
+      this.editor = Object.seal(editor) // 一定要用 Object.seal() ，否则会报错
+    },
+    closeEditor() {
+      const editor = this.editor
+      if (editor == null) return
+      editor.destroy() // 组件销毁时，及时销毁编辑器
     }
   }
 }
@@ -288,6 +370,7 @@ export default {
 .cp-content-attribute {
   display: flex;
   margin-top: 20px;
+  margin-bottom: 15px;
   font-size: 14px;
 }
 </style>
