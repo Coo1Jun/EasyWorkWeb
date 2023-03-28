@@ -18,6 +18,54 @@
             @blur="workItemTitleBlur"
           />
         </div>
+        <div class="cp-content-attribute">
+          <div>
+            <div style="margin-bottom: 10px;">负责人</div>
+            <el-select
+              ref="principalSelect"
+              v-model="workItem.principal"
+              placeholder="请选择负责人"
+              filterable
+              clearable
+              @change="principalChange"
+            >
+              <el-option
+                v-for="m in members"
+                :key="m.id"
+                :label="m.name"
+                :value="m.id"
+              />
+            </el-select>
+          </div>
+          <div style="margin-left: 10px;margin-right: 10px">
+            <div style="margin-bottom: 10px;">流程状态</div>
+            <el-select
+              ref="stateSelect"
+              v-model="workItem.state"
+              filterable
+              @change="stateChange"
+            >
+              <el-option
+                v-for="(s, index) in states"
+                :key="index"
+                :label="s"
+                :value="s"
+              />
+            </el-select>
+          </div>
+          <div>
+            <div style="margin-bottom: 10px">完成时间</div>
+            <el-date-picker
+              v-model="workItem.duration"
+              type="daterange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              value-format="yyyy-MM-dd"
+              @change="durationChange"
+            />
+          </div>
+        </div>
 
       </div>
       <!-- 右边 -->
@@ -83,6 +131,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 export default {
   name: 'CardPreview',
   props: {
@@ -93,22 +142,42 @@ export default {
   },
   data() {
     return {
+      members: [{ id: '1', name: '李正帆' }, { id: '2', name: '李正帆测试1' }, { id: '3', name: '李正帆测试22222222222222222222222' }], // 团队成员
       workItemVisible: true,
       collapseActiveName: ['1', '2'], // collapse默认展开的菜单
       priorityOldValue: 0, // 优先级的旧值
       riskOldValue: 0, // 优先级的旧值
+      states: [], // 流程状态
       workItem: {
         title: '任务111111',
         oldTitle: '',
         priority: 0,
         risk: 0,
-        workType: 'Task'
+        workType: 'Task',
+        principal: '2', // 负责人
+        state: '', // 状态
+        startTime: '', // 开始时间
+        endTime: '', // 结束时间
+        duration: [] // 完成时间，有两个值，第一个为开始时间，第二个为结束时间
       }
     }
+  },
+  computed: {
+    ...mapGetters(['defaultStates', 'TaskStates', 'BugStates'])
   },
   watch: {
     visable(newVal) {
       this.workItemVisible = newVal
+    }
+  },
+  mounted() {
+    // 判断当前的workType，选择对应的states
+    if (this.workItem.workType === 'Feature' || this.workItem.workType === 'Story') {
+      this.states = this.defaultStates
+    } else if (this.workItem.workType === 'Task') {
+      this.states = this.TaskStates
+    } else if (this.workItem.workType === 'Bug') {
+      this.states = this.BugStates
     }
   },
   beforeDestroy() {
@@ -158,6 +227,21 @@ export default {
         this.workItem.oldTitle = this.workItem.title
         // todo 发请求，改标题
       }
+    },
+    principalChange(value) {
+      console.log('负责人修改：', value)
+      // todo发请求 修改负责人
+    },
+    stateChange(value) {
+      console.log('状态修改为：', value)
+      // todo发请求 修改状态
+    },
+    durationChange(value) {
+      this.workItem.startTime = value[0]
+      this.workItem.endTime = value[1]
+      console.log('当前开始时间为', this.workItem.startTime)
+      console.log('当前结束时间为', this.workItem.endTime)
+      // todo 发请求 修改完成时间
     }
   }
 }
@@ -200,5 +284,10 @@ export default {
 .cp-attribute-item {
   display: flex;
   margin: 15px 0;
+}
+.cp-content-attribute {
+  display: flex;
+  margin-top: 20px;
+  font-size: 14px;
 }
 </style>
