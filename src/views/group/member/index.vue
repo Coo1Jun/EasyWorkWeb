@@ -66,7 +66,7 @@
                       placeholder="请输入邮箱"
                       :name="`email${index}`"
                     />
-                    <el-button type="danger" icon="el-icon-delete" circle plain style="margin-left: 10px" @click="deleteEmailInvite(index)" />
+                    <el-button v-if="emailInvite.emails.length > 1" type="danger" icon="el-icon-delete" circle plain style="margin-left: 10px" @click="deleteEmailInvite(index)" />
                   </div>
                 </el-form-item>
               </el-form>
