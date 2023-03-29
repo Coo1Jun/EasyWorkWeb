@@ -18,7 +18,7 @@
         type="primary"
         icon="el-icon-plus"
         style="float: right"
-        @click="addProjectGroupVisible = true"
+        @click="addGroupMemberVisible = true"
       >
         添加成员
       </el-button>
@@ -45,6 +45,41 @@
         label="角色"
       />
     </el-table>
+
+    <el-dialog
+      title="添加成员"
+      :visible.sync="addGroupMemberVisible"
+      width="600px"
+      top="10vh"
+    >
+      <div class="gm-add-member-dialog">
+        <el-tabs v-model="activeName">
+          <el-tab-pane label="邮箱邀请" name="invite">
+            <div style="margin-bottom: 20px">邮箱</div>
+            <div
+              v-for="(e, index) in emailInvite"
+              :key="index"
+              style="display: flex;margin-bottom: 20px"
+            >
+              <el-input
+                v-model="emailInvite[index]"
+                placeholder="请输入邮箱"
+              />
+              <el-button type="danger" icon="el-icon-delete" circle plain style="margin-left: 10px" @click="deleteEmailInvite(index)" />
+            </div>
+            <el-link type="primary" @click="addEmailCount">
+              <i class="el-icon-plus" />
+              添加
+            </el-link>
+          </el-tab-pane>
+          <el-tab-pane label="邀请记录" name="record">配置管理</el-tab-pane>
+        </el-tabs>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="addGroupMemberVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addGroupMember">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -55,7 +90,9 @@ export default {
   components: { },
   data() {
     return {
+      addGroupMemberVisible: false,
       searchWord: '',
+      activeName: 'invite',
       tableData: [],
       groupMember: [
         {
@@ -64,7 +101,8 @@ export default {
           email: '11111@qq.com',
           role: '管理员'
         }
-      ]
+      ],
+      emailInvite: ['', '', '']
     }
   },
   computed: {
@@ -93,6 +131,23 @@ export default {
         return
       }
       this.tableData = this.groupMember.filter(data => (data.name.includes(this.searchWord) || data.email.includes(this.searchWord)))
+    },
+    addGroupMember() {
+      console.log(this.emailInvite)
+      // todo 发请求
+      this.addGroupMemberVisible = false
+
+      // 初始化emailInvite
+      this.emailInvite = []
+      for (let i = 0; i < 3; i++) {
+        this.emailInvite.push('')
+      }
+    },
+    addEmailCount() {
+      this.emailInvite.push('')
+    },
+    deleteEmailInvite(index) {
+      this.emailInvite.splice(index, 1)
     }
   }
 }
@@ -114,5 +169,10 @@ export default {
 .gm-search-result {
   color: #999999;
   margin-left: 30px;
+}
+.gm-add-member-dialog {
+  height: 400px;
+  overflow: auto;
+  padding: 0 20px;
 }
 </style>
