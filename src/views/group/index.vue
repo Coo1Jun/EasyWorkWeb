@@ -1,5 +1,5 @@
 <template>
-  <div class="group-container">
+  <div v-if="$route.name === 'Group'" class="group-container">
     <div class="group-title-name">
       我加入的项目组
     </div>
@@ -28,6 +28,16 @@
         label="描述"
         show-overflow-tooltip
       />
+      <el-table-column
+        width="300"
+      >
+        <template slot-scope="scope">
+          <el-button
+            size="mini"
+            @click="toMember(scope.row)"
+          >查看组成员</el-button>
+        </template>
+      </el-table-column>
     </el-table>
     <div class="group-title-name">
       我创建的项目组
@@ -65,6 +75,16 @@
         label="描述"
         show-overflow-tooltip
       />
+      <el-table-column
+        width="300"
+      >
+        <template slot-scope="scope">
+          <el-button
+            size="mini"
+            @click="toMember(scope.row)"
+          >查看组成员</el-button>
+        </template>
+      </el-table-column>
     </el-table>
     <!-- 新建项目组 -->
     <el-dialog
@@ -92,6 +112,7 @@
       </div>
     </el-dialog>
   </div>
+  <router-view v-else />
 </template>
 
 <script>
@@ -151,6 +172,9 @@ export default {
           return false
         }
       })
+    },
+    toMember(row) {
+      this.$router.push({ name: 'GroupMember', params: { groupId: row.id }})
     }
   }
 
