@@ -51,21 +51,25 @@
       :visible.sync="addGroupMemberVisible"
       width="600px"
       top="10vh"
+      @closed="closeDialog"
     >
       <div class="gm-add-member-dialog">
         <el-tabs v-model="activeName">
           <el-tab-pane label="邮箱邀请" name="invite">
             <div style="margin-bottom: 20px">邮箱</div>
-            <div
-              v-for="(e, index) in emailInvite"
-              :key="index"
-              style="display: flex;margin-bottom: 20px"
-            >
-              <el-input
-                v-model="emailInvite[index]"
-                placeholder="请输入邮箱"
-              />
-              <el-button type="danger" icon="el-icon-delete" circle plain style="margin-left: 10px" @click="deleteEmailInvite(index)" />
+            <div>
+              <el-form ref="emailInvite" :model="emailInvite" :rules="emailsRule">
+                <el-form-item v-for="(e, index) in emailInvite.emails" :key="index" :prop="`email${index}`">
+                  <div style="display: flex">
+                    <el-input
+                      v-model="emailInvite.emails[index]"
+                      placeholder="请输入邮箱"
+                      :name="`email${index}`"
+                    />
+                    <el-button type="danger" icon="el-icon-delete" circle plain style="margin-left: 10px" @click="deleteEmailInvite(index)" />
+                  </div>
+                </el-form-item>
+              </el-form>
             </div>
             <el-link type="primary" @click="addEmailCount">
               <i class="el-icon-plus" />
@@ -102,7 +106,8 @@ export default {
           role: '管理员'
         }
       ],
-      emailInvite: ['', '', '']
+      emailInvite: { emails: ['', '', ''] },
+      emailsRule: {}
     }
   },
   computed: {
@@ -115,6 +120,7 @@ export default {
   },
   mounted() {
     this.tableData = this.groupMember
+    this.buildRule()
     // todo 根据groupId拿数据 this.$route.params.groupInfo.id
   },
   beforeRouteEnter(to, from, next) {
@@ -133,21 +139,56 @@ export default {
       this.tableData = this.groupMember.filter(data => (data.name.includes(this.searchWord) || data.email.includes(this.searchWord)))
     },
     addGroupMember() {
-      console.log(this.emailInvite)
-      // todo 发请求
-      this.addGroupMemberVisible = false
+      this.$refs.emailInvite.validate((valid) => {
+        if (valid) {
+          console.log(this.emailInvite)
+          // todo 发请求
 
-      // 初始化emailInvite
-      this.emailInvite = []
-      for (let i = 0; i < 3; i++) {
-        this.emailInvite.push('')
-      }
+          this.addGroupMemberVisible = false
+          // 初始化emailInvite
+          this.emailInvite = { emails: [] }
+          for (let i = 0; i < 3; i++) {
+            this.emailInvite.emails.push('')
+          }
+          this.$refs.emailInvite.clearValidate()
+          this.buildRule()
+        } else {
+          return false
+        }
+      })
     },
     addEmailCount() {
-      this.emailInvite.push('')
+      this.emailInvite.emails.push('')
+      this.buildRule()
     },
     deleteEmailInvite(index) {
-      this.emailInvite.splice(index, 1)
+      this.emailInvite.emails.splice(index, 1)
+      this.buildRule()
+    },
+    buildRule() {
+      // 创建对于每个 input 的验证规则
+      const reg = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-]+)+$/
+      const rule = {}
+      this.emailInvite.emails.forEach((email, index) => {
+        rule[`email${index}`] = [{ trigger: 'blur', validator: (rule, value, callback) => {
+          value = this.emailInvite.emails[index]
+          if (value && !reg.test(value)) {
+            callback(new Error('请输入正确的邮箱格式'))
+          } else {
+            callback()
+          }
+        } }]
+      })
+      this.emailsRule = rule
+    },
+    closeDialog() {
+      // 初始化emailInvite
+      this.emailInvite = { emails: [] }
+      for (let i = 0; i < 3; i++) {
+        this.emailInvite.emails.push('')
+      }
+      this.$refs.emailInvite.clearValidate()
+      this.buildRule()
     }
   }
 }
