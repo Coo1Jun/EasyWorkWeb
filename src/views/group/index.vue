@@ -174,7 +174,7 @@ export default {
       })
     },
     toMember(row) {
-      this.$router.push({ name: 'GroupMember', params: { groupId: row.id }})
+      this.$router.push({ name: 'GroupMember', params: { groupInfo: row }})
     }
   }
 
