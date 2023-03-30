@@ -4,7 +4,7 @@
       我加入的项目组
     </div>
     <el-table
-      :data="group"
+      :data="joinedGroup"
       style="width: 100%"
       border
     >
@@ -21,7 +21,7 @@
       <el-table-column
         prop="createTime"
         label="创建时间"
-        width="120"
+        width="240"
       />
       <el-table-column
         prop="description"
@@ -150,7 +150,7 @@
 </template>
 
 <script>
-import { getGroupListApi, addGroupApi, editGroupApi } from '@/api/group'
+import { getGroupListApi, addGroupApi, editGroupApi, getJoinedGroupListApi } from '@/api/group'
 
 export default {
   name: 'Group',
@@ -172,15 +172,7 @@ export default {
         description: ''
       },
       createdGroup: [],
-      group: [
-        {
-          id: '1',
-          name: 'xxx项目组',
-          description: 'xxx项目组的描述',
-          createBy: '李正帆',
-          createTime: '2023-03-29'
-        }
-      ],
+      joinedGroup: [],
       newGroup: {
         name: '',
         description: ''
@@ -198,6 +190,8 @@ export default {
   async mounted() {
     const { data } = await getGroupListApi()
     this.createdGroup = data.records
+    const joinedGroupList = await getJoinedGroupListApi()
+    this.joinedGroup = joinedGroupList.data.records
   },
   methods: {
     closeDialog() {

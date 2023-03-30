@@ -2,7 +2,15 @@ import request from '@/utils/request'
 
 export function getGroupListApi(params) {
   return request({
-    url: '/api/ew-project/group/all',
+    url: '/api/ew-project/group/created',
+    method: 'get',
+    params
+  })
+}
+
+export function getJoinedGroupListApi(params) {
+  return request({
+    url: '/api/ew-project/group/joined',
     method: 'get',
     params
   })
