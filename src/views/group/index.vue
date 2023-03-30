@@ -24,7 +24,7 @@
         width="120"
       />
       <el-table-column
-        prop="desc"
+        prop="description"
         label="描述"
         show-overflow-tooltip
       />
@@ -51,7 +51,7 @@
       </el-button>
     </div>
     <el-table
-      :data="group"
+      :data="createdGroup"
       style="width: 100%"
       border
     >
@@ -68,10 +68,10 @@
       <el-table-column
         prop="createTime"
         label="创建时间"
-        width="120"
+        width="240"
       />
       <el-table-column
-        prop="desc"
+        prop="description"
         label="描述"
         show-overflow-tooltip
       />
@@ -102,8 +102,8 @@
         <el-form-item label="项目组名称" prop="name">
           <el-input v-model="newGroup.name" placeholder="请输入项目组名称" maxlength="32" show-word-limit />
         </el-form-item>
-        <el-form-item label="描述" prop="desc">
-          <el-input v-model="newGroup.desc" type="textarea" placeholder="请输入项目组描述" />
+        <el-form-item label="描述" prop="description">
+          <el-input v-model="newGroup.description" type="textarea" placeholder="请输入项目组描述" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -116,6 +116,7 @@
 </template>
 
 <script>
+import { getGroupListApi, addGroupApi } from '@/api/group'
 
 export default {
   name: 'Group',
@@ -130,18 +131,19 @@ export default {
     }
     return {
       addProjectGroupVisible: false,
+      createdGroup: [],
       group: [
         {
           id: '1',
           name: 'xxx项目组',
-          desc: 'xxx项目组的描述',
+          description: 'xxx项目组的描述',
           createBy: '李正帆',
           createTime: '2023-03-29'
         }
       ],
       newGroup: {
         name: '',
-        desc: ''
+        description: ''
       },
       groupRules: {
         name: [
@@ -150,24 +152,31 @@ export default {
       }
     }
   },
+  async mounted() {
+    const { data } = await getGroupListApi()
+    this.createdGroup = data.records
+    console.log(this.createdGroup)
+  },
   methods: {
     closeDialog() {
       // 关闭dialog重置表单
       this.$refs.newGroup.resetFields()
     },
-    addGroup() {
-      this.$refs.newGroup.validate(valid => {
+    async addGroup() {
+      this.$refs.newGroup.validate(async(valid) => {
         if (valid) {
-          this.addProjectVisible = false
-          console.log('新建的项目组', this.newGroup)
-
-          // todo向后端发请求
-
-          this.$message({
-            message: '添加成功',
-            type: 'success',
-            duration: 3000 // 持续时间为 3 秒
-          })
+          this.addProjectGroupVisible = false
+          const response = await addGroupApi(this.newGroup)
+          if (response.success) {
+            // 重新读取数据
+            const { data } = await getGroupListApi()
+            this.createdGroup = data.records
+            this.$message({
+              message: '添加成功',
+              type: 'success',
+              duration: 3000 // 持续时间为 3 秒
+            })
+          }
         } else {
           return false
         }

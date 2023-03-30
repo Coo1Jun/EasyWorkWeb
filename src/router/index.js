@@ -184,6 +184,21 @@ export const constantRoutes = [
             meta: { title: '成员' }
           }
         ]
+      },
+      {
+        path: 'group',
+        name: 'Group',
+        component: () => import('@/views/group/index'),
+        meta: { title: '组', icon: 'el-icon-user' },
+        children: [
+          {
+            hidden: true,
+            path: 'member',
+            name: 'GroupMember',
+            component: () => import('@/views/group/member/index'),
+            meta: { title: '项目组成员' }
+          }
+        ]
       }
     ]
   },
