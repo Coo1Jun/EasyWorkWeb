@@ -15,3 +15,11 @@ export function addGroupApi(data) {
     data
   })
 }
+
+export function editGroupApi(data) {
+  return request({
+    url: '/api/ew-project/group',
+    method: 'put',
+    data
+  })
+}
