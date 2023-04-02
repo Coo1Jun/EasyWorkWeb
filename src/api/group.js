@@ -31,3 +31,14 @@ export function editGroupApi(data) {
     data
   })
 }
+
+/**
+ * 获取项目组成员列表
+ */
+export function getMemberListApi(params) {
+  return request({
+    url: '/api/ew-project/group/member/list',
+    method: 'get',
+    params
+  })
+}

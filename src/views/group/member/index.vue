@@ -6,14 +6,23 @@
     <div class="gm-search">
       <span>
         <el-input
-          v-model="searchWord"
+          v-model="search.name"
           prefix-icon="el-icon-search"
-          placeholder="搜索用户名或邮箱"
-          :style="{width: '300px'}"
-          @input="handleSearch"
+          placeholder="搜索用户名"
+          :style="{width: '200px', 'margin-right': '20px'}"
+          @blur="handleSearch"
         />
       </span>
-      <span class="gm-search-result">{{ memberCount }}个成员</span>
+      <span>
+        <el-input
+          v-model="search.email"
+          prefix-icon="el-icon-search"
+          placeholder="搜索邮箱"
+          :style="{width: '200px'}"
+          @blur="handleSearch"
+        />
+      </span>
+      <span class="gm-search-result">{{ page.total }}个成员</span>
       <el-button
         type="primary"
         icon="el-icon-plus"
@@ -24,7 +33,7 @@
       </el-button>
     </div>
     <el-table
-      :data="tableData"
+      :data="groupMember"
       style="width: 100%"
       border
     >
@@ -84,20 +93,39 @@
         <el-button type="primary" @click="addGroupMember">确 定</el-button>
       </div>
     </el-dialog>
+    <div style="float: right;margin-top: 20px">
+      <el-pagination
+        background
+        :current-page.sync="page.currentPage"
+        :page-sizes="[10, 20, 50]"
+        :page-size="page.pageSize"
+        :pager-count="5"
+        layout="sizes, prev, pager, next, jumper"
+        :total="page.total"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      />
+    </div>
   </div>
 </template>
 
 <script>
+
+import { getMemberListApi } from '@/api/group'
 
 export default {
   name: 'GroupMember',
   components: { },
   data() {
     return {
+      search: { name: '', email: '' },
+      page: {
+        currentPage: 1,
+        pageSize: 10,
+        total: 0
+      },
       addGroupMemberVisible: false,
-      searchWord: '',
       activeName: 'invite',
-      tableData: [],
       groupMember: [
         {
           id: '1',
@@ -113,15 +141,13 @@ export default {
   computed: {
     groupInfo() {
       return this.$route.params.groupInfo
-    },
-    memberCount() {
-      return this.groupMember ? this.groupMember.length : 0
     }
   },
-  mounted() {
-    this.tableData = this.groupMember
+  async mounted() {
     this.buildRule()
     // todo 根据groupId拿数据 this.$route.params.groupInfo.id
+    const memberList = await getMemberListApi({ groupId: this.$route.params.groupInfo.id })
+    this.groupMember = memberList.data.records
   },
   beforeRouteEnter(to, from, next) {
     // 当前组件需要groupId才可以渲染，如果没有，则跳转到项目组界面
@@ -131,12 +157,16 @@ export default {
     next()
   },
   methods: {
-    handleSearch() {
-      if (this.searchWord === '') {
-        this.tableData = this.groupMember
-        return
-      }
-      this.tableData = this.groupMember.filter(data => (data.name.includes(this.searchWord) || data.email.includes(this.searchWord)))
+    async handleSearch() {
+      const memberList = await getMemberListApi({
+        groupId: this.$route.params.groupInfo.id,
+        name: this.search.name,
+        email: this.search.email,
+        limit: this.page.pageSize,
+        pageNo: this.page.currentPage
+      })
+      this.groupMember = memberList.data.records
+      this.page.total = memberList.data.total
     },
     addGroupMember() {
       this.$refs.emailInvite.validate((valid) => {
@@ -189,6 +219,13 @@ export default {
       }
       this.$refs.emailInvite.clearValidate()
       this.buildRule()
+    },
+    handleSizeChange(val) {
+      this.pageSize = val
+      this.handleSearch()
+    },
+    handleCurrentChange(val) {
+      this.handleSearch()
     }
   }
 }
