@@ -148,6 +148,7 @@ export default {
     // todo 根据groupId拿数据 this.$route.params.groupInfo.id
     const memberList = await getMemberListApi({ groupId: this.$route.params.groupInfo.id })
     this.groupMember = memberList.data.records
+    this.page.total = memberList.data.total
   },
   beforeRouteEnter(to, from, next) {
     // 当前组件需要groupId才可以渲染，如果没有，则跳转到项目组界面
@@ -221,7 +222,7 @@ export default {
       this.buildRule()
     },
     handleSizeChange(val) {
-      this.pageSize = val
+      this.page.pageSize = val
       this.handleSearch()
     },
     handleCurrentChange(val) {
