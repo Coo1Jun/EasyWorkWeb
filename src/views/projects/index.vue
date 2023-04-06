@@ -69,9 +69,9 @@
         label-width="80px"
         :rules="projectRules"
       >
-        <el-form-item label="部门" prop="deptId">
-          <el-select v-model="projectInfo.deptId" placeholder="请选择部门" style="width: 100%;">
-            <el-option v-for="dept in depts" :key="dept.id" :label="dept.deptName" :value="dept.id" />
+        <el-form-item label="项目组" prop="deptId">
+          <el-select v-model="projectInfo.deptId" placeholder="请选择项目组" style="width: 100%;">
+            <el-option v-for="group in groups" :key="group.id" :label="group.name" :value="group.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="项目名称" prop="projectName">
@@ -94,6 +94,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import { getGroupListApi } from '@/api/group'
 
 export default {
   name: 'Projects',
@@ -101,7 +102,7 @@ export default {
   data() {
     const validateDept = (rule, value, callback) => {
       if (!value) {
-        callback(new Error('请选择部门'))
+        callback(new Error('请选择项目组'))
       } else {
         callback()
       }
@@ -135,19 +136,7 @@ export default {
         tab: '',
         description: ''
       },
-      depts: [
-        {
-          id: '1',
-          deptName: '部门1'
-        },
-        {
-          id: '2',
-          deptName: '部门2'
-        }, {
-          id: '3',
-          deptName: '部门3'
-        }
-      ],
+      groups: [],
       tableData: [],
       basicData: [
         {
@@ -203,8 +192,11 @@ export default {
       this.projectInfo.tab = newVal.toUpperCase()
     }
   },
-  mounted() {
+  async mounted() {
     this.tableData = this.basicData
+    // 获取项目列表
+    const groupResponse = await getGroupListApi()
+    this.groups = groupResponse.data.records
   },
   beforeRouteEnter(to, from, next) {
     next(vm => {

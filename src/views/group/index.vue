@@ -150,7 +150,7 @@
 </template>
 
 <script>
-import { getGroupListApi, addGroupApi, editGroupApi, getJoinedGroupListApi } from '@/api/group'
+import { getCreatedGroupListApi, addGroupApi, editGroupApi, getJoinedGroupListApi } from '@/api/group'
 
 export default {
   name: 'Group',
@@ -188,7 +188,7 @@ export default {
 
   },
   async mounted() {
-    const { data } = await getGroupListApi()
+    const { data } = await getCreatedGroupListApi()
     this.createdGroup = data.records
     const joinedGroupList = await getJoinedGroupListApi()
     this.joinedGroup = joinedGroupList.data.records
@@ -204,7 +204,7 @@ export default {
           const response = await addGroupApi(this.newGroup)
           if (response.success) {
             // 重新读取数据
-            const { data } = await getGroupListApi()
+            const { data } = await getCreatedGroupListApi()
             this.createdGroup = data.records
             this.$message({
               message: '添加成功',
@@ -250,7 +250,7 @@ export default {
           const response = await editGroupApi(this.groupEditor)
           if (response.success) {
             // 重新读取数据
-            const { data } = await getGroupListApi()
+            const { data } = await getCreatedGroupListApi()
             this.createdGroup = data.records
             this.$message({
               message: '修改成功',
