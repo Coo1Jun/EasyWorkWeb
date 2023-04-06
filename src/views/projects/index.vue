@@ -16,18 +16,27 @@
     <div class="search">
       <span>
         <el-input
-          v-model="keyword"
+          v-model="search.name"
           prefix-icon="el-icon-search"
           placeholder="请输入项目名称"
-          :style="{width: '300px'}"
-          @input="handleInput"
+          :style="{width: '200px', 'margin-right': '20px'}"
+          @blur="handleSearch"
         />
       </span>
-      <span class="search-result">{{ projectCount }}个项目</span>
+      <span>
+        <el-input
+          v-model="search.tab"
+          prefix-icon="el-icon-search"
+          placeholder="请输入项目标识"
+          :style="{width: '200px'}"
+          @blur="handleSearch"
+        />
+      </span>
+      <span class="search-result">{{ page.total }}个项目</span>
     </div>
     <div>
       <el-table
-        :data="tableData"
+        :data="projects"
         style="width: 100%"
         stripe
         row-class-name="row-hand"
@@ -39,7 +48,7 @@
           sortable
         />
         <el-table-column
-          prop="tab"
+          prop="projectTab"
           label="标识"
           width="250"
         />
@@ -49,6 +58,13 @@
           width="250"
         />
         <el-table-column
+          prop="createTime"
+          label="创建时间"
+          sortable
+          width="250"
+          :formatter="formatterDate"
+        />
+        <el-table-column
           prop="updateTime"
           label="更新时间"
           sortable
@@ -56,6 +72,19 @@
           :formatter="formatterDate"
         />
       </el-table>
+    </div>
+    <div style="float: right;margin-top: 20px">
+      <el-pagination
+        background
+        :current-page.sync="page.currentPage"
+        :page-sizes="[10, 20, 50]"
+        :page-size="page.pageSize"
+        :pager-count="5"
+        layout="sizes, prev, pager, next, jumper"
+        :total="page.total"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      />
     </div>
     <el-dialog
       title="新建项目"
@@ -95,6 +124,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import { getGroupListApi } from '@/api/group'
+import { getProjectListApi, addProjectApi } from '@/api/project'
 
 export default {
   name: 'Projects',
@@ -128,6 +158,12 @@ export default {
       }
     }
     return {
+      search: { name: '', tab: '' },
+      page: {
+        currentPage: 1,
+        pageSize: 10,
+        total: 0
+      },
       keyword: '',
       addProjectVisible: false,
       projectInfo: {
@@ -137,6 +173,7 @@ export default {
         description: ''
       },
       groups: [],
+      projects: [],
       tableData: [],
       basicData: [
         {
@@ -194,9 +231,13 @@ export default {
   },
   async mounted() {
     this.tableData = this.basicData
-    // 获取项目列表
+    // 获取项目组信息列表
     const groupResponse = await getGroupListApi()
     this.groups = groupResponse.data.records
+    // 获取项目信息列表
+    const projectResponse = await getProjectListApi()
+    this.projects = projectResponse.data.records
+    this.page.total = projectResponse.data.total
   },
   beforeRouteEnter(to, from, next) {
     next(vm => {
@@ -277,6 +318,23 @@ export default {
       this.$store.dispatch('project/setCurProject', row)
       // 跳转到/mission/projects/details
       this.$router.push('/mission/projects/details')
+    },
+    async handleSearch() {
+      const projectResponse = await getProjectListApi({
+        name: this.search.name,
+        tab: this.search.tab,
+        limit: this.page.pageSize,
+        pageNo: this.page.currentPage
+      })
+      this.projects = projectResponse.data.records
+      this.page.total = projectResponse.data.total
+    },
+    handleSizeChange(val) {
+      this.page.pageSize = val
+      this.handleSearch()
+    },
+    handleCurrentChange(val) {
+      this.handleSearch()
     }
   }
 }
