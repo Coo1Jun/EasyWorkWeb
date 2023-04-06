@@ -1,6 +1,11 @@
 import request from '@/utils/request'
 
-export function getGroupListApi(params) {
+/**
+ * 获取用户自己创建的项目组
+ * @param {*} params
+ * @returns
+ */
+export function getCreatedGroupListApi(params) {
   return request({
     url: '/api/ew-project/group/created',
     method: 'get',
@@ -8,9 +13,27 @@ export function getGroupListApi(params) {
   })
 }
 
+/**
+ * 获取用户加入的项目组，不包括自己创建的
+ * @param {*} params
+ * @returns
+ */
 export function getJoinedGroupListApi(params) {
   return request({
     url: '/api/ew-project/group/joined',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 获取用户加入的项目组，包括自己创建的
+ * @param {*} params
+ * @returns
+ */
+export function getGroupListApi(params) {
+  return request({
+    url: '/api/ew-project/group/list',
     method: 'get',
     params
   })
