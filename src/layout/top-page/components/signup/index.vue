@@ -19,6 +19,8 @@
           v-model="registerForm.username"
           placeholder="请输入用户名"
           auto-complete="on"
+          maxlength="32"
+          show-word-limit
           @keyup.enter.native="handleRegister"
         />
       </el-form-item>

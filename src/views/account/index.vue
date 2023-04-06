@@ -48,7 +48,7 @@
               trigger="hover"
               content="为了使您在工作中方便沟通，建议使用姓名"
             >
-              <el-input slot="reference" v-model="profile.name" />
+              <el-input slot="reference" v-model="profile.name" maxlength="32" show-word-limit />
             </el-popover>
           </el-form-item>
           <el-form-item label="邮箱">

@@ -112,7 +112,7 @@
           <el-input v-model="projectInfo.projectName" placeholder="请输入项目名称" maxlength="32" show-word-limit />
         </el-form-item>
         <el-form-item label="项目标识" prop="tab">
-          <el-input v-model="projectInfo.tab" placeholder="大写字母和数字，15个字符以内" />
+          <el-input v-model="projectInfo.tab" maxlength="15" show-word-limit placeholder="大写字母和数字，15个字符以内" />
         </el-form-item>
         <el-form-item label="描述" prop="description">
           <el-input v-model="projectInfo.description" type="textarea" placeholder="请输入项目描述" />
