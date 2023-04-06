@@ -50,25 +50,30 @@
         <el-table-column
           prop="projectTab"
           label="标识"
+          width="150"
+        />
+        <el-table-column
+          prop="groupName"
+          label="所属项目组"
           width="250"
         />
         <el-table-column
           prop="createBy"
           label="创建人"
-          width="250"
+          width="200"
         />
         <el-table-column
           prop="createTime"
           label="创建时间"
           sortable
-          width="250"
+          width="200"
           :formatter="formatterDate"
         />
         <el-table-column
           prop="updateTime"
           label="更新时间"
           sortable
-          width="250"
+          width="200"
           :formatter="formatterDate"
         />
       </el-table>
@@ -98,8 +103,8 @@
         label-width="80px"
         :rules="projectRules"
       >
-        <el-form-item label="项目组" prop="deptId">
-          <el-select v-model="projectInfo.deptId" placeholder="请选择项目组" style="width: 100%;">
+        <el-form-item label="项目组" prop="groupId">
+          <el-select v-model="projectInfo.groupId" placeholder="请选择项目组" style="width: 100%;">
             <el-option v-for="group in groups" :key="group.id" :label="group.name" :value="group.id" />
           </el-select>
         </el-form-item>
@@ -147,12 +152,13 @@ export default {
     const reg = /^[a-zA-Z0-9_-]{1,15}$/
     const validateTab = (rule, value, callback) => {
       if (!value) {
-        // 项目标识 非必填
+        // 项目标识 必填
+        callback(new Error('请输入项目标识'))
         callback()
       } else if (!reg.test(value)) {
         callback(new Error('英文字母/数字/下划线/连接线（不超过15字符）'))
       } else if (this.existTab(value)) {
-        callback(new Error('该标识已被项目/项目集使用，请改用其他标识'))
+        callback(new Error('该标识已被使用，请改用其他标识'))
       } else {
         callback()
       }
@@ -164,65 +170,30 @@ export default {
         pageSize: 10,
         total: 0
       },
-      keyword: '',
       addProjectVisible: false,
       projectInfo: {
-        deptId: '',
+        groupId: '',
         projectName: '',
         tab: '',
         description: ''
       },
       groups: [],
       projects: [],
-      tableData: [],
-      basicData: [
-        {
-          id: '1',
-          projectName: '项目名1',
-          tab: 'P1',
-          createBy: '创建人1',
-          updateTime: '2023-5-20 14:00:00'
-        },
-        {
-          id: '2',
-          projectName: '项目名2',
-          tab: 'P2',
-          createBy: '创建人2',
-          updateTime: '2023-3-20 14:00:00'
-        },
-        {
-          id: '3',
-          projectName: '项目名3',
-          tab: 'P3',
-          createBy: '创建人3',
-          updateTime: '2023-6-20 14:00:00'
-        },
-        {
-          id: '4',
-          projectName: '项目名4',
-          tab: 'P4',
-          createBy: '创建人4',
-          updateTime: '2023-1-20 14:00:00'
-        }
-      ],
       projectRules: {
-        deptId: [
+        groupId: [
           { required: true, trigger: 'blur', validator: validateDept }
         ],
         projectName: [
           { required: true, trigger: 'blur', validator: validateProName }
         ],
         tab: [
-          { required: false, trigger: 'blur', validator: validateTab }
+          { required: true, trigger: 'blur', validator: validateTab }
         ]
       }
     }
   },
   computed: {
-    ...mapGetters(['userInfo', 'curProject']),
-    projectCount() {
-      return this.tableData.length
-    }
+    ...mapGetters(['userInfo', 'curProject'])
   },
   watch: {
     'projectInfo.tab'(newVal, oldVal) {
@@ -230,7 +201,6 @@ export default {
     }
   },
   async mounted() {
-    this.tableData = this.basicData
     // 获取项目组信息列表
     const groupResponse = await getGroupListApi()
     this.groups = groupResponse.data.records
@@ -255,52 +225,28 @@ export default {
     formatterDate(row, column, cellValue) {
       return cellValue
     },
-    handleInput() {
-      if (this.keyword === '') {
-        this.tableData = this.basicData
-        return
-      }
-      this.tableData = this.basicData.filter(data => data.projectName.includes(this.keyword))
-    },
     existTab(value) {
-      return this.basicData.filter(data => data.tab === value).length > 0
+      return this.projects.filter(data => data.projectTab === value).length > 0
     },
     addProject() {
-      this.$refs.projectInfo.validate(valid => {
+      this.$refs.projectInfo.validate(async(valid) => {
         if (valid) {
-          this.addProjectVisible = false
-
           // todo向后端发请求
-
-          const maxId = this.basicData.reduce((maxId, data) => (data.id > maxId ? data.id : maxId), 0) + 1
-
-          const date = new Date()
-          const year = date.getFullYear()
-          const month = date.getMonth() + 1
-          const day = date.getDate()
-          const hours = date.getHours()
-          const minutes = date.getMinutes()
-          const seconds = date.getSeconds()
-          // 在月份和日期前面补零
-          const formattedMonth = String(month).padStart(2, '0')
-          const formattedDay = String(day).padStart(2, '0')
-          const formattedHours = String(hours).padStart(2, '0')
-          const formattedMinutes = String(minutes).padStart(2, '0')
-          const formattedSeconds = String(seconds).padStart(2, '0')
-          const newDate = `${year}-${formattedMonth}-${formattedDay} ${formattedHours}:${formattedMinutes}:${formattedSeconds}`
-          this.basicData.push({
-            id: maxId,
-            projectName: this.projectInfo.projectName,
+          const response = await addProjectApi({
+            groupId: this.projectInfo.groupId,
+            name: this.projectInfo.projectName,
             tab: this.projectInfo.tab,
-            createBy: this.userInfo.realName,
-            updateTime: newDate
+            description: this.projectInfo.description
           })
-          this.handleInput()
-          this.$message({
-            message: '添加成功',
-            type: 'success',
-            duration: 3000 // 持续时间为 3 秒
-          })
+          if (response.success) {
+            this.addProjectVisible = false
+            this.handleSearch()
+            this.$message({
+              message: '添加成功',
+              type: 'success',
+              duration: 3000 // 持续时间为 3 秒
+            })
+          }
         } else {
           return false
         }

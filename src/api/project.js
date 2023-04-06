@@ -12,3 +12,11 @@ export function addProjectApi(data) {
     data
   })
 }
+
+export function getProjectListApi(params) {
+  return request({
+    url: '/api/ew-project/project/list',
+    method: 'get',
+    params
+  })
+}
