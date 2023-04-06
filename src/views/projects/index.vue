@@ -78,7 +78,7 @@
         />
       </el-table>
     </div>
-    <div style="float: right;margin-top: 20px">
+    <div style="float: right;margin-top: 20px;margin-bottom: 20px">
       <el-pagination
         background
         :current-page.sync="page.currentPage"

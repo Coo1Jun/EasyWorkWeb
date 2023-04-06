@@ -93,7 +93,7 @@
         <el-button type="primary" @click="addGroupMember">确 定</el-button>
       </div>
     </el-dialog>
-    <div style="float: right;margin-top: 20px">
+    <div style="float: right;margin-top: 20px;margin-bottom: 20px">
       <el-pagination
         background
         :current-page.sync="page.currentPage"
