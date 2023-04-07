@@ -315,16 +315,9 @@
           :model="newPlanSet"
           label-width="80px"
           label-position="top"
+          :rules="plansSetRules"
         >
-          <el-form-item label="所属计划集" prop="parentPlanSetIds">
-            <el-cascader
-              v-model="newPlanSet.parentPlanSetIds"
-              :options="parentPlanSet"
-              :props="planSetProps"
-              style="width: 100%"
-            />
-          </el-form-item>
-          <el-form-item label="标题">
+          <el-form-item label="标题" prop="title">
             <el-input
               v-model="newPlanSet.title"
               placeholder="请输入标题"
@@ -333,7 +326,7 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button @click="newPlanSetVisiable = false">取 消</el-button>
-          <el-button type="primary" @click="addProject">确 定</el-button>
+          <el-button type="primary" @click="addPlans">确 定</el-button>
         </div>
       </el-dialog>
     </div>
@@ -348,6 +341,7 @@ import { mapGetters } from 'vuex'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import config from '@/config/wangEditor'
 import { uploadUrl } from '@/api/file'
+import { addPlansApi, addWorkItemApi } from '@/api/workitem'
 
 // 鼠标滚轮控制横向滚动条
 Vue.directive('horizontal-scroll', {
@@ -366,6 +360,13 @@ export default {
   components: { PlanNavbar, Editor, Toolbar, PlanCard },
   data() {
     const { editorConfig, toolbarConfig } = config
+    const validTitle = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('标题不能为空'))
+      } else {
+        callback()
+      }
+    }
     return {
       members: [{ id: 1, name: '李正帆' }, { id: 2, name: '李正帆测试1' }, { id: 3, name: '李正帆测试2' }], // 团队成员
       projects: [{ id: 1, name: '项目1' }, { id: 2, name: '项目2' }, { id: 3, name: '项目3' }], // 所有项目
@@ -513,7 +514,6 @@ export default {
       // 新建计划集 start
       newPlanSetVisiable: false,
       newPlanSet: {
-        parentPlanSetIds: '', // 所属父计划集
         title: '' // 标题
       },
       // 新建计划集 end
@@ -542,8 +542,15 @@ export default {
         title: '',
         isEpic: false,
         parentWorkItemTitle: ''
-      }
+      },
       // 新建工作项 dialog属性 end
+      // 校验规则 start =====================
+      plansSetRules: {
+        title: [
+          { required: true, trigger: 'blur', validator: validTitle }
+        ]
+      }
+      // 校验规则 end =====================
     }
   },
   computed: {
@@ -678,8 +685,9 @@ export default {
         })
     },
     closePlanDialog() {
+      this.$refs.newPlanSet.resetFields()
       console.log('关闭新建计划')
-      console.log(this.html)
+      console.log(this.html.length)
       this.html = ''
     },
     addProject() {},
@@ -745,6 +753,27 @@ export default {
     },
     openPlanSetDialog() {
       this.newPlanSetVisiable = true
+    },
+    addPlans() {
+      this.$refs.newPlanSet.validate(async(valid) => {
+        if (valid) {
+          const { success } = await addPlansApi({
+            projectId: this.curProject.id,
+            title: this.newPlanSet.title
+          })
+          if (success) {
+            this.newPlanSetVisiable = false
+            this.$message({
+              message: '添加成功',
+              type: 'success',
+              duration: 3000 // 持续时间为 3 秒
+            })
+          }
+          // todo 发请求 刷新页面数据
+        } else {
+          return false
+        }
+      })
     }
   }
 }
