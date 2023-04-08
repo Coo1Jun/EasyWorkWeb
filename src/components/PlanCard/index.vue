@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-table
-      :data="workItem"
+      :data="workItems"
       style="width: 100%;margin-bottom: 20px;"
       row-key="id"
       tooltip-effect="light"
@@ -75,7 +75,7 @@
               :value="m.id"
             />
           </el-select>
-          <span v-else>{{ scope.row.principal && scope.row.principal.name }}</span>
+          <span v-else>{{ scope.row.principal && scope.row.principal.realName }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -97,7 +97,7 @@
         :width="80"
       />
       <el-table-column
-        prop="state"
+        prop="status"
         label="流程状态"
         :width="80"
         class-name="state"
@@ -119,7 +119,7 @@
               :value="s"
             />
           </el-select>
-          <span v-else>{{ scope.row.state }}</span>
+          <span v-else>{{ scope.row.status }}</span>
         </template>
       </el-table-column>
       <!-- 占位 使table不太靠近右边 -->
@@ -136,16 +136,26 @@
 <script>
 import CardPreview from '@/components/CardPreview'
 import { mapGetters } from 'vuex'
+import { getWorkItemTreeApi } from '@/api/workitem'
+import { getMemberListByGroupIdApi } from '@/api/group'
+
 export default {
   name: 'PlanCard',
   components: { CardPreview },
   props: {
-
+    curProject: {
+      type: Object,
+      required: true
+    },
+    curEpic: {
+      type: Object,
+      required: true
+    }
   },
   data() {
     return {
       workItemVisible: false,
-      members: [{ id: 1, name: '李正帆' }, { id: 2, name: '李正帆测试1' }, { id: 3, name: '李正帆测试222222' }], // 团队成员
+      members: [], // 团队成员
       states: [],
       priorityColor: {
         1: '#73d897',
@@ -160,105 +170,30 @@ export default {
         principal: '',
         state: ''
       },
-      workItem: [
-        {
-          id: '1',
-          number: '1111', // 编号
-          title: '特性1',
-          principal: { id: '1', name: '李正帆111111111' }, // 负责人
-          workTime: '14', // 工时
-          workType: 'Feature', // 工作项类型：Epic、Feature、Story、Task、Bug
-          state: '新建', // 流程状态
-          priority: 1,
-          children: [
-            {
-              id: '5',
-              number: '22222', // 编号
-              title: '故事1',
-              principal: { id: '2', name: '李正帆2' }, // 负责人
-              workTime: '14', // 工时
-              workType: 'Story', // 工作项类型：Epic、Feature、Story、Task、Bug
-              state: '新建', // 流程状态
-              priority: 2,
-              children: [
-                {
-                  id: '8',
-                  number: '11111', // 编号
-                  title: '任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任务1',
-                  principal: { id: '2', name: '李正帆' }, // 负责人
-                  workTime: '14', // 工时
-                  workType: 'Task', // 工作项类型：Epic、Feature、Story、Task、Bug
-                  state: '开发中', // 流程状态
-                  priority: 3
-                },
-                {
-                  id: '9',
-                  number: '11411', // 编号
-                  title: '【bug】发现了问题',
-                  principal: { id: '2', name: '李正帆' }, // 负责人
-                  workTime: '14', // 工时
-                  workType: 'Bug', // 工作项类型：Epic、Feature、Story、Task、Bug
-                  state: '新建', // 流程状态
-                  priority: 5
-                }
-              ]
-            },
-            {
-              id: '6',
-              number: '2223', // 编号
-              title: '故事3',
-              principal: {}, // 负责人
-              workTime: '14', // 工时
-              workType: 'Story', // 工作项类型：Epic、Feature、Story、Task、Bug
-              state: '新建', // 流程状态
-              priority: 4
-            }
-          ]
-        },
-        {
-          id: '2',
-          number: '2', // 编号
-          title: '特性2',
-          principal: {}, // 负责人
-          workTime: '14', // 工时
-          workType: 'Feature', // 工作项类型：Epic、Feature、Story、Task、Bug
-          state: '新建', // 流程状态
-          priority: 5,
-          children: [
-            {
-              id: '7',
-              number: '22', // 编号
-              title: '故事4',
-              principal: {}, // 负责人
-              workTime: '14', // 工时
-              workType: 'Story', // 工作项类型：Epic、Feature、Story、Task、Bug
-              state: '新建' // 流程状态
-            }
-          ]
-        },
-        {
-          id: '3',
-          number: '3', // 编号
-          title: '特性3',
-          principal: {}, // 负责人
-          workTime: '14', // 工时
-          workType: 'Feature', // 工作项类型：Epic、Feature、Story、Task、Bug
-          state: '新建' // 流程状态
-        },
-        {
-          id: '4',
-          number: '4444', // 编号
-          title: '特性4',
-          principal: {}, // 负责人
-          workTime: '14', // 工时
-          workType: 'Feature', // 工作项类型：Epic、Feature、Story、Task、Bug
-          state: '新建' // 流程状态
-        }
-      ]
+      workItems: []
     }
   },
   computed: {
     ...mapGetters(['defaultStates', 'TaskStates', 'BugStates'])
+  },
+  watch: {
+    curEpic: {
+      handler(val) {
+        this.refreshData()
+      },
+      deep: true
+    }
+  },
+  async mounted() {
+    const treeResponse = await getWorkItemTreeApi({
+      projectId: this.curProject.projectId,
+      EpicId: this.curEpic.id
+    })
+    this.workItems = treeResponse.data
+    // 根据项目组id获取用户信息列表
+    getMemberListByGroupIdApi(this.curProject.groupId).then(res => {
+      this.members = res.data
+    })
   },
   beforeDestroy() {
   },
@@ -328,6 +263,13 @@ export default {
     },
     setWorkItemVisible(value) {
       this.workItemVisible = value
+    },
+    async refreshData() {
+      const treeResponse = await getWorkItemTreeApi({
+        projectId: this.curProject.projectId,
+        EpicId: this.curEpic.id
+      })
+      this.workItems = treeResponse.data
     }
   }
 }
