@@ -24,13 +24,13 @@
           :data="planSet"
           node-key="id"
           highlight-current
-          :props="defaultProps"
+          :props="planSetProps"
           @node-click="handleNodeClick"
           @node-contextmenu="handleContextmenu"
         />
       </div>
       <!-- 右边的卡片内容 -->
-      <div class="content">
+      <div v-if="curEpic" class="content">
         <!-- 进度条 -->
         <plan-navbar :progress="progress" class="plan-navbar" @openDialog="openWorkItemDialog" />
         <!-- plan-avatar 所有人完成情况 -->
@@ -108,6 +108,9 @@
         </div>
         <PlanCard />
       </div>
+      <div v-else>
+        hello
+      </div>
     </div>
 
     <ul
@@ -115,9 +118,8 @@
       :style="{ left: left + 'px', top: top + 'px' }"
       class="contextmenu"
     >
-      <li v-if="curData && !curData.isPlanSet" @click="openPlanSetDialog">新建计划集</li>
-      <li v-if="curData && !curData.isPlanSet" @click="openPlanDialog">新建计划</li>
-      <li v-if="curData && curData.isPlanSet" @click="addWorkItemVisible = false">查看</li>
+      <li v-if="curData && curData.workType === 'Plans'" @click="openPlanDialog">新建计划</li>
+      <li v-if="curData && curData.workType === 'Epic'" @click="addWorkItemVisible = false">查看</li>
       <li style="color: red" @click="delPlan">删除</li>
     </ul>
 
@@ -137,12 +139,13 @@
             <!-- 标题 -->
             <div class="work-tiem-title">
               <el-form
-                ref="newWorkItem"
+                ref="newWorkItem1"
                 :model="newWorkItem"
                 label-width="80px"
                 label-position="top"
+                :rules="newWorkItemRules"
               >
-                <el-form-item label="标题">
+                <el-form-item label="标题" prop="title">
                   <el-input
                     v-model="newWorkItem.title"
                     placeholder="请输入标题"
@@ -160,7 +163,7 @@
                 :mode="mode"
               />
               <Editor
-                v-model="html"
+                v-model="newWorkItem.description"
                 style="height: 300px; overflow-y: hidden"
                 :default-config="editorConfig"
                 :mode="mode"
@@ -188,10 +191,11 @@
           <!-- 右边属性区 -->
           <div class="plan-dialog-attribute">
             <el-form
-              ref="newWorkItem"
+              ref="newWorkItem2"
               :model="newWorkItem"
               label-width="80px"
               label-position="top"
+              :rules="newWorkItemRules"
             >
               <el-form-item label="所属项目" prop="parentProId">
                 <el-input
@@ -200,24 +204,21 @@
                   disabled
                 />
               </el-form-item>
-              <el-form-item v-if="workDialog.isEpic" label="所属计划集" prop="parentPlanSetIds">
-                <el-cascader
-                  v-model="newWorkItem.parentPlanSetIds"
-                  :options="parentPlanSet"
-                  :props="planSetProps"
+              <el-form-item v-if="workDialog.isEpic" label="所属计划集" prop="parentPlanSetId">
+                <el-select
+                  v-model="newWorkItem.parentPlanSetId"
+                  placeholder="请选择计划集"
                   style="width: 100%"
-                />
-              <!-- <el-select
-                v-model="newWorkItem.parentProId"
-                placeholder="请选择项目"
-                style="width: 100%"
-                filterable
-              >
-                <el-option
-                  :label="curProject.projectName"
-                  :value="curProject.id"
-                />
-              </el-select> -->
+                  filterable
+                  clearable
+                >
+                  <el-option
+                    v-for="plans in planSet"
+                    :key="plans.id"
+                    :label="plans.title"
+                    :value="plans.id"
+                  />
+                </el-select>
               </el-form-item>
               <el-form-item label="工作项类型" prop="workType">
                 <el-select
@@ -236,15 +237,18 @@
               <el-form-item v-if="!workDialog.isEpic" :label="workDialog.parentWorkItemTitle" prop="parentWorkItemId">
                 <el-select
                   v-model="newWorkItem.parentWorkItemId"
-                  placeholder="请选择标题"
+                  placeholder="请选择父工作项"
                   style="width: 100%"
                   filterable
+                  :disabled="newWorkItem.workType === 'Feature'"
                 >
-                <!-- 当前项目、Epic（计划）是知道的，所以应该遍历当前Epic下对应的父工作项 -->
-                <!-- <el-option
-                  :label="curProject.projectName"
-                  :value="curProject.id"
-                /> -->
+                  <!-- 当前项目、Epic（计划）是知道的，所以应该遍历当前Epic下对应的父工作项 -->
+                  <el-option
+                    v-for="work in parentWorkItemOptions"
+                    :key="work.id"
+                    :label="work.title"
+                    :value="work.id"
+                  />
                 </el-select>
               </el-form-item>
               <el-form-item label="负责人" prop="principal">
@@ -257,9 +261,9 @@
                 >
                   <el-option
                     v-for="m in members"
-                    :key="m.id"
+                    :key="m.userId"
                     :label="m.name"
-                    :value="m.id"
+                    :value="m.userId"
                   />
                 </el-select>
               </el-form-item>
@@ -337,11 +341,12 @@
 import PlanNavbar from '@/components/PlanNavbar'
 import PlanCard from '@/components/PlanCard'
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import config from '@/config/wangEditor'
 import { uploadUrl } from '@/api/file'
-import { addPlansApi, addWorkItemApi } from '@/api/workitem'
+import { addPlansApi, addWorkItemApi, getPlansApi, getWorkItemListApi } from '@/api/workitem'
+import { getProjectInfoApi } from '@/api/project'
+import { getMemberListByGroupIdApi } from '@/api/group'
 
 // 鼠标滚轮控制横向滚动条
 Vue.directive('horizontal-scroll', {
@@ -367,9 +372,33 @@ export default {
         callback()
       }
     }
+    const validDate = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('完成时间不能为空'))
+      } else {
+        callback()
+      }
+    }
+    const validParentWorkItem = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('所属父工作项不能为空'))
+      } else {
+        callback()
+      }
+    }
+    const validWorkType = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('工作项类型不能为空'))
+      } else {
+        callback()
+      }
+    }
     return {
-      members: [{ id: 1, name: '李正帆' }, { id: 2, name: '李正帆测试1' }, { id: 3, name: '李正帆测试2' }], // 团队成员
-      projects: [{ id: 1, name: '项目1' }, { id: 2, name: '项目2' }, { id: 3, name: '项目3' }], // 所有项目
+      curProject: null,
+      curEpic: null,
+      members: [], // 团队成员
+      parentWorkItemOptions: [], // 父工作项的选项，根据不同的工作项类型而改变
+      workItemMap: {},
       uploadUrl,
       defaultFileList: [
         // {
@@ -385,7 +414,6 @@ export default {
       // === 鼠标右键计划列表end
       // ===富文本编辑器start
       editor: null,
-      html: '',
       toolbarConfig,
       editorConfig,
       mode: 'default', // or 'simple'
@@ -424,83 +452,7 @@ export default {
           completedTasks: 10 // 已经完成的任务
         }
       ],
-      planSet: [
-        {
-          id: 1,
-          label: '一级 1',
-          isPlanSet: false,
-          children: [
-            {
-              id: 4,
-              label: '二级 1-1',
-              isPlanSet: false,
-              children: [
-                {
-                  id: 9,
-                  label: '三级 1-1-1',
-                  isPlanSet: true
-                },
-                {
-                  id: 10,
-                  label: '三级 1-1-2',
-                  isPlanSet: true
-                }
-              ]
-            }
-          ]
-        },
-        {
-          id: 2,
-          label: '一级 2',
-          isPlanSet: false,
-          children: [
-            {
-              id: 5,
-              label: '二级 2-1',
-              isPlanSet: true
-            },
-            {
-              id: 6,
-              label: '二级 2-2',
-              isPlanSet: true
-            }
-          ]
-        },
-        {
-          id: 3,
-          label: '一级 3',
-          isPlanSet: false,
-          children: [
-            {
-              id: 7,
-              label: '二级 3-1',
-              isPlanSet: true
-            },
-            {
-              id: 8,
-              label: '二级 3-2',
-              isPlanSet: false,
-              children: [
-                {
-                  id: 11,
-                  label: '三级 3-2-1',
-                  isPlanSet: true
-                },
-                {
-                  id: 12,
-                  label: '三级 3-2-2',
-                  isPlanSet: true
-                },
-                {
-                  id: 13,
-                  label: '三级 3-2-3',
-                  isPlanSet: true
-                }
-              ]
-            }
-          ]
-        }
-      ],
+      planSet: [], // 计划集
       defaultProps: {
         children: 'children',
         label: 'label',
@@ -509,7 +461,7 @@ export default {
       planSetProps: {
         children: 'children',
         value: 'id',
-        label: 'label'
+        label: 'title'
       },
       // 新建计划集 start
       newPlanSetVisiable: false,
@@ -520,16 +472,14 @@ export default {
       // 新建工作项：新建计划、新建卡片等等 start
       newWorkItem: {
         title: '', // 标题
-        desc: '', // 描述
+        description: '', // 描述
         fileIdList: [], // 附件
         parentProId: '', // 所属项目
-        parentPlanSetIds: [], // 所属计划集,数组的元素分别是一级一级往下传递，比如['a','b','c']表示，计划集为 a/b/c
-        parentWorkItemId: '', // 除了Epic，其他工作项类型都有所属，比如Feature所属Epic下
+        parentPlanSetId: null, // 所属计划集
+        parentWorkItemId: null, // 除了Epic，其他工作项类型都有所属，比如Feature所属Epic下
         workType: '', // 工作项类型：Epic、Feature、Story、Task、Bug
-        principal: '', // 负责人
+        principal: null, // 负责人
         duration: null, // 持续时间
-        startTime: '', // 开始时间
-        endTime: '', // 结束时间
         priority: 0, // 优先级
         risk: 0, // 风险
         severity: '' // 严重程度 Bug类别
@@ -549,12 +499,25 @@ export default {
         title: [
           { required: true, trigger: 'blur', validator: validTitle }
         ]
+      },
+      newWorkItemRules: {
+        title: [
+          { required: true, trigger: 'blur', validator: validTitle }
+        ],
+        duration: [
+          { required: true, trigger: 'blur', validator: validDate }
+        ],
+        parentWorkItemId: [
+          { required: true, trigger: 'blur', validator: validParentWorkItem }
+        ],
+        workType: [
+          { required: true, trigger: 'blur', validator: validWorkType }
+        ]
       }
       // 校验规则 end =====================
     }
   },
   computed: {
-    ...mapGetters(['curProject']),
     haveTagsView() {
       // TagsView高 34px
       return this.$store.state.settings.tagsView
@@ -597,24 +560,63 @@ export default {
       switch (value) {
         case 'Story':
           this.workDialog.parentWorkItemTitle = '所属Feature'
+          this.newWorkItem.parentWorkItemId = null
+          this.parentWorkItemOptions = this.workItemMap['Feature']
           break
         case 'Task':
         case 'Bug':
           this.workDialog.parentWorkItemTitle = '所属Story'
+          this.newWorkItem.parentWorkItemId = null
+          this.parentWorkItemOptions = this.workItemMap['Story']
           break
         default:
           this.workDialog.parentWorkItemTitle = '所属Epic'
+          this.newWorkItem.parentWorkItemId = this.curEpic.id
+          this.parentWorkItemOptions = []
+          this.parentWorkItemOptions.push(this.curEpic)
+      }
+    },
+    curEpic(value) {
+      if (value) {
+        getWorkItemListApi({
+          projectId: this.curProject.projectId,
+          EpicId: this.curEpic.id
+        }).then(res => {
+          this.workItemMap = res.data
+          console.log(']]]]]]]]]]]]]]]]]]]]]', this.workItemMap)
+        })
+      }
+    },
+    '$route.query.projectId'(value) {
+      if (!value) {
+        this.$router.push('/mission/projects')
       }
     }
   },
-  mounted() {
-    // 获取到当前选择项目的id
-    // 如果id为空，说明没选，跳转到/mission/projects
-    if (!(this.curProject && this.curProject.id)) {
+  async mounted() {
+    // 根据项目id获取项目信息
+    const projectResponse = await getProjectInfoApi(this.$route.query.projectId)
+    this.curProject = projectResponse.data
+    if (this.curProject == null) {
       this.$router.push('/mission/projects')
-      return
     }
+    // 后端获取计划集
+    getPlansApi({ projectId: this.$route.query.projectId }).then(res => {
+      this.planSet = res.data
+    })
+    // 根据项目组id获取用户信息列表
+    getMemberListByGroupIdApi(this.curProject.groupId).then(res => {
+      this.members = res.data
+    })
     // todo 向后端请求，根据项目id查询所有计划
+  },
+  beforeRouteEnter(to, from, next) {
+    // 如果id为空，说明没选，跳转到/mission/projects
+    if (!to.query.projectId) {
+      next('/mission/projects')
+    } else {
+      next()
+    }
   },
   beforeDestroy() {
     this.closeEditor()
@@ -624,12 +626,10 @@ export default {
       console.log(key, keyPath)
     },
     handleNodeClick(data, node) {
-      console.log('当前节点是数据是', data)
-      console.log('当前节点是', node)
-      if (node.isLeaf) {
-        console.log('当前选中的是叶子节点')
-      } else {
-        console.log('当前选中的不是叶子节点')
+      if (data.workType === 'Epic') {
+        this.curEpic = data
+        console.log(data)
+        console.log('点击的是Epic,向后端发请求')
       }
       this.closeMenu()
     },
@@ -648,20 +648,6 @@ export default {
     },
     closeMenu() {
       this.visible = false
-    },
-    appendPlan() {
-      this.addWorkItemVisible = true
-      // this.$refs.planTree.append(
-      //   {
-      //     id: 13,
-      //     label: '新建的计划'
-      //   },
-      //   this.curNode
-      // )
-      this.$message({
-        type: 'success',
-        message: '新建成功!'
-      })
     },
     delPlan() {
       this.$confirm('此操作将永久删除该计划及其任务, 是否继续?', '警告', {
@@ -685,12 +671,74 @@ export default {
         })
     },
     closePlanDialog() {
-      this.$refs.newPlanSet.resetFields()
-      console.log('关闭新建计划')
-      console.log(this.html.length)
-      this.html = ''
+      this.curData = null
+      this.curNode = null
+      if (this.$refs.newPlanSet) this.$refs.newPlanSet.resetFields()
+      this.newWorkItemReset()
+      console.log('关闭新建计划', this.newWorkItem)
     },
-    addProject() {},
+    addProject() {
+      let titleValid
+      this.$refs.newWorkItem1.validate(valid => { titleValid = valid })
+      // 标题校验不通过，直接结束
+      if (!titleValid) return
+      this.$refs.newWorkItem2.validate(async(valid) => {
+        if (valid) {
+          let curEpicId = this.curEpic.id
+          if (this.newWorkItem.workType === 'Plans' || this.newWorkItem.workType === 'Epic') {
+            curEpicId = null
+          }
+          const { success } = await addWorkItemApi({
+            title: this.newWorkItem.title,
+            description: this.newWorkItem.description,
+            fileList: this.newWorkItem.fileIdList,
+            projectId: this.curProject.projectId,
+            plansId: this.newWorkItem.parentPlanSetId,
+            parentWorkItemId: this.newWorkItem.parentWorkItemId,
+            workType: this.newWorkItem.workType,
+            principalId: this.newWorkItem.principal,
+            startTime: this.newWorkItem.duration[0],
+            endTime: this.newWorkItem.duration[1],
+            priority: this.newWorkItem.priority,
+            risk: this.newWorkItem.risk,
+            epicId: curEpicId
+          })
+          if (success) {
+            this.addWorkItemVisible = false
+            this.$message({
+              message: '添加成功',
+              type: 'success',
+              duration: 3000 // 持续时间为 3 秒
+            })
+            // 发请求 刷新页面数据
+            // 1.请求计划集
+            getPlansApi({ projectId: this.$route.query.projectId }).then(res => {
+              this.planSet = res.data
+            })
+            // 2.请求工作项
+          }
+        } else {
+          return false
+        }
+      })
+    },
+    // 重置表单
+    newWorkItemReset() {
+      this.newWorkItem = {
+        title: '', // 标题
+        description: '', // 描述
+        fileIdList: [], // 附件
+        parentProId: '', // 所属项目
+        parentPlanSetId: null, // 所属计划集
+        parentWorkItemId: null, // 除了Epic，其他工作项类型都有所属，比如Feature所属Epic下
+        workType: '', // 工作项类型：Epic、Feature、Story、Task、Bug
+        principal: null, // 负责人
+        duration: null, // 持续时间
+        priority: 0, // 优先级
+        risk: 0, // 风险
+        severity: '' // 严重程度 Bug类别
+      }
+    },
     onCreated(editor) {
       this.editor = Object.seal(editor) // 一定要用 Object.seal() ，否则会报错
     },
@@ -739,6 +787,9 @@ export default {
       }
     },
     openPlanDialog() {
+      if (this.curData && this.curData.workType === 'Plans') {
+        this.newWorkItem.parentPlanSetId = this.curData.id
+      }
       this.workDialog.title = '新建计划'
       this.addWorkItemVisible = true
       this.newWorkItem.workType = 'Epic'
@@ -758,7 +809,7 @@ export default {
       this.$refs.newPlanSet.validate(async(valid) => {
         if (valid) {
           const { success } = await addPlansApi({
-            projectId: this.curProject.id,
+            projectId: this.curProject.projectId,
             title: this.newPlanSet.title
           })
           if (success) {
@@ -769,7 +820,10 @@ export default {
               duration: 3000 // 持续时间为 3 秒
             })
           }
-          // todo 发请求 刷新页面数据
+          // 发请求 刷新页面数据
+          getPlansApi({ projectId: this.$route.query.projectId }).then(res => {
+            this.planSet = res.data
+          })
         } else {
           return false
         }
