@@ -32,11 +32,11 @@
       <!-- 右边的卡片内容 -->
       <div v-if="curEpic" class="content">
         <!-- 进度条 -->
-        <plan-navbar :progress="progress" class="plan-navbar" @openDialog="openWorkItemDialog" />
+        <plan-navbar :progress="statistics.percentage" class="plan-navbar" @openDialog="openWorkItemDialog" />
         <!-- plan-avatar 所有人完成情况 -->
         <div v-if="planAvatarShow" class="plan-avatar">
           <div class="plan-avatar-average">
-            <div>{{ averageTasks }}</div>
+            <div>{{ statistics.averageTasks }}</div>
             <div style="color: #909399; width: 80px; text-align: center">
               人均卡片
             </div>
@@ -45,7 +45,7 @@
             <el-menu
               default-active="all"
               mode="horizontal"
-              :style="{ width: userCount * 100 + 100 + 'px' }"
+              :style="{ width: statistics.userCount * 100 + 100 + 'px' }"
               @select="handleSelect"
             >
               <el-menu-item index="all">
@@ -54,7 +54,7 @@
                   src="https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/el_default_user.png"
                 />
                 <div class="username">所有</div>
-                <div>{{ allCompletedTasks }} / {{ allTaskCount }}</div>
+                <div>{{ statistics.allCompletedTasks }} / {{ statistics.allTaskCount }}</div>
               </el-menu-item>
               <el-tooltip
                 v-for="user in planUsers"
@@ -69,7 +69,7 @@
                 <el-menu-item :index="user.id">
                   <el-avatar
                     :size="'large'"
-                    src="https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/e540756cb72f4164b8647bae5bfb3f4d.png"
+                    :src="user.portrait"
                   />
                   <div class="username">{{ user.username }}</div>
                   <div>{{ user.completedTasks }} / {{ user.taskCount }}</div>
@@ -79,15 +79,15 @@
           </div>
           <div class="plan-task-summary">
             <div>
-              <div>{{ 14 }}天</div>
+              <div>{{ statistics.remainingTime }}天</div>
               <div style="color: #909399; width: 80px">剩余时间</div>
             </div>
             <div>
-              <div>{{ remainingTasks }}</div>
+              <div>{{ statistics.remainingTasks }}</div>
               <div style="color: #909399; width: 80px">剩余卡片</div>
             </div>
             <div>
-              <div>{{ 0 }}</div>
+              <div>{{ statistics.delayedTasks }}</div>
               <div style="color: #909399; width: 80px">延期卡片</div>
             </div>
           </div>
@@ -106,7 +106,7 @@
             <i class="el-icon-arrow-down" />
           </button>
         </div>
-        <PlanCard />
+        <PlanCard ref="PlanCard" :cur-project="curProject" :cur-epic="curEpic" />
       </div>
       <div v-else>
         hello
@@ -344,7 +344,7 @@ import Vue from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import config from '@/config/wangEditor'
 import { uploadUrl } from '@/api/file'
-import { addPlansApi, addWorkItemApi, getPlansApi, getWorkItemListApi } from '@/api/workitem'
+import { addPlansApi, addWorkItemApi, getPlansApi, getWorkItemListApi, getWorkItemUserListApi, getWorkItemStatisticsApi } from '@/api/workitem'
 import { getProjectInfoApi } from '@/api/project'
 import { getMemberListByGroupIdApi } from '@/api/group'
 
@@ -399,6 +399,7 @@ export default {
       members: [], // 团队成员
       parentWorkItemOptions: [], // 父工作项的选项，根据不同的工作项类型而改变
       workItemMap: {},
+      statistics: {}, // 统计信息
       uploadUrl,
       defaultFileList: [
         // {
@@ -426,32 +427,7 @@ export default {
       riskActiveClass: '',
       priorityActiveClass: '',
       // dialog新建工作项 end
-      planUsers: [
-        {
-          id: '1',
-          username: '小明1',
-          taskCount: 10, // 任务总数
-          completedTasks: 4 // 已经完成的任务
-        },
-        {
-          id: '2',
-          username: '小明2',
-          taskCount: 10, // 任务总数
-          completedTasks: 0 // 已经完成的任务
-        },
-        {
-          id: '3',
-          username: '小明发射点发射点发顺丰的3',
-          taskCount: 40, // 任务总数
-          completedTasks: 32 // 已经完成的任务
-        },
-        {
-          id: '4',
-          username: '小明4',
-          taskCount: 30, // 任务总数
-          completedTasks: 10 // 已经完成的任务
-        }
-      ],
+      planUsers: [],
       planSet: [], // 计划集
       defaultProps: {
         children: 'children',
@@ -521,31 +497,6 @@ export default {
     haveTagsView() {
       // TagsView高 34px
       return this.$store.state.settings.tagsView
-    },
-    userCount() {
-      return this.planUsers ? this.planUsers.length : 0
-    },
-    allTaskCount() {
-      return this.planUsers
-        ? this.planUsers.reduce((cur, user) => user.taskCount + cur, 0)
-        : 0
-    },
-    allCompletedTasks() {
-      return this.planUsers
-        ? this.planUsers.reduce((cur, user) => user.completedTasks + cur, 0)
-        : 0
-    },
-    averageTasks() {
-      return parseFloat((this.allTaskCount / this.userCount).toFixed(1))
-    },
-    progress() {
-      return Math.ceil((this.allCompletedTasks / this.allTaskCount) * 100)
-    },
-    remainingTasks() {
-      return this.allTaskCount - this.allCompletedTasks
-    },
-    parentPlanSet() {
-      return null
     }
   },
   watch: {
@@ -578,13 +529,7 @@ export default {
     },
     curEpic(value) {
       if (value) {
-        getWorkItemListApi({
-          projectId: this.curProject.projectId,
-          EpicId: this.curEpic.id
-        }).then(res => {
-          this.workItemMap = res.data
-          console.log(']]]]]]]]]]]]]]]]]]]]]', this.workItemMap)
-        })
+        this.getBasicData()
       }
     },
     '$route.query.projectId'(value) {
@@ -628,8 +573,6 @@ export default {
     handleNodeClick(data, node) {
       if (data.workType === 'Epic') {
         this.curEpic = data
-        console.log(data)
-        console.log('点击的是Epic,向后端发请求')
       }
       this.closeMenu()
     },
@@ -643,8 +586,6 @@ export default {
       this.top = event.pageY
       // 计算鼠标右键菜单的位置 end
       this.visible = true
-      console.log(data)
-      console.log(node)
     },
     closeMenu() {
       this.visible = false
@@ -716,6 +657,10 @@ export default {
               this.planSet = res.data
             })
             // 2.请求工作项
+            // 3.刷新子组件的数据
+            this.$refs.PlanCard.refreshData()
+            // 4.刷新工作项数据
+            this.getBasicData()
           }
         } else {
           return false
@@ -827,6 +772,28 @@ export default {
         } else {
           return false
         }
+      })
+    },
+    getBasicData() {
+      getWorkItemListApi({
+        projectId: this.curProject.projectId,
+        EpicId: this.curEpic.id
+      }).then(res => {
+        this.workItemMap = res.data
+      })
+      // 根据项目id和EpicId获取参与项目工作的用户基本信息
+      getWorkItemUserListApi({
+        projectId: this.curProject.projectId,
+        EpicId: this.curEpic.id
+      }).then(res => {
+        this.planUsers = res.data
+      })
+      // 根据项目id和EpicId，计算工作项统计信息
+      getWorkItemStatisticsApi({
+        projectId: this.curProject.projectId,
+        EpicId: this.curEpic.id
+      }).then(res => {
+        this.statistics = res.data
       })
     }
   }

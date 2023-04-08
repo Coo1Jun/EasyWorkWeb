@@ -51,3 +51,42 @@ export function getWorkItemListApi(params) {
     params
   })
 }
+
+/**
+ * 根据项目id和Epic的id查询所有工作项的树形结构数据
+ * @param {*} params
+ * @returns
+ */
+export function getWorkItemTreeApi(params) {
+  return request({
+    url: '/api/ew-project/workitem/tree',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 根据项目id和EpicId获取参与项目工作的用户基本信息
+ * @param {*} params
+ * @returns
+ */
+export function getWorkItemUserListApi(params) {
+  return request({
+    url: '/api/ew-project/workitem/user/list',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 根据项目id和EpicId，计算工作项统计信息
+ * @param {*} params
+ * @returns
+ */
+export function getWorkItemStatisticsApi(params) {
+  return request({
+    url: '/api/ew-project/workitem/statistics',
+    method: 'get',
+    params
+  })
+}
