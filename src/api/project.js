@@ -20,3 +20,10 @@ export function getProjectListApi(params) {
     params
   })
 }
+
+export function getProjectInfoApi(id) {
+  return request({
+    url: `/api/ew-project/project/${id}`,
+    method: 'get'
+  })
+}

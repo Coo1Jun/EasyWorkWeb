@@ -65,3 +65,14 @@ export function getMemberListApi(params) {
     params
   })
 }
+
+/**
+ * 根据项目id获取项目组成员列表
+ */
+export function getMemberListByGroupIdApi(groupId) {
+  return request({
+    url: `/api/ew-project/group/member/list/${groupId}`,
+    method: 'get'
+  })
+}
+
