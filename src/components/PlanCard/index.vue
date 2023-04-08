@@ -79,17 +79,26 @@
         </template>
       </el-table-column>
       <el-table-column
-        prop="workTime"
+        prop="remainingTime"
         label="剩余时间"
         show-overflow-tooltip
         :width="80"
-      />
+      >
+        <template slot-scope="scope">
+          <span v-if="scope.row.remainingTime === '0'" style="color: red">{{ scope.row.remainingTime }} 天</span>
+          <span v-else>{{ scope.row.remainingTime }} 天</span>
+        </template>
+      </el-table-column>
       <el-table-column
-        prop="workTime"
+        prop="manHour"
         label="估算工时"
         show-overflow-tooltip
         :width="80"
-      />
+      >
+        <template slot-scope="scope">
+          <span>{{ scope.row.manHour }} 天</span>
+        </template>
+      </el-table-column>
       <el-table-column
         prop="workType"
         label="卡片类型"
