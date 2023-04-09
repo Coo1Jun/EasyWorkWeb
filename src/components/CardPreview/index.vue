@@ -24,7 +24,7 @@
             <div style="margin-bottom: 10px;">负责人</div>
             <el-select
               ref="principalSelect"
-              v-model="workItem.principal"
+              v-model="workItem.principalId"
               placeholder="请选择负责人"
               filterable
               clearable
@@ -32,9 +32,9 @@
             >
               <el-option
                 v-for="m in members"
-                :key="m.id"
+                :key="m.userId"
                 :label="m.name"
-                :value="m.id"
+                :value="m.userId"
               />
             </el-select>
           </div>
@@ -42,7 +42,7 @@
             <div style="margin-bottom: 10px;">流程状态</div>
             <el-select
               ref="stateSelect"
-              v-model="workItem.state"
+              v-model="workItem.status"
               filterable
               @change="stateChange"
             >
@@ -57,7 +57,7 @@
           <div>
             <div style="margin-bottom: 10px">完成时间</div>
             <el-date-picker
-              v-model="workItem.duration"
+              v-model="duration"
               type="daterange"
               range-separator="至"
               start-placeholder="开始日期"
@@ -75,7 +75,7 @@
                 <span>描述</span>
                 <el-link v-if="!editorVisable" style="color: #409eff;margin-left: 20px" @click="editDesc">编辑</el-link>
                 <el-link v-if="editorVisable" style="color: #409eff;margin-left: 20px" @click="saveDesc">保存</el-link>
-                <el-link v-if="workItem.desc !== workItem.oldDesc" style="color: #409eff;margin-left: 20px" @click="cancelEditing">取消编辑</el-link>
+                <el-link v-if="workItem.description !== oldDesc" style="color: #409eff;margin-left: 20px" @click="cancelEditing">取消编辑</el-link>
               </div>
               <div v-if="editorVisable">
                 <div v-if="workItemVisible" style="border: 1px solid #eee">
@@ -86,7 +86,7 @@
                     :mode="mode"
                   />
                   <Editor
-                    v-model="workItem.desc"
+                    v-model="workItem.description"
                     style="height: 300px; overflow-y: hidden"
                     :default-config="editorConfig"
                     :mode="mode"
@@ -94,7 +94,7 @@
                   />
                 </div>
               </div>
-              <div v-else v-html="workItem.desc" />
+              <div v-else v-html="workItem.description" />
             </el-tab-pane>
             <el-tab-pane :label="tabPaneFileLabel" name="attachment">
               <el-upload
@@ -111,7 +111,9 @@
                 <el-button style="margin-left: 10px" size="mini" icon="el-icon-plus" circle />
               </el-upload>
             </el-tab-pane>
-            <el-tab-pane :label="tabPaneSubWorkLabel" name="subWorkItem">配置管理</el-tab-pane>
+            <el-tab-pane :label="tabPaneSubWorkLabel" name="subWorkItem">
+              <!-- <PlanCard v-if="workItem.children&&workItem.children.length>0" /> -->
+            </el-tab-pane>
           </el-tabs>
         </div>
       </div>
@@ -145,25 +147,25 @@
             <div class="basic-info">
               <div>
                 <span class="basic-info-item">项目</span>
-                <span>项目名称</span>
+                <span>{{ curProject.projectName }}</span>
               </div>
               <div>
                 <span class="basic-info-item">创建人</span>
-                <span style="margin-right: 5px"><el-avatar :size="'small'" src="https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/default_user.png" /></span>
-                <span>李正帆</span>
+                <span style="margin-right: 5px"><el-avatar :size="'small'" :src="createUser && createUser.portrait" /></span>
+                <span>{{ createUser && createUser.realName }}</span>
               </div>
               <div>
                 <span class="basic-info-item">创建时间</span>
-                <span>2023年3月27日 20:18:36</span>
+                <span>{{ workItem.createTime }}</span>
               </div>
               <div>
                 <span class="basic-info-item">更新人</span>
-                <span style="margin-right: 5px"><el-avatar :size="'small'" src="https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/default_user.png" /></span>
-                <span>李正帆</span>
+                <span style="margin-right: 5px"><el-avatar :size="'small'" :src="updateUser && updateUser.portrait" /></span>
+                <span>{{ updateUser && updateUser.realName }}</span>
               </div>
               <div>
                 <span class="basic-info-item">更新时间</span>
-                <span>2023年3月27日 20:18:36</span>
+                <span>{{ workItem.updateTime }}</span>
               </div>
             </div>
           </el-collapse-item>
@@ -178,6 +180,9 @@ import { mapGetters } from 'vuex'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import config from '@/config/wangEditor'
 import { uploadUrl } from '@/api/file'
+import { getMemberListByGroupIdApi } from '@/api/group'
+import { getUserInfoApi } from '@/api/user'
+
 export default {
   name: 'CardPreview',
   components: { Editor, Toolbar },
@@ -185,6 +190,14 @@ export default {
     visable: {
       type: Boolean,
       default: false
+    },
+    workItemPreview: {
+      type: Object,
+      required: true
+    },
+    curProject: {
+      type: Object,
+      required: true
     }
   },
   data() {
@@ -192,8 +205,8 @@ export default {
     return {
       uploadUrl,
       defaultFileList: [],
-      members: [{ id: '1', name: '李正帆' }, { id: '2', name: '李正帆测试1' }, { id: '3', name: '李正帆测试22222222222222222222222' }], // 团队成员
-      workItemVisible: true,
+      members: [], // 团队成员
+      workItemVisible: false,
       collapseActiveName: ['1', '2'], // collapse默认展开的菜单
       tabsActiveName: 'basicInfo', // tabs默认展开的菜单
       priorityOldValue: 0, // 优先级的旧值
@@ -208,28 +221,32 @@ export default {
       mode: 'default', // or 'simple'
       // ===富文本编辑器end
       workItem: {
-        title: '任务111111',
+        title: '',
         oldTitle: '',
         priority: 0,
         risk: 0,
-        workType: 'Task',
-        principal: '2', // 负责人
+        workType: '',
+        principal: '', // 负责人
         state: '', // 状态
         startTime: '', // 开始时间
         endTime: '', // 结束时间
-        duration: [], // 完成时间，有两个值，第一个为开始时间，第二个为结束时间
         fileIdList: [], // 附件
-        desc: '<h1>Hello, world!</h1>', // 描述
-        oldDesc: '' // 描述的旧值，用于取消编辑时
-      }
+        desc: '', // 描述
+        oldDesc: '', // 描述的旧值，用于取消编辑时
+        children: []
+      },
+      duration: [], // 完成时间，有两个值，第一个为开始时间，第二个为结束时间
+      oldDesc: '', // 描述的旧值，用于取消编辑时
+      createUser: {}, // 创建人信息
+      updateUser: {} // 更新人信息
     }
   },
   computed: {
     ...mapGetters(['defaultStates', 'TaskStates', 'BugStates']),
     tabPaneFileLabel() {
       let label = '附件'
-      if (this.workItem.fileIdList && this.workItem.fileIdList.length > 0) {
-        label += '(' + this.workItem.fileIdList.length + ')'
+      if (this.workItem.fileList && this.workItem.fileList.length > 0) {
+        label += '(' + this.workItem.fileList.length + ')'
       }
       return label
     },
@@ -244,19 +261,40 @@ export default {
   watch: {
     visable(newVal) {
       this.workItemVisible = newVal
+    },
+    workItemPreview(value) {
+      this.workItem = value
+      // 判断当前的workType，选择对应的states
+      if (this.workItem.workType === 'Feature' || this.workItem.workType === 'Story') {
+        this.states = this.defaultStates
+      } else if (this.workItem.workType === 'Task') {
+        this.states = this.TaskStates
+      } else if (this.workItem.workType === 'Bug') {
+        this.states = this.BugStates
+      }
+      // 赋值用于显示完成时间
+      this.duration = []
+      this.duration.push(this.workItem.startTime)
+      this.duration.push(this.workItem.endTime)
+      // 保存旧值
+      this.oldDesc = this.workItem.description
+      // 获取创建人和更新人信息
+      getUserInfoApi(this.workItem.createId).then(res => {
+        this.createUser = res.data
+      })
+      getUserInfoApi(this.workItem.updateId).then(res => {
+        this.updateUser = res.data
+      })
     }
   },
-  mounted() {
+  async mounted() {
+    console.log('1111111111111111111111', this.workItem)
     // 保存描述的旧值
-    this.workItem.oldDesc = this.workItem.desc
-    // 判断当前的workType，选择对应的states
-    if (this.workItem.workType === 'Feature' || this.workItem.workType === 'Story') {
-      this.states = this.defaultStates
-    } else if (this.workItem.workType === 'Task') {
-      this.states = this.TaskStates
-    } else if (this.workItem.workType === 'Bug') {
-      this.states = this.BugStates
-    }
+    this.oldDesc = this.workItem.description
+    // 根据项目组id获取用户信息列表
+    getMemberListByGroupIdApi(this.curProject.groupId).then(res => {
+      this.members = res.data
+    })
   },
   beforeDestroy() {
     // 解绑所有自定义事件
@@ -269,7 +307,7 @@ export default {
       this.$emit('set-visable', false)
       // 如果处于编辑状态，则保存
       if (this.editorVisable) {
-        if (this.workItem.desc !== this.workItem.oldDesc) {
+        if (this.workItem.description !== this.oldDesc) {
           this.saveDesc()
         } else {
           this.cancelEditing()
@@ -334,20 +372,20 @@ export default {
     editDesc() {
       this.editorVisable = true
       // 保存旧值
-      this.workItem.oldDesc = this.workItem.desc
+      this.oldDesc = this.workItem.description
     },
     saveDesc() {
-      console.log('描述改为：', this.workItem.desc)
+      console.log('描述改为：', this.workItem.description)
       // todo发请求 修改描述
 
       // 保存旧值
-      this.workItem.oldDesc = this.workItem.desc
+      this.oldDesc = this.workItem.description
       this.editorVisable = false
     },
     cancelEditing() {
       this.editorVisable = false
       // 恢复旧值
-      this.workItem.desc = this.workItem.oldDesc
+      this.workItem.description = this.oldDesc
     },
     handleTabClick(tab, event) {
       console.log(tab, event)
@@ -362,15 +400,15 @@ export default {
     },
     handlePreview(file) {
       console.log(file)
-      console.log(this.workItem.fileIdList)
+      console.log(this.workItem.fileList)
     },
     handleRemove(file, fileList) {
       console.log(file)
       console.log(fileList)
-      this.workItem.fileIdList = this.workItem.fileIdList.filter(id => id !== file.response.data.id)
+      this.workItem.fileList = this.workItem.fileList.filter(id => id !== file.response.data.id)
     },
     uploadSuccess(response, file, fileList) {
-      this.workItem.fileIdList.push(response.data.id)
+      this.workItem.fileList.push(response.data.id)
     },
     uploadError() {
       this.$message({

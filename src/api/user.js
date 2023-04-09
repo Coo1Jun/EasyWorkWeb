@@ -63,3 +63,15 @@ export function editEmail(data) {
   })
 }
 
+/**
+ * 根据用户id获取用户基本信息
+ * @param {*} id
+ * @returns
+ */
+export function getUserInfoApi(id) {
+  return request({
+    url: `/api/ew-server/user/${id}`,
+    method: 'get'
+  })
+}
+
