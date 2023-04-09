@@ -70,9 +70,9 @@
           >
             <el-option
               v-for="m in members"
-              :key="m.id"
+              :key="m.userId"
               :label="m.name"
-              :value="m.id"
+              :value="m.userId"
             />
           </el-select>
           <span v-else>{{ scope.row.principal && scope.row.principal.realName }}</span>
@@ -138,7 +138,7 @@
         </template>
       </el-table-column>
     </el-table>
-    <CardPreview :visable="workItemVisible" @set-visable="setWorkItemVisible" />
+    <CardPreview :visable="workItemVisible" :work-item-preview="curWorkItemPreview" :cur-project="curProject" @set-visable="setWorkItemVisible" />
   </div>
 </template>
 
@@ -166,6 +166,7 @@ export default {
       workItemVisible: false,
       members: [], // 团队成员
       states: [],
+      curWorkItemPreview: {},
       priorityColor: {
         1: '#73d897',
         2: '#6698ff',
@@ -249,6 +250,7 @@ export default {
       if (column.label && column.label === '标题') {
         console.log(row)
         console.log(column)
+        this.curWorkItemPreview = JSON.parse(JSON.stringify(row))
         this.workItemVisible = true
       }
     },
