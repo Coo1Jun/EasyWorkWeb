@@ -248,8 +248,8 @@ export default {
         })
       }
       if (column.label && column.label === '标题') {
-        console.log(row)
-        console.log(column)
+        // console.log(row)
+        // console.log(column)
         this.curWorkItemPreview = JSON.parse(JSON.stringify(row))
         this.workItemVisible = true
       }

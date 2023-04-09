@@ -58,6 +58,7 @@
             <div style="margin-bottom: 10px">完成时间</div>
             <el-date-picker
               v-model="duration"
+              :clearable="false"
               type="daterange"
               range-separator="至"
               start-placeholder="开始日期"
@@ -72,7 +73,7 @@
         </div>
         <!--  -->
         <div>
-          <el-tabs v-model="tabsActiveName" @tab-click="handleTabClick">
+          <el-tabs v-model="tabsActiveName">
             <el-tab-pane label="基本信息" name="basicInfo">
               <div style="margin-bottom: 10px">
                 <span>描述</span>
@@ -97,7 +98,7 @@
                   />
                 </div>
               </div>
-              <div v-else v-html="workItem.description" />
+              <div v-else class="cp-desc" v-html="workItem.description" />
             </el-tab-pane>
             <el-tab-pane :label="tabPaneFileLabel" name="attachment">
               <el-upload
@@ -233,7 +234,7 @@ export default {
         state: '', // 状态
         startTime: '', // 开始时间
         endTime: '', // 结束时间
-        fileIdList: [], // 附件
+        fileList: [], // 附件
         desc: '', // 描述
         oldDesc: '', // 描述的旧值，用于取消编辑时
         children: []
@@ -288,10 +289,15 @@ export default {
       getUserInfoApi(this.workItem.updateId).then(res => {
         this.updateUser = res.data
       })
+      // 附件信息
+      if (!this.workItem.fileList) {
+        this.defaultFileList = []
+      } else {
+        this.defaultFileList = this.workItem.fileList
+      }
     }
   },
   async mounted() {
-    console.log('1111111111111111111111', this.workItem)
     // 保存描述的旧值
     this.oldDesc = this.workItem.description
     // 根据项目组id获取用户信息列表
@@ -390,9 +396,6 @@ export default {
       // 恢复旧值
       this.workItem.description = this.oldDesc
     },
-    handleTabClick(tab, event) {
-      console.log(tab, event)
-    },
     onCreated(editor) {
       this.editor = Object.seal(editor) // 一定要用 Object.seal() ，否则会报错
     },
@@ -470,5 +473,8 @@ export default {
   margin-top: 20px;
   margin-bottom: 15px;
   font-size: 14px;
+}
+::v-deep .cp-desc img {
+  width: 100%;
 }
 </style>
