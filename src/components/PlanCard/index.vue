@@ -85,7 +85,7 @@
         :width="80"
       >
         <template slot-scope="scope">
-          <span v-if="scope.row.remainingTime === '0'" style="color: red">{{ scope.row.remainingTime }} 天</span>
+          <span v-if="scope.row.remainingTime === '0' && scope.row.endFlag === 0" style="color: red">{{ scope.row.remainingTime }} 天</span>
           <span v-else>{{ scope.row.remainingTime }} 天</span>
         </template>
       </el-table-column>

@@ -65,6 +65,9 @@
               value-format="yyyy-MM-dd"
               @change="durationChange"
             />
+            <el-tag v-if="new Date().getTime() - new Date(workItem.endTime).getTime() > 0 && workItem.endFlag === 0" style="margin-left: 10px" type="danger">已延期</el-tag>
+            <el-tag v-else-if="workItem.status === '已完成'" style="margin-left: 10px" type="success">已完成</el-tag>
+            <el-tag v-else-if="workItem.status === '未复现' || workItem.status === '已取消' || workItem.status === '关闭'" style="margin-left: 10px" type="info">{{ workItem.status }}</el-tag>
           </div>
         </div>
         <!--  -->
