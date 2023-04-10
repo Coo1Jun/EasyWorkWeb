@@ -106,7 +106,7 @@
             <i class="el-icon-arrow-down" />
           </button>
         </div>
-        <PlanCard ref="PlanCard" :cur-project="curProject" :cur-epic="curEpic" />
+        <PlanCard ref="PlanCard" :cur-project="curProject" :cur-epic="curEpic" @refreshParentData="refreshParentData" />
       </div>
       <div v-else>
         hello
@@ -795,6 +795,9 @@ export default {
       }).then(res => {
         this.statistics = res.data
       })
+    },
+    refreshParentData() {
+      this.getBasicData()
     }
   }
 }

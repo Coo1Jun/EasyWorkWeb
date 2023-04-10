@@ -39,7 +39,7 @@
             ref="titleInput"
             v-model="workItemEditor.title"
             class="title-input"
-            @blur="titleCellBlur"
+            @blur="titleCellBlur(scope.row)"
           >
           <span v-else>{{ scope.row.title }}</span>
         </template>
@@ -65,14 +65,14 @@
             style="width: 100%"
             filterable
             clearable
-            @change="principalChange"
+            @change="principalChange(scope.row, $event)"
             @visible-change="principalOption"
           >
             <el-option
               v-for="m in members"
               :key="m.userId"
               :label="m.name"
-              :value="m.userId"
+              :value="m"
             />
           </el-select>
           <span v-else>{{ scope.row.principal && scope.row.principal.realName }}</span>
@@ -119,7 +119,7 @@
             style="width: 100%"
             filterable
             @visible-change="principalOption"
-            @change="stateChange"
+            @change="stateChange(scope.row, $event)"
           >
             <el-option
               v-for="(s, index) in states"
@@ -145,7 +145,7 @@
 <script>
 import CardPreview from '@/components/CardPreview'
 import { mapGetters } from 'vuex'
-import { getWorkItemTreeApi } from '@/api/workitem'
+import { getWorkItemTreeApi, editWorkItemApi } from '@/api/workitem'
 import { getMemberListByGroupIdApi } from '@/api/group'
 
 export default {
@@ -215,10 +215,17 @@ export default {
         this.$refs.titleInput.focus()
       })
     },
-    titleCellBlur() {
+    titleCellBlur(row) {
       this.workItemEditor.cellId = ''
-      console.log('title修改：', this.workItemEditor.title)
-      // todo 发请求
+      editWorkItemApi({
+        id: row.id,
+        title: this.workItemEditor.title,
+        editType: 'title'
+      }).then(res => {
+        if (res.success) {
+          row.title = this.workItemEditor.title
+        }
+      })
     },
     // 跳过表示不处理这次的点击事件
     cellClick(row, column, cell, event) {
@@ -254,10 +261,22 @@ export default {
         this.workItemVisible = true
       }
     },
-    principalChange(value) {
-      console.log('负责人修改：', value)
+    async principalChange(row, value) {
+      // console.log('负责人修改：', value)
+      // console.log(row)
       // todo发请求
-
+      editWorkItemApi({
+        id: row.id,
+        principalId: value.userId
+      }).then(res => {
+        if (res.success) {
+          row.principal.realName = value.name
+          row.principal.id = value.userId
+          this.refreshData() // 刷新数据
+          // 刷新父组件数据
+          this.$emit('refreshParentData')
+        }
+      })
       this.workItemEditor.principal = ''
     },
     principalOption(visible) {
@@ -266,10 +285,21 @@ export default {
         this.workItemEditor.cellId = ''
       }
     },
-    stateChange(value) {
+    stateChange(row, value) {
       console.log('状态修改为：', value)
       // todo发请求
-
+      editWorkItemApi({
+        id: row.id,
+        editType: 'status',
+        status: value
+      }).then(res => {
+        if (res.success) {
+          row.status = value
+          this.refreshData() // 刷新数据
+          // 刷新父组件数据
+          this.$emit('refreshParentData')
+        }
+      })
       this.workItemEditor.state = ''
     },
     setWorkItemVisible(value) {

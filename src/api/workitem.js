@@ -90,3 +90,16 @@ export function getWorkItemStatisticsApi(params) {
     params
   })
 }
+
+/**
+ * 修改工作项信息
+ * @param {*} params
+ * @returns
+ */
+export function editWorkItemApi(data) {
+  return request({
+    url: '/api/ew-project/workitem',
+    method: 'put',
+    data
+  })
+}
