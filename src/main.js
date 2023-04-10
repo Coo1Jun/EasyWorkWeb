@@ -17,6 +17,17 @@ import router from './router'
 import '@/icons' // icon
 import '@/permission' // 权限控制
 
+// 引入文件操作函数
+import file from '@/utils/file.js'
+// 引入文件操作相关插件
+import fileOperationPlugins from '@/utils/fileOperationPlugins.js'
+// 全局样式
+import '_a/styles/base.styl'
+import '_a/styles/iconfont/iconfont.css'
+import '_a/styles/iconfontCover.styl'
+import '_a/styles/elementCover.styl'
+import '_a/styles/mediaScreenXs.styl'
+
 /**
  * 如果不想使用模拟服务器
  * 你希望将MockJs用于模拟api
@@ -36,6 +47,10 @@ import '@/permission' // 权限控制
 Vue.use(ElementUI)
 
 Vue.config.productionTip = false
+Vue.prototype.$file = file
+for (const key in fileOperationPlugins) {
+  Vue.prototype[`$${key}`] = fileOperationPlugins[key]
+}
 
 new Vue({
   el: '#app',

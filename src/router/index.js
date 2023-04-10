@@ -137,7 +137,7 @@ export const constantRoutes = [
       {
         path: 'personal',
         name: 'Personal',
-        component: () => import('@/views/404'),
+        component: () => import('@/views/disk/index'),
         meta: { title: '网盘', icon: 'el-icon-folder-opened' }
       }
     ]
