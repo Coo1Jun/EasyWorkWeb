@@ -44,6 +44,7 @@
               ref="stateSelect"
               v-model="workItem.status"
               filterable
+              :disabled="workItem.workType === 'Epic'"
               @change="stateChange"
             >
               <el-option
@@ -115,7 +116,7 @@
                 <el-button style="margin-left: 10px" size="mini" icon="el-icon-plus" circle />
               </el-upload>
             </el-tab-pane>
-            <el-tab-pane :label="tabPaneSubWorkLabel" name="subWorkItem">
+            <el-tab-pane v-if="workItem.workType !== 'Epic'" :label="tabPaneSubWorkLabel" name="subWorkItem">
               <!-- <PlanCard v-if="workItem.children&&workItem.children.length>0" /> -->
             </el-tab-pane>
           </el-tabs>
@@ -303,6 +304,10 @@ export default {
       getUserInfoApi(this.workItem.updateId).then(res => {
         this.updateUser = res.data
       })
+      // 根据项目组id获取用户信息列表
+      getMemberListByGroupIdApi(this.curProject.groupId).then(res => {
+        this.members = res.data
+      })
       // 附件信息
       this.fileIdList = []
       if (!this.workItem.fileList) {
@@ -314,14 +319,6 @@ export default {
         }
       }
     }
-  },
-  async mounted() {
-    // 保存描述的旧值
-    this.oldDesc = this.workItem.description
-    // 根据项目组id获取用户信息列表
-    getMemberListByGroupIdApi(this.curProject.groupId).then(res => {
-      this.members = res.data
-    })
   },
   beforeDestroy() {
     // 解绑所有自定义事件

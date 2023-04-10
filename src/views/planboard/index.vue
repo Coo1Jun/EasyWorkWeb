@@ -119,7 +119,7 @@
       class="contextmenu"
     >
       <li v-if="curData && curData.workType === 'Plans'" @click="openPlanDialog">新建计划</li>
-      <li v-if="curData && curData.workType === 'Epic'" @click="addWorkItemVisible = false">查看</li>
+      <li v-if="curData && curData.workType === 'Epic'" @click="showEpic">查看</li>
       <li style="color: red" @click="delPlan">删除</li>
     </ul>
 
@@ -334,12 +334,20 @@
         </div>
       </el-dialog>
     </div>
+    <CardPreview
+      :visable="workItemVisible"
+      :work-item-preview="curWorkItemPreview"
+      :cur-project="curProject"
+      @set-visable="setWorkItemVisible"
+      @refreshPlanCardData="refreshPlanCardData"
+    />
   </div>
 </template>
 
 <script>
 import PlanNavbar from '@/components/PlanNavbar'
 import PlanCard from '@/components/PlanCard'
+import CardPreview from '@/components/CardPreview'
 import Vue from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import config from '@/config/wangEditor'
@@ -362,7 +370,7 @@ Vue.directive('horizontal-scroll', {
 
 export default {
   name: 'Planboard',
-  components: { PlanNavbar, Editor, Toolbar, PlanCard },
+  components: { PlanNavbar, Editor, Toolbar, PlanCard, CardPreview },
   data() {
     const { editorConfig, toolbarConfig } = config
     const validTitle = (rule, value, callback) => {
@@ -394,7 +402,7 @@ export default {
       }
     }
     return {
-      curProject: null,
+      curProject: {},
       curEpic: null,
       members: [], // 团队成员
       parentWorkItemOptions: [], // 父工作项的选项，根据不同的工作项类型而改变
@@ -489,8 +497,10 @@ export default {
         workType: [
           { required: true, trigger: 'blur', validator: validWorkType }
         ]
-      }
+      },
       // 校验规则 end =====================
+      workItemVisible: false,
+      curWorkItemPreview: {}
     }
   },
   computed: {
@@ -805,6 +815,20 @@ export default {
     },
     refreshParentData() {
       this.getBasicData()
+    },
+    showEpic() {
+      this.curWorkItemPreview = JSON.parse(JSON.stringify(this.curData))
+      console.log(this.curWorkItemPreview)
+      this.workItemVisible = true
+    },
+    setWorkItemVisible(value) {
+      this.workItemVisible = value
+    },
+    refreshPlanCardData() {
+      // 后端获取计划集
+      getPlansApi({ projectId: this.$route.query.projectId }).then(res => {
+        this.planSet = res.data
+      })
     }
   }
 }
