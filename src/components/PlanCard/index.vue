@@ -138,7 +138,13 @@
         </template>
       </el-table-column>
     </el-table>
-    <CardPreview :visable="workItemVisible" :work-item-preview="curWorkItemPreview" :cur-project="curProject" @set-visable="setWorkItemVisible" />
+    <CardPreview
+      :visable="workItemVisible"
+      :work-item-preview="curWorkItemPreview"
+      :cur-project="curProject"
+      @set-visable="setWorkItemVisible"
+      @refreshPlanCardData="refreshPlanCardData"
+    />
   </div>
 </template>
 
@@ -311,6 +317,11 @@ export default {
         EpicId: this.curEpic.id
       })
       this.workItems = treeResponse.data
+    },
+    refreshPlanCardData() {
+      this.refreshData()
+      // 刷新父组件数据
+      this.$emit('refreshParentData')
     }
   }
 }

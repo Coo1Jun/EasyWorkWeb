@@ -150,7 +150,7 @@
           <el-collapse-item title="基础信息" name="2">
             <div class="basic-info">
               <div>
-                <span class="basic-info-item">项目</span>
+                <span class="basic-info-item">所属项目</span>
                 <span>{{ curProject.projectName }}</span>
               </div>
               <div>
@@ -186,6 +186,7 @@ import config from '@/config/wangEditor'
 import { uploadUrl } from '@/api/file'
 import { getMemberListByGroupIdApi } from '@/api/group'
 import { getUserInfoApi } from '@/api/user'
+import { editWorkItemApi } from '@/api/workitem'
 
 export default {
   name: 'CardPreview',
@@ -226,7 +227,6 @@ export default {
       // ===富文本编辑器end
       workItem: {
         title: '',
-        oldTitle: '',
         priority: 0,
         risk: 0,
         workType: '',
@@ -235,22 +235,28 @@ export default {
         startTime: '', // 开始时间
         endTime: '', // 结束时间
         fileList: [], // 附件
-        desc: '', // 描述
-        oldDesc: '', // 描述的旧值，用于取消编辑时
+        description: '', // 描述
         children: []
       },
       duration: [], // 完成时间，有两个值，第一个为开始时间，第二个为结束时间
       oldDesc: '', // 描述的旧值，用于取消编辑时
+      oldTitle: '', // 标题的旧值
+      oldStatus: '', // 状态的旧值
+      oldPrincipalId: '', // 负责人的旧值
+      oldPriority: 0, // 优先级旧值
+      oldRisk: 0, // 风险等级旧值
       createUser: {}, // 创建人信息
-      updateUser: {} // 更新人信息
+      updateUser: {}, // 更新人信息
+      fileIdList: [], // 附件id列表（实时）
+      oldFileIdList: [] // 附件id列表的旧值
     }
   },
   computed: {
     ...mapGetters(['defaultStates', 'TaskStates', 'BugStates']),
     tabPaneFileLabel() {
       let label = '附件'
-      if (this.workItem.fileList && this.workItem.fileList.length > 0) {
-        label += '(' + this.workItem.fileList.length + ')'
+      if (this.fileIdList && this.fileIdList.length > 0) {
+        label += '(' + this.fileIdList.length + ')'
       }
       return label
     },
@@ -268,6 +274,7 @@ export default {
     },
     workItemPreview(value) {
       this.workItem = value
+      // console.log(value)
       // 判断当前的workType，选择对应的states
       if (this.workItem.workType === 'Feature' || this.workItem.workType === 'Story') {
         this.states = this.defaultStates
@@ -282,6 +289,13 @@ export default {
       this.duration.push(this.workItem.endTime)
       // 保存旧值
       this.oldDesc = this.workItem.description
+      this.oldTitle = this.workItem.title
+      this.oldStatus = this.workItem.status
+      this.oldPrincipalId = this.workItem.principalId
+      this.oldPriority = this.workItem.priority
+      this.priorityOldValue = this.workItem.priority
+      this.oldRisk = this.workItem.risk
+      this.riskOldValue = this.workItem.risk
       // 获取创建人和更新人信息
       getUserInfoApi(this.workItem.createId).then(res => {
         this.createUser = res.data
@@ -290,10 +304,14 @@ export default {
         this.updateUser = res.data
       })
       // 附件信息
+      this.fileIdList = []
       if (!this.workItem.fileList) {
         this.defaultFileList = []
       } else {
         this.defaultFileList = this.workItem.fileList
+        for (const file of this.workItem.fileList) {
+          this.fileIdList.push(file.id)
+        }
       }
     }
   },
@@ -328,26 +346,68 @@ export default {
         if (value === this.priorityOldValue) {
           this.workItem.priority = 0
           this.priorityOldValue = 0
+          value = 0
         } else {
           this.priorityOldValue = value
         }
       }
       // 因为change事件，每次评分的时候都会触发，即使评分是相同的也会
-      // todo 发请求 改优先级
+      // console.log('优先级改为：', value)
+      // 发请求 改优先级
+      editWorkItemApi({
+        id: this.workItem.id,
+        priority: value
+      }).then(res => {
+        if (!res.success) {
+          // 恢复旧值
+          this.workItem.priority = this.oldPriority
+          this.workItem.priorityOldValue = this.oldPriority
+        } else {
+          // 保存旧值
+          this.oldPriority = value
+          // 刷新数据
+          this.$emit('refreshPlanCardData')
+        }
+      }, () => {
+        // 这是错误时的回调，恢复旧值
+        this.workItem.priority = this.oldPriority
+        this.workItem.priorityOldValue = this.oldPriority
+      })
     },
     riskCheck(value) {
       if (value !== 0) {
         if (value === this.riskOldValue) {
           this.workItem.risk = 0
           this.riskOldValue = 0
+          value = 0
         } else {
           this.riskOldValue = value
         }
       }
-      // todo 发请求 改风险等级
+      // console.log('风险等级改为：', value)
+      // 发请求 改风险等级
+      editWorkItemApi({
+        id: this.workItem.id,
+        risk: value
+      }).then(res => {
+        if (!res.success) {
+          // 恢复旧值
+          this.workItem.risk = this.oldRisk
+          this.workItem.riskOldValue = this.oldRisk
+        } else {
+          // 保存旧值
+          this.oldRisk = value
+          // 刷新数据
+          this.$emit('refreshPlanCardData')
+        }
+      }, () => {
+        // 这是错误时的回调，恢复旧值
+        this.workItem.risk = this.oldRisk
+        this.workItem.riskOldValue = this.oldRisk
+      })
     },
     workItemTitleBlur() {
-      console.log('标题改为', this.workItem.title)
+      // console.log('标题改为', this.workItem.title)
       if (!this.workItem.title) {
         this.$message({
           type: 'error',
@@ -355,28 +415,100 @@ export default {
           duration: 3000
         })
         // 当标题为空并且失去焦点时，将工作项的title旧值赋值上
-        this.workItem.title = this.workItem.oldTitle
+        this.workItem.title = this.oldTitle
         this.$refs.titleInput.focus()
       } else {
-        // 保存旧值
-        this.workItem.oldTitle = this.workItem.title
-        // todo 发请求，改标题
+        // 发请求，改标题
+        editWorkItemApi({
+          id: this.workItem.id,
+          title: this.workItem.title,
+          editType: 'title'
+        }).then(res => {
+          if (!res.success) {
+            this.workItem.title = this.oldTitle
+          } else {
+            // 保存旧值
+            this.oldTitle = this.workItem.title
+            // 刷新数据
+            this.$emit('refreshPlanCardData')
+          }
+        }, () => {
+          // 这是错误时的回调，恢复旧值
+          this.workItem.title = this.oldTitle
+        })
       }
     },
     principalChange(value) {
-      console.log('负责人修改：', value)
-      // todo发请求 修改负责人
+      // console.log('负责人修改：', value)
+      // 发请求 修改负责人
+      editWorkItemApi({
+        id: this.workItem.id,
+        principalId: value
+      }).then(res => {
+        if (res.success) {
+          // 保存旧值
+          this.oldPrincipalId = value
+          // 刷新数据
+          this.$emit('refreshPlanCardData')
+        } else {
+          // 恢复旧值
+          this.workItem.principalId = this.oldPrincipalId
+        }
+      }, () => {
+        // 这是错误时的回调，恢复旧值
+        this.workItem.principalId = this.oldPrincipalId
+      })
     },
     stateChange(value) {
-      console.log('状态修改为：', value)
-      // todo发请求 修改状态
+      // console.log('状态修改为：', value)
+      // 发请求 修改状态
+      editWorkItemApi({
+        id: this.workItem.id,
+        editType: 'status',
+        status: value
+      }).then(res => {
+        if (!res.success) {
+          // 恢复旧值
+          this.workItem.status = this.oldStatus
+        } else {
+          // 保存旧值
+          this.oldStatus = value
+          // 刷新数据
+          this.$emit('refreshPlanCardData')
+        }
+      }, () => {
+        // 这是错误时的回调，恢复旧值
+        this.workItem.status = this.oldStatus
+      })
     },
     durationChange(value) {
-      this.workItem.startTime = value[0]
-      this.workItem.endTime = value[1]
       console.log('当前开始时间为', this.workItem.startTime)
       console.log('当前结束时间为', this.workItem.endTime)
-      // todo 发请求 修改完成时间
+      // 发请求 修改完成时间
+      editWorkItemApi({
+        id: this.workItem.id,
+        editType: 'date',
+        startTime: value[0],
+        endTime: value[1]
+      }).then(res => {
+        if (!res.success) {
+          // 恢复旧值
+          this.duration = []
+          this.duration.push(this.workItem.startTime)
+          this.duration.push(this.workItem.endTime)
+        } else {
+          // 保存旧值
+          this.workItem.startTime = value[0]
+          this.workItem.endTime = value[1]
+          // 刷新数据
+          this.$emit('refreshPlanCardData')
+        }
+      }, () => {
+        // 这是错误时的回调，恢复旧值
+        this.duration = []
+        this.duration.push(this.workItem.startTime)
+        this.duration.push(this.workItem.endTime)
+      })
     },
     editDesc() {
       this.editorVisable = true
@@ -385,10 +517,24 @@ export default {
     },
     saveDesc() {
       console.log('描述改为：', this.workItem.description)
-      // todo发请求 修改描述
-
-      // 保存旧值
-      this.oldDesc = this.workItem.description
+      // 发请求 修改描述
+      editWorkItemApi({
+        id: this.workItem.id,
+        description: this.workItem.description
+      }).then(res => {
+        if (!res.success) {
+          // 恢复旧值
+          this.workItem.description = this.oldDesc
+        } else {
+          // 保存旧值
+          this.oldDesc = this.workItem.description
+          // 刷新数据
+          this.$emit('refreshPlanCardData')
+        }
+      }, () => {
+        // 这是错误时的回调，恢复旧值
+        this.workItem.description = this.oldDesc
+      })
       this.editorVisable = false
     },
     cancelEditing() {
@@ -411,16 +557,57 @@ export default {
     handleRemove(file, fileList) {
       console.log(file)
       console.log(fileList)
-      this.workItem.fileList = this.workItem.fileList.filter(id => id !== file.response.data.id)
+      this.fileIdList = []
+      for (const file of fileList) {
+        this.fileIdList.push(file.id)
+      }
+      this.editFileList(file, fileList, 'remove')
     },
     uploadSuccess(response, file, fileList) {
-      this.workItem.fileList.push(response.data.id)
+      this.fileIdList.push(response.data.id)
+      this.editFileList(file, fileList, 'upload')
     },
     uploadError() {
       this.$message({
         type: 'error',
         message: '附件上传失败，请稍后重试！',
         duration: 3000
+      })
+    },
+    editFileList(file, fileList, type) {
+      // console.log('文件列表改为：', this.fileIdList)
+      editWorkItemApi({
+        id: this.workItem.id,
+        fileList: this.fileIdList
+      }).then(res => {
+        if (!res.success) {
+          // 恢复旧值
+          this.fileIdList = []
+          if (type === 'remove') {
+            fileList.push(file)
+          } else if (type === 'upload') {
+            const index = fileList.indexOf(file)
+            fileList.splice(index, 1)
+          }
+          for (const file of fileList) {
+            this.fileIdList.push(file.id)
+          }
+        } else {
+          // 刷新数据
+          this.$emit('refreshPlanCardData')
+        }
+      }, () => {
+        // 这是错误时的回调，恢复旧值
+        this.fileIdList = []
+        if (type === 'remove') {
+          fileList.push(file)
+        } else if (type === 'upload') {
+          const index = fileList.indexOf(file)
+          fileList.splice(index, 1)
+        }
+        for (const file of fileList) {
+          this.fileIdList.push(file.id)
+        }
       })
     }
   }
