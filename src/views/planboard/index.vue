@@ -522,7 +522,7 @@ export default {
           break
         default:
           this.workDialog.parentWorkItemTitle = '所属Epic'
-          this.newWorkItem.parentWorkItemId = this.curEpic.id
+          this.newWorkItem.parentWorkItemId = this.curEpic ? this.curEpic.id : ''
           this.parentWorkItemOptions = []
           this.parentWorkItemOptions.push(this.curEpic)
       }
@@ -542,6 +542,7 @@ export default {
     // 根据项目id获取项目信息
     const projectResponse = await getProjectInfoApi(this.$route.query.projectId)
     this.curProject = projectResponse.data
+    // console.log('sssssssssssssss', this.curProject)
     if (this.curProject == null) {
       this.$router.push('/mission/projects')
     }
@@ -625,9 +626,11 @@ export default {
       if (!titleValid) return
       this.$refs.newWorkItem2.validate(async(valid) => {
         if (valid) {
-          let curEpicId = this.curEpic.id
+          let curEpicId
           if (this.newWorkItem.workType === 'Plans' || this.newWorkItem.workType === 'Epic') {
             curEpicId = null
+          } else {
+            curEpicId = this.curEpic.id
           }
           const { success } = await addWorkItemApi({
             title: this.newWorkItem.title,
@@ -658,7 +661,9 @@ export default {
             })
             // 2.请求工作项
             // 3.刷新子组件的数据
-            this.$refs.PlanCard.refreshData()
+            if (this.curEpic) {
+              this.$refs.PlanCard.refreshData()
+            }
             // 4.刷新工作项数据
             this.getBasicData()
           }
@@ -775,26 +780,28 @@ export default {
       })
     },
     getBasicData() {
-      getWorkItemListApi({
-        projectId: this.curProject.projectId,
-        EpicId: this.curEpic.id
-      }).then(res => {
-        this.workItemMap = res.data
-      })
-      // 根据项目id和EpicId获取参与项目工作的用户基本信息
-      getWorkItemUserListApi({
-        projectId: this.curProject.projectId,
-        EpicId: this.curEpic.id
-      }).then(res => {
-        this.planUsers = res.data
-      })
-      // 根据项目id和EpicId，计算工作项统计信息
-      getWorkItemStatisticsApi({
-        projectId: this.curProject.projectId,
-        EpicId: this.curEpic.id
-      }).then(res => {
-        this.statistics = res.data
-      })
+      if (this.curEpic) {
+        getWorkItemListApi({
+          projectId: this.curProject.projectId,
+          EpicId: this.curEpic.id
+        }).then(res => {
+          this.workItemMap = res.data
+        })
+        // 根据项目id和EpicId获取参与项目工作的用户基本信息
+        getWorkItemUserListApi({
+          projectId: this.curProject.projectId,
+          EpicId: this.curEpic.id
+        }).then(res => {
+          this.planUsers = res.data
+        })
+        // 根据项目id和EpicId，计算工作项统计信息
+        getWorkItemStatisticsApi({
+          projectId: this.curProject.projectId,
+          EpicId: this.curEpic.id
+        }).then(res => {
+          this.statistics = res.data
+        })
+      }
     },
     refreshParentData() {
       this.getBasicData()
