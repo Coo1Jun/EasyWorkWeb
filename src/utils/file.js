@@ -160,7 +160,7 @@ const fileFunction = {
      * @param {*} currentIndex 当前图片索引
      * @param {*} imgInfo 单个图片信息
      * @param {*} imgInfoList 多个图片列表
-     */
+     */ 
   handleImgPreview(currentIndex, imgInfo = {}, imgInfoList = []) {
     // 图片分类下 - 传递整个页面的图片列表；非图片分类下 - 由单个图片构建图片列表
     const imgList =
@@ -280,8 +280,7 @@ const fileFunction = {
           query: {
             filePath: `${row.filePath === '/' ? '' : row.filePath}/${
               row.fileName
-            }`,
-            fileType: 0
+            }`
           }
         })
       }
@@ -290,9 +289,9 @@ const fileFunction = {
     else {
       // 若当前点击项是图片
       const PIC = ['png', 'jpg', 'jpeg', 'gif', 'svg']
-      row.extendName === '' || undefined
+      row.extendName !== undefined || row.extendName !== ''
         ? row.extendName.toLowerCase()
-        : row.extendName
+        : row.extendName = ''
       if (PIC.includes(row.extendName)) {
         this.handleImgPreview(currentIndex, row, fileList)
         return false

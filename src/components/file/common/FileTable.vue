@@ -75,14 +75,9 @@
           </span>
         </template>
       </el-table-column>
-      <!-- <el-table-column
-        v-if="
-          ![0, 8].includes(Number($route.query.fileType)) &&
-            routeName !== 'Share' &&
-            screenWidth > 768
-        "
+      <el-table-column
         key="filePath"
-        :label="fileType === 6 ? '原路径' : '路径'"
+        label="路径"
         prop="filePath"
         show-overflow-tooltip
       >
@@ -92,14 +87,14 @@
             title="点击跳转"
             @click="
               $router.push({
-                query: { filePath: scope.row.filePath, fileType: 0 }
+                query: { filePath: scope.row.filePath}
               })
             "
           >
             {{ scope.row.filePath }}
           </span>
         </template>
-      </el-table-column> -->
+      </el-table-column>
       <el-table-column
         v-if="selectedColumnList.includes('extendName') && screenWidth > 768"
         key="extendName"

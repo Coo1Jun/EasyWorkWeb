@@ -16,13 +16,7 @@
         @click="$file.handleFileNameClick(item, index, fileListSorted)"
         @contextmenu.prevent="handleContextMenu(item, index, $event)"
       >
-        <video
-          v-if="$file.isVideoFile(item)"
-          :style="`height:${gridSize}px; width:${gridSize}px`"
-          :src="$file.setFileImg(item)"
-        />
         <el-image
-          v-else
           class="file-img"
           :src="$file.setFileImg(item)"
           :style="`width: ${gridSize}px; height: ${gridSize}px;`"
