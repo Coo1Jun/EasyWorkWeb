@@ -658,7 +658,7 @@ export default {
       this.curNode = null
       if (this.$refs.newPlanSet) this.$refs.newPlanSet.resetFields()
       this.newWorkItemReset()
-      console.log('关闭新建计划', this.newWorkItem)
+      // console.log('关闭新建计划', this.newWorkItem)
     },
     addProject() {
       let titleValid
