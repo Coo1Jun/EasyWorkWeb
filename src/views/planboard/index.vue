@@ -352,7 +352,15 @@ import Vue from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import config from '@/config/wangEditor'
 import { uploadUrl } from '@/api/file'
-import { addPlansApi, addWorkItemApi, getPlansApi, getWorkItemListApi, getWorkItemUserListApi, getWorkItemStatisticsApi } from '@/api/workitem'
+import {
+  addPlansApi,
+  addWorkItemApi,
+  getPlansApi,
+  getWorkItemListApi,
+  getWorkItemUserListApi,
+  getWorkItemStatisticsApi,
+  getWorkItemByIdApi
+} from '@/api/workitem'
 import { getProjectInfoApi } from '@/api/project'
 import { getMemberListByGroupIdApi } from '@/api/group'
 
@@ -507,6 +515,14 @@ export default {
     haveTagsView() {
       // TagsView高 34px
       return this.$store.state.settings.tagsView
+    },
+    curEpicId: {
+      get() {
+        return this.$store.state.project.curEpicId
+      },
+      set(val) {
+        this.$store.dispatch('project/setCurEpicId', val)
+      }
     }
   },
   watch: {
@@ -539,6 +555,7 @@ export default {
     },
     curEpic(value) {
       if (value) {
+        this.curEpicId = value.id
         this.getBasicData()
       }
     },
@@ -564,6 +581,18 @@ export default {
     getMemberListByGroupIdApi(this.curProject.groupId).then(res => {
       this.members = res.data
     })
+    // 根据当前EpicId查出工作项
+    if (this.curEpicId !== null) {
+      getWorkItemByIdApi({
+        projectId: this.curProject.projectId,
+        EpicId: this.curEpicId
+      }).then(res => {
+        if (res.data) {
+          this.curEpic = res.data
+          this.getBasicData()
+        }
+      })
+    }
     // todo 向后端请求，根据项目id查询所有计划
   },
   beforeRouteEnter(to, from, next) {
@@ -793,21 +822,21 @@ export default {
       if (this.curEpic) {
         getWorkItemListApi({
           projectId: this.curProject.projectId,
-          EpicId: this.curEpic.id
+          EpicId: this.curEpicId
         }).then(res => {
           this.workItemMap = res.data
         })
         // 根据项目id和EpicId获取参与项目工作的用户基本信息
         getWorkItemUserListApi({
           projectId: this.curProject.projectId,
-          EpicId: this.curEpic.id
+          EpicId: this.curEpicId
         }).then(res => {
           this.planUsers = res.data
         })
         // 根据项目id和EpicId，计算工作项统计信息
         getWorkItemStatisticsApi({
           projectId: this.curProject.projectId,
-          EpicId: this.curEpic.id
+          EpicId: this.curEpicId
         }).then(res => {
           this.statistics = res.data
         })

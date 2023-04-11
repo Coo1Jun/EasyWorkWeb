@@ -103,3 +103,17 @@ export function editWorkItemApi(data) {
     data
   })
 }
+
+/**
+ * 根据id获取工作项信息
+ * @param {*} params
+ * @returns
+ */
+export function getWorkItemByIdApi(params) {
+  return request({
+    url: `/api/ew-project/workitem/one`,
+    method: 'get',
+    params
+  })
+}
+
