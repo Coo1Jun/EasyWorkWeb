@@ -4,20 +4,22 @@
       <!-- 左边的计划栏 -->
       <div class="sidebar">
         <div class="navbar-plan-item">
-          <el-button
-            class="btn"
-            type="primary"
-            @click="openPlanSetDialog"
-          >
-            新建计划集
-          </el-button>
-          <el-button
-            class="btn"
-            type="primary"
-            @click="openPlanDialog"
-          >
-            新建计划
-          </el-button>
+          <el-button-group>
+            <el-button
+              class="btn"
+              type="primary"
+              @click="openPlanSetDialog"
+            >
+              新建计划集
+            </el-button>
+            <el-button
+              class="btn"
+              type="primary"
+              @click="openPlanDialog"
+            >
+              新建计划
+            </el-button>
+          </el-button-group>
         </div>
         <el-tree
           ref="planTree"
