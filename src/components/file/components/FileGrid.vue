@@ -59,11 +59,6 @@
 export default {
   name: 'FileGrid',
   props: {
-    // 文件类型
-    fileType: {
-      required: true,
-      type: Number
-    },
     // 文件路径
     filePath: {
       required: true,

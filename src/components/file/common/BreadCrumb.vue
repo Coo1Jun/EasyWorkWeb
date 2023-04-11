@@ -1,30 +1,10 @@
 <template>
   <div class="breadcrumb-wrapper">
     <div class="title">当前位置：</div>
-    <el-input
-      v-show="isShowInput"
-      ref="filePathInputRef"
-      v-model="inputFilePath"
-      class="file-path-input"
-      placeholder="请输入路径"
-      size="mini"
-      :autofocus="true"
-      @blur="handleInputBlurEnter"
-      @change="handleInputBlurEnter"
-    />
     <div
-      v-show="!isShowInput"
       class="breadcrumb-box"
-      :class="{ 'able-input': fileType === 0 }"
-      @click.self="handleClickBreadCrumbSelf"
     >
-      <el-breadcrumb
-        v-if="![0, 8].includes(fileType) && !['Share'].includes($route.name)"
-        separator-class="el-icon-arrow-right"
-      >
-        <el-breadcrumb-item>{{ fileTypeMap[fileType] }}</el-breadcrumb-item>
-      </el-breadcrumb>
-      <el-breadcrumb v-else separator-class="el-icon-arrow-right">
+      <el-breadcrumb separator-class="el-icon-arrow-right">
         <el-breadcrumb-item
           v-for="(item, index) in breadCrumbList"
           :key="index"
@@ -39,29 +19,14 @@
 export default {
   name: 'BreadCrumb',
   props: {
-    // 文件类型
-    fileType: {
-      required: true,
-      type: Number
-    },
     // 文件路径
     filePath: {
-      require: true,
+      required: true,
       type: String
     }
   },
   data() {
     return {
-      fileTypeMap: {
-        1: '全部图片',
-        2: '全部文档',
-        3: '全部视频',
-        4: '全部音乐',
-        5: '其他',
-        6: '回收站'
-      },
-      isShowInput: false, //  是否展示路径输入框
-      inputFilePath: '' //  路径输入
     }
   },
   computed: {
@@ -71,7 +36,8 @@ export default {
     breadCrumbList: {
       get() {
         const filePath = this.$route.query.filePath
-        const filePathList = filePath ? filePath.split('/') : []
+        console.log('444444444444444查询参数改变：', filePath)
+        const filePathList = filePath ? filePath.split('/') : ['全部文件']
         const res = [] //  返回结果数组
         const _path = [] //  存放祖先路径
         for (let i = 0; i < filePathList.length; i++) {
@@ -87,17 +53,11 @@ export default {
             _path.push(filePathList[i])
             res.push({
               path: '/',
-              name:
-								this.fileType === 0
-								  ? '全部文件'
-								  : this.fileType === 8
-								    ? '我的分享'
-								    : this.$route.name === 'Share'
-								      ? '全部分享'
-								      : ''
+              name: '全部文件'
             })
           }
         }
+        console.log('结111111果', res)
         return res
       },
       set() {
@@ -106,52 +66,9 @@ export default {
     }
   },
   methods: {
-    /**
-		 * 点击面包屑导航栏空白处
-		 */
-    handleClickBreadCrumbSelf() {
-      if (this.fileType === 0) {
-        this.inputFilePath = this.filePath
-        this.isShowInput = true
-        this.$nextTick(() => {
-          this.$refs.filePathInputRef.focus()
-        })
-      }
-    },
-    /**
-		 * 路径输入框失去焦点或用户按下回车时触发
-		 */
-    handleInputBlurEnter() {
-      this.isShowInput = false
-      if (this.inputFilePath !== this.filePath) {
-        const fixInputFilePath = this.inputFilePath.endsWith('/')
-          ? this.inputFilePath.slice(0, -1)
-          : this.inputFilePath
-        this.$router.push({
-          query: { filePath: `${fixInputFilePath}`, fileType: 0 }
-        })
-      }
-    },
     // 获取文件参数
     getRouteQuery(item) {
-      const routeName = this.$route.name
-      if (routeName === 'Share') {
-        // 当前是查看他人分享列表的页面
-        return { query: { filePath: item.path }}
-      } else if (this.fileType === 8) {
-        // 当前是我的已分享列表页面
-        return {
-          query: {
-            fileType: 8,
-            filePath: item.path,
-            shareBatchNum:
-							item.path === '/' ? undefined : this.$route.query.shareBatchNum //  当查看的是根目录，批次号置空
-          }
-        }
-      } else {
-        // 网盘页面
-        return { query: { filePath: item.path, fileType: 0 }}
-      }
+      return { query: { filePath: item.path }}
     }
   }
 }

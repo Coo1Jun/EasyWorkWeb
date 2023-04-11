@@ -3,7 +3,6 @@
     <!-- 操作按钮 -->
     <el-header height="auto">
       <OperationMenu
-        :file-type="fileType"
         :file-path="filePath"
         @getSearchFileList="getSearchFileList"
         @getTableDataByType="getTableDataByType"
@@ -13,7 +12,6 @@
       <!-- 面包屑导航栏 -->
       <BreadCrumb
         class="breadcrumb"
-        :file-type="fileType"
         :file-path="filePath"
         @getTableDataByType="getTableDataByType"
       />
@@ -21,7 +19,6 @@
     <!-- 文件列表-表格模式 -->
     <FileTable
       v-if="fileModel === 0"
-      :file-type="fileType"
       :file-path="filePath"
       :file-list="fileList"
       :loading.sync="loading"
@@ -31,27 +28,17 @@
     <!-- 文件列表-网格模式 -->
     <FileGrid
       v-if="fileModel === 1"
-      :file-type="fileType"
       :file-path="filePath"
       :file-list="fileList"
       :loading="loading"
       @getTableDataByType="getTableDataByType"
       @click.native.right="handleClickRight"
     />
-    <!-- 图片-时间线模式 -->
-    <!-- <FileTimeLine
-      v-if="fileModel === 2 && fileType === 1"
-      class="image-model"
-      :file-list="fileList"
-      :loading.sync="loading"
-      @getTableDataByType="getTableDataByType"
-      @click.native.right="handleClickRight"
-    /> -->
     <div class="pagination-wrapper">
       <div class="current-page-count">当前页{{ fileList.length }}条</div>
       <!-- 回收站不展示分页组件 -->
       <el-pagination
-        v-if="fileType !== 6"
+        background
         :current-page="pageData.currentPage"
         :page-size="pageData.pageCount"
         :total="pageData.total"
@@ -399,10 +386,6 @@ export default {
     }
   },
   computed: {
-    // 左侧菜单选中的文件类型
-    fileType() {
-      return this.$route.query.fileType ? Number(this.$route.query.fileType) : 0
-    },
     // 当前所在路径
     filePath() {
       return this.$route.query.filePath ? this.$route.query.filePath : '/'
@@ -418,17 +401,8 @@ export default {
   },
   watch: {
     filePath() {
-      // 当左侧菜单选择“全部”或“我的分享”，文件路径发生变化时，再重新获取文件列表
-      if (this.$route.name === 'File' && [0, 8].includes(this.fileType)) {
-        this.setPageCount()
-        this.getTableDataByType()
-      }
-    },
-    fileType() {
-      if (this.$route.name === 'File') {
-        this.setPageCount()
-        this.getTableDataByType()
-      }
+      this.setPageCount()
+      this.getTableDataByType()
     },
     // 监听文件查看模式
     fileModel() {
@@ -445,11 +419,13 @@ export default {
 		 */
     showFileList() {
       const data = {
-        fileType: this.fileType,
         filePath: this.filePath,
         currentPage: Number(this.pageData.currentPage),
         pageCount: Number(this.pageData.pageCount)
       }
+      console.log('当前文件路径：', this.filePath)
+      console.log('当前页：', this.pageData.currentPage)
+      console.log('每页几条：', this.pageData.pageCount)
       // fileApi.getFileListByPath(data).then((res) => {
       //   if (res.success) {
       //     this.fileList = res.dataList
@@ -463,28 +439,9 @@ export default {
 		 */
     getTableDataByType() {
       // this.loading = true
-      // 分类型
-      if (Number(this.fileType)) {
-        switch (Number(this.fileType)) {
-          case 6: {
-            // 回收站
-            this.showFileRecovery()
-            break
-          }
-          case 8: {
-            // 我的分享
-            this.showMyShareFile()
-            break
-          }
-          default: {
-            this.showFileList()
-            break
-          }
-        }
-      } else {
-        // 全部文件
-        this.showFileList()
-      }
+      console.log('现在搜索框没有搜索内容')
+      // 全部文件
+      this.showFileList()
     },
     /**
 		 * 文件展示区域的空白处右键事件
@@ -492,21 +449,18 @@ export default {
 		 */
     handleClickRight(event) {
       event.preventDefault()
-      // 只有在全部页面才可以进行以下操作
-      if (![6, 8].includes(this.fileType)) {
-        this.$openBox
-          .contextMenu({
-            selectedFile: undefined,
-            domEvent: event,
-            serviceEl: this
-          })
-          .then((res) => {
-            if (res === 'confirm') {
-              // 刷新文件列表
-              this.getTableDataByType()
-            }
-          })
-      }
+      this.$openBox
+        .contextMenu({
+          selectedFile: undefined,
+          domEvent: event,
+          serviceEl: this
+        })
+        .then((res) => {
+          if (res === 'confirm') {
+            // 刷新文件列表
+            this.getTableDataByType()
+          }
+        })
     },
     /**
 		 * 表格数据获取相关事件 | 调整分页大小
@@ -579,6 +533,11 @@ export default {
         pageCount: this.pageData.pageCount,
         fileName: fileName
       }
+      console.log('搜索文件=》start')
+      console.log('当前页：', this.pageData.currentPage)
+      console.log('每页几条：', this.pageData.pageCount)
+      console.log('文件名称：', fileName)
+      console.log('搜索文件=》end')
       // fileApi.searchFile(data).then((res) => {
       //   this.loading = false
       //   if (res.success) {

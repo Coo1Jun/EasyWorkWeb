@@ -5,7 +5,7 @@
       ref="multipleTable"
       v-loading="loading"
       class="file-table"
-      :class="['file-type-' + fileType, routeName === 'Share' ? 'share' : '']"
+      :class="['file-type-' + 0, routeName === 'Share' ? 'share' : '']"
       fit
       element-loading-text="文件加载中……"
       tooltip-effect="dark"
@@ -16,7 +16,6 @@
       @row-contextmenu="handleContextMenu"
     >
       <el-table-column
-        v-if="fileType !== 8"
         key="selection"
         type="selection"
         width="56"
@@ -82,7 +81,7 @@
           </span>
         </template>
       </el-table-column>
-      <el-table-column
+      <!-- <el-table-column
         v-if="
           ![0, 8].includes(Number($route.query.fileType)) &&
             routeName !== 'Share' &&
@@ -106,7 +105,7 @@
             {{ scope.row.filePath }}
           </span>
         </template>
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column
         v-if="selectedColumnList.includes('extendName') && screenWidth > 768"
         key="extendName"
@@ -140,12 +139,6 @@
         </template>
       </el-table-column>
       <el-table-column
-        v-if="
-          selectedColumnList.includes('createTime') &&
-            ![7, 8].includes(fileType) &&
-            !['Share'].includes(routeName) &&
-            screenWidth > 768
-        "
         key="createTime"
         label="创建日期"
         prop="createTime"
@@ -154,7 +147,7 @@
         sortable
         align="center"
       />
-      <el-table-column
+      <!-- <el-table-column
         v-if="
           selectedColumnList.includes('updateTime') &&
             ![7, 8].includes(fileType) &&
@@ -168,22 +161,8 @@
         :sort-by="['isDir', 'updateTime']"
         sortable
         align="center"
-      />
-      <el-table-column
-        v-if="
-          fileType === 6 &&
-            selectedColumnList.includes('deleteTime') &&
-            screenWidth > 768
-        "
-        key="deleteTime"
-        label="删除日期"
-        prop="deleteTime"
-        width="160"
-        :sort-by="['isDir', 'deleteTime']"
-        sortable
-        align="center"
-      />
-      <el-table-column
+      /> -->
+      <!-- <el-table-column
         v-if="fileType === 8 && screenWidth > 768"
         key="shareType"
         label="分享类型"
@@ -194,8 +173,8 @@
         <template slot-scope="scope">
           {{ scope.row.shareType === 1 ? '私密' : '公共' }}
         </template>
-      </el-table-column>
-      <el-table-column
+      </el-table-column> -->
+      <!-- <el-table-column
         v-if="fileType === 8 && screenWidth > 768"
         key="shareTime"
         label="分享时间"
@@ -205,8 +184,8 @@
         show-overflow-tooltip
         sortable
         align="center"
-      />
-      <el-table-column
+      /> -->
+      <!-- <el-table-column
         v-if="fileType === 8 && screenWidth > 768"
         key="endTime"
         label="过期时间"
@@ -227,8 +206,8 @@
             {{ scope.row.endTime }}
           </div>
         </template>
-      </el-table-column>
-      <el-table-column
+      </el-table-column> -->
+      <!-- <el-table-column
         v-if="screenWidth <= 768"
         key="operation"
         label=""
@@ -241,7 +220,7 @@
             @click="handleClickMore(scope.row, $event)"
           />
         </template>
-      </el-table-column>
+      </el-table-column> -->
     </el-table>
   </div>
 </template>
@@ -250,11 +229,6 @@
 export default {
   name: 'FileTable',
   props: {
-    // 文件类型
-    fileType: {
-      required: true,
-      type: Number
-    },
     // 文件路径
     filePath: {
       required: true,
@@ -296,13 +270,6 @@ export default {
 		 * 文件路径变化时清空表格已选行
 		 */
     filePath() {
-      this.clearSelectedTable()
-      this.$refs.multipleTable.clearSort()
-    },
-    /**
-		 * 文件类型变化时清空表格已选行
-		 */
-    fileType() {
       this.clearSelectedTable()
       this.$refs.multipleTable.clearSort()
     },

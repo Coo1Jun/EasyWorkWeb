@@ -2,12 +2,19 @@
   <div
     ref="operationMenuRef"
     class="operation-menu-wrapper"
-    :class="'file-type-' + fileType"
+    :class="'file-type-' + 0"
   >
     <el-button-group
-      v-if="(!selectedFiles.length || !isBatchOperation) && fileType === 0"
+      v-if="(!selectedFiles.length || !isBatchOperation)"
       class="create-operate-group"
     >
+      <el-button
+        id="uploadFileId"
+        size="mini"
+        type="primary"
+        icon="el-icon-plus"
+        @click.native="handleClickAddFolderBtn"
+      >新建文件夹</el-button>
       <el-dropdown class="upload-drop" trigger="hover">
         <el-button
           id="uploadFileId"
@@ -22,38 +29,11 @@
           <el-dropdown-item
             @click.native="handleUploadFileBtnClick(2)"
           >上传文件夹</el-dropdown-item>
-          <el-dropdown-item
+          <!-- <el-dropdown-item
             title="截图粘贴或拖拽上传"
             :disabled="screenWidth <= 520"
             @click.native="handleUploadFileBtnClick(3)"
-          >拖拽上传</el-dropdown-item>
-        </el-dropdown-menu>
-      </el-dropdown>
-
-      <el-dropdown class="create-drop" trigger="hover">
-        <el-button
-          id="uploadFileId"
-          size="mini"
-          type="primary"
-          icon="el-icon-plus"
-        >新建<i class="el-icon-arrow-down el-icon--right" /></el-button>
-        <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item @click.native="handleClickAddFolderBtn">
-            <div class="img-text-wrapper"><img :src="dirImg"> 新建文件夹</div>
-          </el-dropdown-item>
-          <el-dropdown-item divided @click.native="handleCreateFile('docx')">
-            <div class="img-text-wrapper"><img :src="wordImg">Word 文档</div>
-          </el-dropdown-item>
-          <el-dropdown-item @click.native="handleCreateFile('xlsx')">
-            <div class="img-text-wrapper">
-              <img :src="excelImg">Excel 工作表
-            </div>
-          </el-dropdown-item>
-          <el-dropdown-item @click.native="handleCreateFile('pptx')">
-            <div class="img-text-wrapper">
-              <img :src="pptImg">PPT 演示文稿
-            </div>
-          </el-dropdown-item>
+          >拖拽上传</el-dropdown-item> -->
         </el-dropdown-menu>
       </el-dropdown>
     </el-button-group>
@@ -67,14 +47,14 @@
           @click="handleBatchDeleteBtnClick"
         >批量删除</el-button>
         <el-button
-          v-if="selectedFiles.length && !fileType && fileType !== 6"
+          v-if="selectedFiles.length"
           size="mini"
           type="primary"
           icon="el-icon-rank"
           @click="handleBatchMoveBtnClick"
         >批量移动</el-button>
         <el-button
-          v-if="selectedFiles.length && fileType !== 6"
+          v-if="selectedFiles.length"
           size="mini"
           type="primary"
           icon="el-icon-download"
@@ -82,7 +62,7 @@
         >批量下载</el-button>
         <el-button
           v-if="
-            selectedFiles.length && fileType !== 6 && $route.name !== 'Share'
+            selectedFiles.length && $route.name !== 'Share'
           "
           size="mini"
           type="primary"
@@ -94,7 +74,6 @@
 
     <!-- 全局搜索文件 -->
     <el-input
-      v-if="fileType === 0"
       v-model="searchFile.fileName"
       class="select-file-input"
       placeholder="搜索您的文件"
@@ -113,14 +92,14 @@
       />
     </el-input>
 
-    <!-- 批量操作 -->
+    <!-- 批量操作
     <i
       v-if="fileModel === 1 && fileType !== 8"
       class="batch-icon el-icon-finished"
       :class="isBatchOperation ? 'active' : ''"
       :title="isBatchOperation ? '取消批量操作' : '批量操作'"
       @click="handleBatchOperationChange()"
-    />
+    /> -->
     <i
       class="refresh-icon el-icon-refresh"
       title="刷新文件列表"
@@ -178,9 +157,6 @@
           <el-radio-button :label="1">
             <i class="el-icon-s-grid" /> 网格
           </el-radio-button>
-          <el-radio-button v-if="fileType === 1" :label="2">
-            <i class="el-icon-date" /> 时间线
-          </el-radio-button>
         </el-radio-group>
       </div>
       <template v-if="fileGroupLable === 1 || fileGroupLable === 2">
@@ -213,11 +189,6 @@ export default {
     SelectColumn
   },
   props: {
-    // 文件类型
-    fileType: {
-      required: true,
-      type: Number
-    },
     // 文件路径
     filePath: {
       required: true,
@@ -285,12 +256,6 @@ export default {
     // 显示拖拽上传文件遮罩
     showUploadMask() {
       this.handleUploadFileBtnClick(3)
-    },
-    fileType(newValue, oldValue) {
-      if (oldValue === 1 && this.fileModel === 2) {
-        this.$store.commit('changeFileModel', 0)
-        this.fileGroupLable = 0
-      }
     },
     /**
 		 * 监听收纳栏状态
@@ -373,7 +338,7 @@ export default {
         .deleteFile({
           isBatchOperation: true,
           fileInfo: this.selectedFiles,
-          deleteMode: this.fileType === 6 ? 2 : 1 //  删除模式：1-删除到回收站 2-彻底删除
+          deleteMode: 2 //  删除模式：1-删除到回收站 2-彻底删除
         })
         .then((res) => {
           if (res === 'confirm') {
@@ -484,12 +449,13 @@ export default {
   .create-operate-group {
     .upload-drop {
       float: left;
-      >>> .el-button {
-        border-radius: 4px 0 0 4px;
-      }
+
     }
     .create-drop {
       float: left;
+      >>> .el-button {
+        border-radius: 4px 0 0 4px;
+      }
     }
   }
 
