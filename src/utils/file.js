@@ -126,17 +126,12 @@ const fileFunction = {
      * @param {object} file 文件信息
      */
   setFileImg(file) {
-    file.extendName === '' || undefined
+    file.extendName !== undefined || file.extendName !== ''
       ? file.extendName.toLowerCase()
-      : file.extendName
+      : file.extendName = ''
     if (file.isDir === 1) {
       // 文件夹
       return fileImgMap.get('dir')
-    } else if (
-      ['jpg', 'png', 'jpeg', 'gif', 'mp4'].includes(file.extendName)
-    ) {
-      // 图片、视频类型，直接显示缩略图
-      return this.getMinImgStream(file)
     } else if (fileImgMap.has(file.extendName)) {
       // 可以识别文件类型的文件
       return fileImgMap.get(file.extendName)

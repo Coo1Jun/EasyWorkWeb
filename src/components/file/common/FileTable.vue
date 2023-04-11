@@ -30,13 +30,7 @@
         class-name="file-icon-column"
       >
         <template slot-scope="scope">
-          <video
-            v-if="$file.isVideoFile(scope.row)"
-            style="width: 30px; max-height: 30px; cursor: pointer"
-            :src="$file.setFileImg(scope.row)"
-          />
           <img
-            v-else
             :src="$file.setFileImg(scope.row)"
             :title="`${scope.row.isDir ? '' : '点击预览'}`"
             style="width: 30px; max-height: 30px; cursor: pointer"
