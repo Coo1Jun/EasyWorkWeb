@@ -38,8 +38,12 @@ export default {
       selectedColumn: [],
       columnOptions: [
         {
+          value: 'belongType',
+          label: '所属类型'
+        },
+        {
           value: 'extendName',
-          label: '类型'
+          label: '文件类型'
         },
         {
           value: 'fileSize',
@@ -52,10 +56,6 @@ export default {
         {
           value: 'updateTime',
           label: '修改日期'
-        },
-        {
-          value: 'deleteTime',
-          label: '删除日期'
         }
       ]
     }

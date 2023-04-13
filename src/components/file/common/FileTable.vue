@@ -75,7 +75,7 @@
           </span>
         </template>
       </el-table-column>
-      <el-table-column
+      <!-- <el-table-column
         key="filePath"
         label="路径"
         prop="filePath"
@@ -94,12 +94,25 @@
             {{ scope.row.filePath }}
           </span>
         </template>
+      </el-table-column> -->
+      <el-table-column
+        v-if="selectedColumnList.includes('belongType') && screenWidth > 768"
+        key="belongType"
+        label="所属类型"
+        prop="belongType"
+        show-overflow-tooltip
+      >
+        <template slot-scope="scope">
+          <span>
+            {{ scope.row.belongType === 0 ? '项目' : '个人' }}
+          </span>
+        </template>
       </el-table-column>
       <el-table-column
         v-if="selectedColumnList.includes('extendName') && screenWidth > 768"
         key="extendName"
-        label="类型"
-        width="80"
+        label="文件类型"
+        width="100"
         prop="extendName"
         :sort-by="['isDir', 'extendName']"
         sortable
@@ -136,11 +149,9 @@
         sortable
         align="center"
       />
-      <!-- <el-table-column
+      <el-table-column
         v-if="
           selectedColumnList.includes('updateTime') &&
-            ![7, 8].includes(fileType) &&
-            !['Share'].includes(routeName) &&
             screenWidth > 768
         "
         key="updateTime"
@@ -150,7 +161,7 @@
         :sort-by="['isDir', 'updateTime']"
         sortable
         align="center"
-      /> -->
+      />
       <!-- <el-table-column
         v-if="fileType === 8 && screenWidth > 768"
         key="shareType"

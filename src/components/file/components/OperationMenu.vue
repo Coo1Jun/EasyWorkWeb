@@ -92,14 +92,14 @@
       />
     </el-input>
 
-    <!-- 批量操作
+    <!-- 批量操作 -->
     <i
-      v-if="fileModel === 1 && fileType !== 8"
+      v-if="fileModel === 1"
       class="batch-icon el-icon-finished"
       :class="isBatchOperation ? 'active' : ''"
       :title="isBatchOperation ? '取消批量操作' : '批量操作'"
       @click="handleBatchOperationChange()"
-    /> -->
+    />
     <i
       class="refresh-icon el-icon-refresh"
       title="刷新文件列表"

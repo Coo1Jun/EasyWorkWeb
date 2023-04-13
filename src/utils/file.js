@@ -126,7 +126,7 @@ const fileFunction = {
      * @param {object} file 文件信息
      */
   setFileImg(file) {
-    file.extendName !== undefined || file.extendName !== ''
+    file.extendName
       ? file.extendName.toLowerCase()
       : file.extendName = ''
     if (file.isDir === 1) {
@@ -160,7 +160,7 @@ const fileFunction = {
      * @param {*} currentIndex 当前图片索引
      * @param {*} imgInfo 单个图片信息
      * @param {*} imgInfoList 多个图片列表
-     */ 
+     */
   handleImgPreview(currentIndex, imgInfo = {}, imgInfoList = []) {
     // 图片分类下 - 传递整个页面的图片列表；非图片分类下 - 由单个图片构建图片列表
     const imgList =
@@ -247,49 +247,58 @@ const fileFunction = {
      * @param {array} fileList 文件列表
      */
   handleFileNameClick(row, currentIndex, fileList = []) {
+    console.log('点击了=====》', row.fileName)
+    console.log('是否是文件夹', row.isDir)
     // 如果当前文件在回收站中，则不允许预览
-    if (row.deleteFlag !== undefined && row.deleteFlag !== 0) {
+    if (row.deleted && row.deleted !== 1) {
       return false
     }
     // 若是文件夹则进入该文件夹
     if (row.isDir) {
-      if (router.currentRoute.name === 'Share') {
-        // 当前是查看他人分享列表的页面
-        router.push({
-          query: {
-            filePath: `${row.shareFilePath === '/' ? '' : row.shareFilePath}/${
-              row.fileName
-            }`
-          }
-        })
-      } else if (Number(router.currentRoute.query.fileType) === 8) {
-        // 当前是我的已分享列表页面
-        router.push({
-          query: {
-            fileType: 8,
-            filePath: `${row.shareFilePath === '/' ? '' : row.shareFilePath}/${
-              row.fileName
-            }`,
-            shareBatchNum: row.shareBatchNum
-          }
-        })
-      } else if (Number(router.currentRoute.query.fileType) !== 6) {
-        // 回收站页面不允许打开文件夹
-        // 网盘页面
-        router.push({
-          query: {
-            filePath: `${row.filePath === '/' ? '' : row.filePath}/${
-              row.fileName
-            }`
-          }
-        })
-      }
+      router.push({
+        query: {
+          filePath: `${row.filePath === '/' ? '' : row.filePath}/${
+            row.fileName
+          }`
+        }
+      })
+      // if (router.currentRoute.name === 'Share') {
+      //   // 当前是查看他人分享列表的页面
+      //   router.push({
+      //     query: {
+      //       filePath: `${row.shareFilePath === '/' ? '' : row.shareFilePath}/${
+      //         row.fileName
+      //       }`
+      //     }
+      //   })
+      // } else if (Number(router.currentRoute.query.fileType) === 8) {
+      //   // 当前是我的已分享列表页面
+      //   router.push({
+      //     query: {
+      //       fileType: 8,
+      //       filePath: `${row.shareFilePath === '/' ? '' : row.shareFilePath}/${
+      //         row.fileName
+      //       }`,
+      //       shareBatchNum: row.shareBatchNum
+      //     }
+      //   })
+      // } else if (Number(router.currentRoute.query.fileType) !== 6) {
+      //   // 回收站页面不允许打开文件夹
+      //   // 网盘页面
+      //   router.push({
+      //     query: {
+      //       filePath: `${row.filePath === '/' ? '' : row.filePath}/${
+      //         row.fileName
+      //       }`
+      //     }
+      //   })
+      // }
     }
     // 若是文件，则进行相应的预览
     else {
       // 若当前点击项是图片
       const PIC = ['png', 'jpg', 'jpeg', 'gif', 'svg']
-      row.extendName !== undefined || row.extendName !== ''
+      row.extendName
         ? row.extendName.toLowerCase()
         : row.extendName = ''
       if (PIC.includes(row.extendName)) {

@@ -12,7 +12,6 @@
         class="file-item"
         :title="$file.getFileNameComplete(item)"
         :style="`width: ${gridSize + 40}px; `"
-        :class="item.userFileId === selectedFile.userFileId ? 'active' : ''"
         @click="$file.handleFileNameClick(item, index, fileListSorted)"
         @contextmenu.prevent="handleContextMenu(item, index, $event)"
       >
