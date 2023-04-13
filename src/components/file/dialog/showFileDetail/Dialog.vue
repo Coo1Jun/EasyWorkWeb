@@ -6,6 +6,7 @@
     :visible.sync="visible"
     :close-on-click-modal="false"
     width="550px"
+    top="10vh"
     @close="handleDialogClose"
   >
     <img
@@ -53,14 +54,18 @@
         />
       </el-form-item>
       <el-form-item
-        v-if="![7, 8].includes(fileType) && !['Share'].includes(this.routeName)"
+        label="创建人"
+        prop="createBy"
+      >
+        <el-input :value="fileInfo.createBy" readonly />
+      </el-form-item>
+      <el-form-item
         label="创建日期"
         prop="createTime"
       >
         <el-input :value="fileInfo.createTime" readonly />
       </el-form-item>
       <el-form-item
-        v-if="![7, 8].includes(fileType) && !['Share'].includes(this.routeName)"
         label="修改日期"
         prop="updateTime"
       >
