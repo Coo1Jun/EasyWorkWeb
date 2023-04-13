@@ -87,6 +87,10 @@ export default {
     filePath() {
       return this.$route.query.filePath ? this.$route.query.filePath : '/'
     },
+    // 当前目录id
+    dirId() {
+      return this.$route.query.dirId
+    },
     // 文件查看模式 0列表模式 1网格模式 2 时间线模式
     fileModel() {
       return this.$store.getters.fileModel
@@ -118,6 +122,7 @@ export default {
       this.loading = true
       const params = {
         filePath: this.filePath,
+        dirId: this.dirId,
         pageNo: Number(this.pageData.currentPage),
         limit: Number(this.pageData.pageCount),
         fileName: this.fileNameSearch
@@ -224,6 +229,7 @@ export default {
       this.loading = true
       const params = {
         filePath: this.filePath,
+        dirId: this.dirId,
         pageNo: Number(this.pageData.currentPage),
         limit: Number(this.pageData.pageCount),
         fileName: fileName

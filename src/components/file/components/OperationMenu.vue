@@ -96,6 +96,7 @@
     </div>
 
     <el-button
+      v-if="false"
       size="mini"
       type="primary"
       style="border-redius: 4px; margin-right: 10px"
@@ -320,7 +321,8 @@ export default {
     handleClickAddFolderBtn() {
       this.$openDialog
         .addFolder({
-          filePath: this.$route.query.filePath || '/'
+          filePath: this.$route.query.filePath || '/',
+          dirId: this.$route.query.dirId
         })
         .then((res) => {
           if (res === 'confirm') {
@@ -461,7 +463,8 @@ export default {
       addFileApi({
         filePath: this.filePath,
         fileId: response.data.id,
-        fileName: response.data.name.slice(0, response.data.name.lastIndexOf('.'))
+        fileName: response.data.name.slice(0, response.data.name.lastIndexOf('.')),
+        dirId: this.$route.query.dirId
       }).then(res => {
         if (res.success) {
           this.$emit('getTableDataByType')

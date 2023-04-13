@@ -255,7 +255,8 @@ const fileFunction = {
         query: {
           filePath: `${row.filePath === '/' ? '' : row.filePath}/${
             row.fileName
-          }`
+          }`,
+          dirId: row.id
         }
       })
       // if (router.currentRoute.name === 'Share') {

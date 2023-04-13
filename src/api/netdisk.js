@@ -18,7 +18,7 @@ export function getNetDiskListApi(params) {
  * @param {*} data
  * @returns
  */
-export function addDriApi(data) {
+export function addDirApi(data) {
   return request({
     url: '/api/ew-project/netdisk/directory',
     method: 'post',

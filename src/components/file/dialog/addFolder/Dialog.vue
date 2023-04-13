@@ -41,7 +41,7 @@
 </template>
 
 <script>
-import { addDriApi } from '@/api/netdisk'
+import { addDirApi } from '@/api/netdisk'
 
 export default {
   name: 'AddFolderDialog',
@@ -112,11 +112,13 @@ export default {
       this.sureBtnLoading = true
       this.$refs[formName].validate((valid) => {
         if (valid) {
+          console.log(this)
           const data = {
             fileName: this.form.fileName,
-            filePath: this.filePath
+            filePath: this.filePath,
+            dirId: this.dirId
           }
-          addDriApi(data).then(res => {
+          addDirApi(data).then(res => {
             this.sureBtnLoading = false
             if (res.success) {
               this.$refs[formName].resetFields()
