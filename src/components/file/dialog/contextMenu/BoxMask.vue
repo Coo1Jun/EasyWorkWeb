@@ -17,7 +17,7 @@
         <i class="el-icon-view" /> 查看
       </li>
       <li
-        v-if="deleteBtnShow"
+        v-if="selectedFile && selectedFile.belongType === 1"
         class="right-menu-item"
         @click="handleDeleteFileBtnClick(selectedFile)"
       >
@@ -38,14 +38,14 @@
         <i class="el-icon-copy-document" /> 复制
       </li>
       <li
-        v-if="moveBtnShow"
+        v-if="selectedFile && selectedFile.belongType === 1"
         class="right-menu-item"
         @click="handleMoveFileBtnClick(selectedFile)"
       >
         <i class="el-icon-s-promotion" /> 移动
       </li>
       <li
-        v-if="renameBtnShow"
+        v-if="selectedFile && selectedFile.belongType === 1"
         class="right-menu-item"
         @click="handleRenameFileBtnClick(selectedFile)"
       >
@@ -455,7 +455,7 @@ export default {
       this.$openDialog
         .renameFile({
           oldFileName: fileInfo.fileName,
-          userFileId: fileInfo.userFileId
+          id: fileInfo.id
         })
         .then((res) => {
           this.callback(res)

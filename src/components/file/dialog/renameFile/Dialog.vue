@@ -39,7 +39,7 @@
 </template>
 
 <script>
-// import * as fileApi from '@/api/fileApi'
+import { renameFileApi } from '@/api/netdisk'
 
 export default {
   name: 'RenameFileDialog',
@@ -83,23 +83,19 @@ export default {
       this.sureBtnLoading = true
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          // fileApi
-          //   .renameFile({
-          //     userFileId: this.userFileId,
-          //     fileName: this.form.fileName
-          //   })
-          //   .then((res) => {
-          //     console.log(res)
-          //     this.sureBtnLoading = false
-          //     if (res.code === 200) {
-          //       this.$refs[formName].resetFields()
-          //       this.visible = false
-          //       this.callback('confirm')
-          //     }
-          //   })
-          //   .catch(() => {
-          //     this.sureBtnLoading = false
-          //   })
+          renameFileApi({
+            id: this.id,
+            fileName: this.form.fileName
+          }).then(res => {
+            if (res.success) {
+              this.sureBtnLoading = false
+              this.$refs[formName].resetFields()
+              this.visible = false
+              this.callback('confirm')
+            }
+          }).catch(() => {
+            this.sureBtnLoading = false
+          })
         } else {
           this.sureBtnLoading = false
           return false

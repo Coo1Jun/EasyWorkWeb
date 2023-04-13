@@ -38,3 +38,16 @@ export function addFileApi(data) {
     data
   })
 }
+
+/**
+ * 重命名文件
+ * @param {*} data
+ * @returns
+ */
+export function renameFileApi(data) {
+  return request({
+    url: '/api/ew-project/netdisk/rename',
+    method: 'put',
+    data
+  })
+}

@@ -8,44 +8,44 @@ let renameFileInstance = null
 /**
  * 初始化重命名文件实例
  * @param {string} oldFileName 文件原本的名称
- * @param {string} userFileId 文件 ID
+ * @param {string} id 文件 ID
  */
-const initInstanceRenameFile = (oldFileName, userFileId) => {
-	renameFileInstance = new RenameFileConstructor({
-		el: document.createElement('div'),
-		data() {
-			return {
-				oldFileName,
-				userFileId
-			}
-		}
-	})
+const initInstanceRenameFile = (oldFileName, id) => {
+  renameFileInstance = new RenameFileConstructor({
+    el: document.createElement('div'),
+    data() {
+      return {
+        oldFileName,
+        id
+      }
+    }
+  })
 }
 /**
  * 重命名文件 Promise 函数
  * @returns {Promise} 抛出确认和取消回调函数
  */
 const showRenameFileDialog = (obj) => {
-	// 非首次调用服务时，在 DOM 中移除上个实例
-	if (renameFileInstance !== null) {
-		document.body.removeChild(renameFileInstance.$el)
-	}
-	let { oldFileName, userFileId } = obj
-	return new Promise((reslove) => {
-		initInstanceRenameFile(oldFileName, userFileId)
-		renameFileInstance.callback = (res) => {
-			reslove(res)
-			// 服务取消时卸载 DOM
-			if (res === 'cancel' && renameFileInstance !== null) {
-				document.body.removeChild(renameFileInstance.$el)
-				renameFileInstance = null
-			}
-		}
-		document.body.appendChild(renameFileInstance.$el) //  挂载 DOM
-		Vue.nextTick(() => {
-			renameFileInstance.visible = true //  打开对话框
-		})
-	})
+  // 非首次调用服务时，在 DOM 中移除上个实例
+  if (renameFileInstance !== null) {
+    document.body.removeChild(renameFileInstance.$el)
+  }
+  const { oldFileName, id } = obj
+  return new Promise((reslove) => {
+    initInstanceRenameFile(oldFileName, id)
+    renameFileInstance.callback = (res) => {
+      reslove(res)
+      // 服务取消时卸载 DOM
+      if (res === 'cancel' && renameFileInstance !== null) {
+        document.body.removeChild(renameFileInstance.$el)
+        renameFileInstance = null
+      }
+    }
+    document.body.appendChild(renameFileInstance.$el) //  挂载 DOM
+    Vue.nextTick(() => {
+      renameFileInstance.visible = true //  打开对话框
+    })
+  })
 }
 
 export default showRenameFileDialog
