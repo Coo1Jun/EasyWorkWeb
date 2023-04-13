@@ -41,7 +41,7 @@
 </template>
 
 <script>
-// import * as fileApi from '@/api/fileApi'
+import { addDriApi } from '@/api/netdisk'
 
 export default {
   name: 'AddFolderDialog',
@@ -116,19 +116,16 @@ export default {
             fileName: this.form.fileName,
             filePath: this.filePath
           }
-          // fileApi
-          //   .createFold(data)
-          //   .then((res) => {
-          //     if (res.code === 200) {
-          //       this.sureBtnLoading = false
-          //       this.$refs[formName].resetFields()
-          //       this.visible = false
-          //       this.callback('confirm')
-          //     }
-          //   })
-          //   .catch(() => {
-          //     this.sureBtnLoading = false
-          //   })
+          addDriApi(data).then(res => {
+            this.sureBtnLoading = false
+            if (res.success) {
+              this.$refs[formName].resetFields()
+              this.visible = false
+              this.callback('confirm')
+            }
+          }).catch(() => {
+            this.sureBtnLoading = false
+          })
         } else {
           this.sureBtnLoading = false
           return false

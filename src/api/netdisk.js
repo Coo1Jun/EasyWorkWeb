@@ -12,3 +12,16 @@ export function getNetDiskListApi(params) {
     params
   })
 }
+
+/**
+ * 添加文件夹
+ * @param {*} data
+ * @returns
+ */
+export function addDriApi(data) {
+  return request({
+    url: '/api/ew-project/netdisk/directory',
+    method: 'post',
+    data
+  })
+}
