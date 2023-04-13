@@ -15,27 +15,49 @@
         icon="el-icon-plus"
         @click.native="handleClickAddFolderBtn"
       >新建文件夹</el-button>
-      <el-dropdown class="upload-drop" trigger="hover">
+      <el-upload
+        :action="uploadUrl"
+        class="om-upload"
+        :on-success="uploadSuccess"
+        :on-error="uploadError"
+        multiple
+        :show-file-list="false"
+      >
+        <el-button
+          id="uploadFileId"
+          size="mini"
+          type="primary"
+          icon="el-icon-upload2"
+          style="border-radius: 0 4px 4px 0"
+        >上传文件</el-button>
+      </el-upload>
+      <!-- <el-dropdown class="upload-drop" trigger="hover">
         <el-button
           id="uploadFileId"
           size="mini"
           type="primary"
           icon="el-icon-upload2"
         >上传<i class="el-icon-arrow-down el-icon--right" /></el-button>
-        <el-dropdown-menu slot="dropdown">
+        <el-dropdown-menu slot="dropdown" class="om-dropdown-menu">
+          <el-dropdown-item>
+            <el-upload
+              class="upload-demo"
+              :action="uploadUrl"
+              :on-success="uploadSuccess"
+              :on-error="uploadError"
+              multiple
+            >
+              <span class="om-dropdown-item">上传文件</span>
+            </el-upload>
+          </el-dropdown-item>
+          <el-dropdown-item>上传文件夹</el-dropdown-item>
           <el-dropdown-item
-            @click.native="handleUploadFileBtnClick(1)"
-          >上传文件</el-dropdown-item>
-          <el-dropdown-item
-            @click.native="handleUploadFileBtnClick(2)"
-          >上传文件夹</el-dropdown-item>
-          <!-- <el-dropdown-item
             title="截图粘贴或拖拽上传"
             :disabled="screenWidth <= 520"
             @click.native="handleUploadFileBtnClick(3)"
-          >拖拽上传</el-dropdown-item> -->
+          >拖拽上传</el-dropdown-item>
         </el-dropdown-menu>
-      </el-dropdown>
+      </el-dropdown> -->
     </el-button-group>
     <div class="batch-operate-group">
       <el-button-group v-if="isBatchOperation">
@@ -183,6 +205,7 @@
 <script>
 import SelectColumn from './SelectColumn.vue'
 import { mapState } from 'vuex'
+import { uploadUrl } from '@/api/file'
 export default {
   name: 'OperationMenu',
   components: {
@@ -197,6 +220,7 @@ export default {
   },
   data() {
     return {
+      uploadUrl,
       // 文件搜索数据
       searchFile: {
         fileName: ''
@@ -310,22 +334,11 @@ export default {
 		 * @param {boolean} uploadWay 上传方式 0-文件上传 1-文件夹上传 2-粘贴图片或拖拽上传
 		 */
     handleUploadFileBtnClick(uploadWay) {
-      this.$openDialog.authWeChat({}).then((res) => {
-        switch (res) {
-          case 'confirm': {
-            this.$common.goAccount('/settings/account')
-            break
-          }
-          case 'go': {
-            this.$openBox.uploadFile({
-              params: this.uploadFileParams,
-              uploadWay,
-              serviceEl: this,
-              callType: 1 //  callType 调用此服务的方式：1 - 顶部栏，2 - 右键菜单
-            })
-            break
-          }
-        }
+      this.$openBox.uploadFile({
+        params: this.uploadFileParams,
+        uploadWay,
+        serviceEl: this,
+        callType: 1 //  callType 调用此服务的方式：1 - 顶部栏，2 - 右键菜单
       })
     },
 
@@ -427,6 +440,15 @@ export default {
       if (!event.target.className.includes('setting-icon')) {
         this.operatePopoverVisible = false
       }
+    },
+    uploadSuccess(response, file, fileList) {
+    },
+    uploadError() {
+      this.$message({
+        type: 'error',
+        message: '附件上传失败，请稍后重试！',
+        duration: 3000
+      })
     }
   }
 }
@@ -515,5 +537,17 @@ export default {
     margin-right: 4px;
     height: 24px;
   }
+}
+</style>
+<style scoped>
+.om-dropdown-menu .el-dropdown-menu__item{
+  padding: 0;
+}
+.om-dropdown-item {
+  margin: 0 20px;
+  width: 100%;
+}
+.om-upload {
+  display: inline-block;
 }
 </style>
