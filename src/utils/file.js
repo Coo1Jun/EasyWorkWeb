@@ -81,11 +81,7 @@ const fileFunction = {
      * @returns {string}  文件下载路径
      */
   getDownloadFilePath(row) {
-    return `/fileTransfer/downloadFile?userFileId=${
-      row.userFileId
-    }&shareBatchNum=${
-      row.shareBatchNum == null ? '' : row.shareBatchNum
-    }&extractionCode=${row.extractionCode == null ? '' : row.extractionCode}`
+    return `/api/ew-server/file/download/${row.fileId}`
   },
   /**
      * 获取分享链接

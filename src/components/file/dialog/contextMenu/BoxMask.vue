@@ -59,7 +59,7 @@
         <i class="el-icon-share" /> 分享
       </li>
       <li
-        v-if="downloadBtnShow"
+        v-if="selectedFile && selectedFile.isDir === 0"
         class="right-menu-item"
         @click="visible = false"
       >
@@ -101,13 +101,13 @@
           </li>
         </ul>
       </li>
-      <li
+      <!-- <li
         v-if="onlineEditBtnShow"
         class="right-menu-item"
         @click="handleClickFileEdit(selectedFile)"
       >
         <i class="el-icon-edit" /> 在线编辑
-      </li>
+      </li> -->
       <li
         v-if="copyLinkBtnShow"
         class="right-menu-item"
@@ -144,25 +144,16 @@
         <li class="right-menu-item" @click="handleClickAddFolderBtn">
           <i class="el-icon-folder-add" /> 新建文件夹
         </li>
-        <li class="right-menu-item" @click="handleCreateFile('docx')">
-          <img :src="wordImg">新建 Word 文档
-        </li>
-        <li class="right-menu-item" @click="handleCreateFile('xlsx')">
-          <img :src="excelImg">新建 Excel 工作表
-        </li>
-        <li class="right-menu-item" @click="handleCreateFile('pptx')">
-          <img :src="pptImg">新建 PPT 演示文稿
-        </li>
         <el-divider />
-        <li class="right-menu-item" @click="handleUploadFileBtnClick(1)">
+        <!-- <li class="right-menu-item" @click="handleUploadFileBtnClick(1)">
           <i class="el-icon-upload2" /> 上传文件
-        </li>
-        <li class="right-menu-item" @click="handleUploadFileBtnClick(2)">
+        </li> -->
+        <!-- <li class="right-menu-item" @click="handleUploadFileBtnClick(2)">
           <i class="el-icon-folder-opened" /> 上传文件夹
         </li>
         <li class="right-menu-item" @click="handleUploadFileBtnClick(3)">
           <i class="el-icon-thumb" /> 拖拽上传
-        </li>
+        </li> -->
       </template>
     </ul>
   </transition>

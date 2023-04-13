@@ -25,6 +25,7 @@
       >
         <el-button
           id="uploadFileId"
+          ref="uploadBtn"
           size="mini"
           type="primary"
           icon="el-icon-upload2"
