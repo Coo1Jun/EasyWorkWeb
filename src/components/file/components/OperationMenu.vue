@@ -94,6 +94,19 @@
       </el-button-group>
     </div>
 
+    <el-button
+      size="mini"
+      type="primary"
+      style="border-redius: 4px; margin-right: 10px"
+      @click="uploadListDrawer = true"
+    >上传列表</el-button>
+    <el-drawer
+      title="我是标题"
+      :visible.sync="uploadListDrawer"
+      :with-header="false"
+    >
+      <span>我来啦!</span>
+    </el-drawer>
     <!-- 全局搜索文件 -->
     <el-input
       v-model="searchFile.fileName"
@@ -206,6 +219,7 @@
 import SelectColumn from './SelectColumn.vue'
 import { mapState } from 'vuex'
 import { uploadUrl } from '@/api/file'
+import { addFileApi } from '@/api/netdisk'
 export default {
   name: 'OperationMenu',
   components: {
@@ -220,6 +234,7 @@ export default {
   },
   data() {
     return {
+      uploadListDrawer: false,
       uploadUrl,
       // 文件搜索数据
       searchFile: {
@@ -442,6 +457,17 @@ export default {
       }
     },
     uploadSuccess(response, file, fileList) {
+      addFileApi({
+        filePath: this.filePath,
+        fileId: response.data.id,
+        fileName: response.data.name.slice(0, response.data.name.lastIndexOf('.'))
+      }).then(res => {
+        if (res.success) {
+          this.$emit('getTableDataByType')
+        }
+      }, () => {
+        this.uploadError()
+      })
     },
     uploadError() {
       this.$message({

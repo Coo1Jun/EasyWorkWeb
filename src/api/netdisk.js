@@ -25,3 +25,16 @@ export function addDriApi(data) {
     data
   })
 }
+
+/**
+ * 添加文件
+ * @param {*} data
+ * @returns
+ */
+export function addFileApi(data) {
+  return request({
+    url: '/api/ew-project/netdisk/upload',
+    method: 'post',
+    data
+  })
+}

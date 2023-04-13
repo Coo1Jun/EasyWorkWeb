@@ -199,12 +199,12 @@ export default {
 		 * 表格数据获取相关事件 | 获取我的分享列表
 		 */
     showMyShareFile() {
-      const data = {
-        shareFilePath: this.filePath,
-        shareBatchNum: this.$route.query.shareBatchNum,
-        currentPage: this.pageData.currentPage,
-        pageCount: this.pageData.pageCount
-      }
+      // const data = {
+      //   shareFilePath: this.filePath,
+      //   shareBatchNum: this.$route.query.shareBatchNum,
+      //   currentPage: this.pageData.currentPage,
+      //   pageCount: this.pageData.pageCount
+      // }
       // shareApi.getMyShareFileList(data).then((res) => {
       //   if (res.success) {
       //     this.fileList = res.dataList
