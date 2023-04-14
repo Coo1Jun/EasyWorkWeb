@@ -134,6 +134,14 @@ export default {
       // console.log(this.targetData)
       // console.log(this.targetPath)
       // console.log(this.fileInfo)
+      if (!this.targetData) {
+        this.$message({
+          type: 'error',
+          message: '请选择一个目标路径',
+          duration: 3000
+        })
+        return
+      }
       this.sureBtnLoading = true
       moveFileApi({
         id: this.fileInfo.id,
