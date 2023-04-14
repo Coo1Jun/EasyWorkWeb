@@ -27,48 +27,43 @@ export default {
   },
   data() {
     return {
+      breadCrumbList: [
+        {
+          path: '/',
+          name: '全部文件',
+          dirId: null
+        }
+      ]
     }
   },
-  computed: {
-    /**
-		 * 面包屑导航栏数组
-		 */
-    breadCrumbList: {
-      get() {
-        const filePath = this.$route.query.filePath
-        console.log('444444444444444查询参数改变：', filePath)
-        const filePathList = filePath ? filePath.split('/') : ['全部文件']
-        const res = [] //  返回结果数组
-        const _path = [] //  存放祖先路径
-        for (let i = 0; i < filePathList.length; i++) {
-          if (filePathList[i]) {
-            _path.push(filePathList[i])
-            res.push({
-              path: _path.join('/'),
-              name: filePathList[i]
-            })
-          } else if (i === 0) {
-            //  根目录
-            filePathList[i] = ''
-            _path.push(filePathList[i])
-            res.push({
-              path: '/',
-              name: '全部文件'
-            })
-          }
+  watch: {
+    '$route.query'() {
+      // console.log('query参数改变：', this.$route.query)
+      const filePath = this.$route.query.filePath
+      const filePathList = filePath.split('/')
+      const res = []
+      for (const query of this.breadCrumbList) {
+        res.push(query)
+        if (filePath === query.path) {
+          break
         }
-        console.log('结111111果', res)
-        return res
-      },
-      set() {
-        return []
+      }
+      // 如果res的长度等于breadCrumbList，说明这次的路由是新的
+      if (res.length === this.breadCrumbList.length) {
+        this.breadCrumbList.push({
+          path: filePath,
+          dirId: this.$route.query.dirId,
+          name: filePathList[filePathList.length - 1]
+        })
+      } else {
+        this.breadCrumbList = res
       }
     }
   },
   methods: {
     // 获取文件参数
     getRouteQuery(item) {
-      return { query: { filePath: item.path }}
+      return { query: { filePath: item.path, dirId: item.dirId }}
     }
   }
 }
