@@ -24,7 +24,7 @@
         :data="fileTree"
         :props="{
           children: 'children',
-          label: 'label'
+          label: 'fileName'
         }"
         :highlight-current="true"
         :expand-on-click-node="false"
@@ -58,7 +58,7 @@
 </template>
 
 <script>
-// import * as fileApi from '@/api/fileApi'
+import { getDirTreeNodeApi, moveFileApi } from '@/api/netdisk'
 
 export default {
   name: 'MoveFileDialog',
@@ -66,6 +66,7 @@ export default {
     return {
       visible: false, //  对话框是否可见
       targetPath: '/', //  目标路径
+      targetData: null,
       fileTree: [], //  文件夹目录树
       loading: false, //  文件夹目录树 loading 状态
       defaultExpandedKeys: [],
@@ -91,10 +92,10 @@ export default {
 		 */
     initFileTree(id) {
       this.loading = true
-      fileApi.getFoldTree().then((res) => {
+      getDirTreeNodeApi().then(res => {
         this.loading = false
         if (res.success) {
-          this.fileTree = [res.data]
+          this.fileTree = res.data
           this.defaultExpandedKeys = id ? [id] : [this.fileTree[0].id]
         }
       })
@@ -106,15 +107,18 @@ export default {
 		 */
     handleNodeClick(data) {
       this.targetPath = data.filePath ? data.filePath : '/'
+      this.targetData = data
     },
     /**
 		 * 新建文件夹按钮点击事件
 		 * @description 调用新建文件夹服务，并在弹窗确认回调事件中刷新文件夹树
 		 */
     handleAddFolderBtnClick(data) {
+      // console.log(data)
       this.$openDialog
         .addFolder({
-          filePath: data.filePath || '/'
+          filePath: data.filePath || '/',
+          dirId: data.id
         })
         .then(() => {
           this.initFileTree(data.id)
@@ -125,51 +129,24 @@ export default {
 		 * @description 调用移动文件接口
 		 */
     handleDialogSure() {
+      console.log(this.targetData)
+      console.log(this.targetPath)
+      console.log(this.fileInfo)
       this.sureBtnLoading = true
-      if (this.isBatchOperation) {
-        //  批量移动
-        const data = {
-          filePath: this.targetPath,
-          userFileIds: this.fileInfo
-            .map((item) => {
-              return item.userFileId
-            })
-            .join(',')
+      moveFileApi({
+        id: this.fileInfo.id,
+        dirId: this.targetData.id,
+        filePath: this.targetData.filePath
+      }).then(res => {
+        this.sureBtnLoading = false
+        if (res.success) {
+          this.visible = false
+          this.fileInfo = {}
+          this.callback('confirm')
         }
-        // fileApi
-        //   .moveFile(data)
-        //   .then((res) => {
-        //     this.sureBtnLoading = false
-        //     if (res.code === 200) {
-        //       this.visible = false
-        //       this.fileInfo = {}
-        //       this.callback('confirm')
-        //     }
-        //   })
-        //   .catch(() => {
-        //     this.sureBtnLoading = false
-        //   })
-      } else {
-        //  单文件移动
-        const data = {
-          filePath: this.targetPath,
-          userFileIds: this.fileInfo.userFileId
-        }
-        // fileApi
-        //   .moveFile(data)
-        //   .then((res) => {
-        //     this.sureBtnLoading = false
-        //     if (res.code === 200) {
-        //       this.visible = false
-        //       this.callback('confirm')
-        //     } else {
-        //       this.$message.error(res.message)
-        //     }
-        //   })
-        //   .catch(() => {
-        //     this.sureBtnLoading = false
-        //   })
-      }
+      }).catch(() => {
+        this.sureBtnLoading = false
+      })
     }
   }
 }

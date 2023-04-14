@@ -51,3 +51,28 @@ export function renameFileApi(data) {
     data
   })
 }
+
+/**
+ * 获取文件夹树结构
+ * @param {*}
+ * @returns
+ */
+export function getDirTreeNodeApi() {
+  return request({
+    url: '/api/ew-project/netdisk/dir/tree',
+    method: 'get'
+  })
+}
+
+/**
+ * 移动文件
+ * @param {*}
+ * @returns
+ */
+export function moveFileApi(data) {
+  return request({
+    url: '/api/ew-project/netdisk/move',
+    method: 'put',
+    data
+  })
+}

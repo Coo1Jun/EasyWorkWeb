@@ -112,7 +112,7 @@ export default {
       this.sureBtnLoading = true
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          console.log(this)
+          // console.log(this)
           const data = {
             fileName: this.form.fileName,
             filePath: this.filePath,
