@@ -92,7 +92,9 @@ export default {
 		 */
     initFileTree(id) {
       this.loading = true
-      getDirTreeNodeApi().then(res => {
+      getDirTreeNodeApi({
+        excludeId: this.fileInfo.id
+      }).then(res => {
         this.loading = false
         if (res.success) {
           this.fileTree = res.data
@@ -129,9 +131,9 @@ export default {
 		 * @description 调用移动文件接口
 		 */
     handleDialogSure() {
-      console.log(this.targetData)
-      console.log(this.targetPath)
-      console.log(this.fileInfo)
+      // console.log(this.targetData)
+      // console.log(this.targetPath)
+      // console.log(this.fileInfo)
       this.sureBtnLoading = true
       moveFileApi({
         id: this.fileInfo.id,

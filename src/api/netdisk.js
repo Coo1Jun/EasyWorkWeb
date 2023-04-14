@@ -57,10 +57,11 @@ export function renameFileApi(data) {
  * @param {*}
  * @returns
  */
-export function getDirTreeNodeApi() {
+export function getDirTreeNodeApi(params) {
   return request({
     url: '/api/ew-project/netdisk/dir/tree',
-    method: 'get'
+    method: 'get',
+    params
   })
 }
 
