@@ -244,7 +244,7 @@ export default {
       },
       operatePopoverVisible: false, //  收纳栏是否显示
       fileGroupLable: 0, //  文件展示模式
-      dirImg: require('_a/images/file/dir.png'),
+      // dirImg: require('_a/images/file/dir.png'),
       wordImg: require('_a/images/file/file_word.svg'),
       excelImg: require('_a/images/file/file_excel.svg'),
       pptImg: require('_a/images/file/file_ppt.svg')

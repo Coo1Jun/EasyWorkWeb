@@ -190,7 +190,7 @@ export default {
         left: '126px',
         right: 'auto'
       },
-      dirImg: require('_a/images/file/dir.png'),
+      // dirImg: require('_a/images/file/dir.png'),
       wordImg: require('_a/images/file/file_word.svg'),
       excelImg: require('_a/images/file/file_excel.svg'),
       pptImg: require('_a/images/file/file_ppt.svg')

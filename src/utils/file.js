@@ -127,7 +127,7 @@ const fileFunction = {
       : file.extendName = ''
     if (file.isDir === 1) {
       // 文件夹
-      return fileImgMap.get('dir')
+      return fileImgMap.get('dir' + file.belongType)
     } else if (fileImgMap.has(file.extendName)) {
       // 可以识别文件类型的文件
       return fileImgMap.get(file.extendName)
