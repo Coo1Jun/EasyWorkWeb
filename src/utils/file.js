@@ -164,14 +164,14 @@ const fileFunction = {
               ? imgInfoList.map((item) => {
                 return {
                   ...item,
-                  fileUrl: this.getViewFilePath(item),
+                  fileUrl: item.fileUrl,
                   downloadLink: this.getDownloadFilePath(item)
                 }
               })
               : [
                 {
                   ...imgInfo,
-                  fileUrl: this.getViewFilePath(imgInfo),
+                  fileUrl: imgInfo.fileUrl,
                   downloadLink: this.getDownloadFilePath(imgInfo)
                 }
               ]
@@ -245,6 +245,7 @@ const fileFunction = {
   handleFileNameClick(row, currentIndex, fileList = []) {
     console.log('点击了=====》', row.fileName)
     console.log('是否是文件夹', row.isDir)
+    console.log(fileList)
     // 如果当前文件在回收站中，则不允许预览
     if (row.deleted && row.deleted !== 1) {
       return false
