@@ -51,13 +51,13 @@
       >
         <i class="el-icon-edit-outline" /> 重命名
       </li>
-      <li
+      <!-- <li
         v-if="shareBtnShow"
         class="right-menu-item"
         @click="handleShareFileBtnClick(selectedFile)"
       >
         <i class="el-icon-share" /> 分享
-      </li>
+      </li> -->
       <li
         v-if="selectedFile && selectedFile.isDir === 0"
         class="right-menu-item"
