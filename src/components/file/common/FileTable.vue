@@ -15,12 +15,12 @@
       @sort-change="handleSortChange"
       @row-contextmenu="handleContextMenu"
     >
-      <el-table-column
+      <!-- <el-table-column
         key="selection"
         type="selection"
         width="56"
         align="center"
-      />
+      /> -->
       <el-table-column
         key="isDir"
         label

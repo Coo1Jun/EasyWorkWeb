@@ -42,14 +42,16 @@ export default {
       const filePath = this.$route.query.filePath
       const filePathList = filePath.split('/')
       const res = []
+      let flag = false
       for (const query of this.breadCrumbList) {
         res.push(query)
         if (filePath === query.path) {
+          flag = true
           break
         }
       }
       // 如果res的长度等于breadCrumbList，说明这次的路由是新的
-      if (res.length === this.breadCrumbList.length) {
+      if (!flag) {
         this.breadCrumbList.push({
           path: filePath,
           dirId: this.$route.query.dirId,
@@ -58,7 +60,17 @@ export default {
       } else {
         this.breadCrumbList = res
       }
+      localStorage.setItem('breadCrumbList', JSON.stringify(this.breadCrumbList))
     }
+  },
+  mounted() {
+    this.breadCrumbList = JSON.parse(localStorage.getItem('breadCrumbList')) || [{
+      path: '/',
+      name: '全部文件',
+      dirId: null
+    }]
+    const query = this.breadCrumbList[this.breadCrumbList.length - 1]
+    this.$router.push({ query: { filePath: query.path, dirId: query.dirId }})
   },
   methods: {
     // 获取文件参数

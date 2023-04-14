@@ -244,8 +244,8 @@ const fileFunction = {
      */
   handleFileNameClick(row, currentIndex, fileList = []) {
     console.log('点击了=====》', row.fileName)
-    console.log('是否是文件夹', row.isDir)
-    console.log(fileList)
+    // console.log('是否是文件夹', row.isDir)
+    // console.log(fileList)
     // 如果当前文件在回收站中，则不允许预览
     if (row.deleted && row.deleted !== 1) {
       return false
@@ -303,49 +303,51 @@ const fileFunction = {
         this.handleImgPreview(currentIndex, row, fileList)
         return false
       }
+      window.open(`${1}/onlinePreview?url=` + encodeURIComponent(base64Encode.encode(row.fileUrl)))
       // 若当前点击项是可以使用office在线预览的
-      if ([...officeFileType].includes(row.extendName)) {
-        const url = `${config.getFileUrl}/fileTransfer/getFileUrl/` + row.userFileId + '.' + row.extendName
-        window.open(`${config.kkFileView}/onlinePreview?url=` + encodeURIComponent(base64Encode.encode(url)))
-        return false
-      }
+      // if ([...officeFileType].includes(row.extendName)) {
+      //   const url = `${config.getFileUrl}/fileTransfer/getFileUrl/` + row.userFileId + '.' + row.extendName
+      //   window.open(`${config.kkFileView}/onlinePreview?url=` + encodeURIComponent(base64Encode.encode(url)))
+      //   return false
+      // }
       // 若当前点击项是pdf
-      if (row.extendName === 'pdf') {
-        window.open(this.getViewFilePath(row), '_blank')
-      }
+      // 阿里云oss的地址不能直接访问
+      // if (row.extendName === 'pdf') {
+      //   window.open(row.fileUrl, '_blank')
+      // }
       // 若当前点击项是代码或文本文件
-      let codeFileSuffix = row.extendName
-      if (codeFileSuffix === 'yaml') {
-        codeFileSuffix = 'yml'
-      }
-      // 无格式文件也可以在线编辑
-      if (
-        fileSuffixCodeModeMap.has(codeFileSuffix) ||
-                (row.isDir === 0 && row.extendName === '')
-      ) {
-        Vue.prototype.$openBox.codePreview({ fileInfo: row, isEdit: false })
-        return false
-      }
-      // 若当前点击项是 markdown 文档
-      if (markdownFileType.includes(row.extendName.toLowerCase())) {
-        Vue.prototype.$openBox.markdownPreview({
-          fileInfo: row,
-          editable: false
-        })
-        return false
-      }
-      // 若当前点击项是视频mp4格式
-      const VIDEO = ['mp4']
-      if (VIDEO.includes(row.extendName.toLowerCase())) {
-        this.handleVideoPreview(currentIndex, row, fileList)
-        return false
-      }
-      // 若当前点击项是音频 mp3、flac 格式
-      const AUDIO = ['mp3', 'flac']
-      if (AUDIO.includes(row.extendName.toLowerCase())) {
-        this.handleAudioPreview(currentIndex, row, fileList)
-        return false
-      }
+      // let codeFileSuffix = row.extendName
+      // if (codeFileSuffix === 'yaml') {
+      //   codeFileSuffix = 'yml'
+      // }
+      // // 无格式文件也可以在线编辑
+      // if (
+      //   fileSuffixCodeModeMap.has(codeFileSuffix) ||
+      //           (row.isDir === 0 && row.extendName === '')
+      // ) {
+      //   Vue.prototype.$openBox.codePreview({ fileInfo: row, isEdit: false })
+      //   return false
+      // }
+      // // 若当前点击项是 markdown 文档
+      // if (markdownFileType.includes(row.extendName.toLowerCase())) {
+      //   Vue.prototype.$openBox.markdownPreview({
+      //     fileInfo: row,
+      //     editable: false
+      //   })
+      //   return false
+      // }
+      // // 若当前点击项是视频mp4格式
+      // const VIDEO = ['mp4']
+      // if (VIDEO.includes(row.extendName.toLowerCase())) {
+      //   this.handleVideoPreview(currentIndex, row, fileList)
+      //   return false
+      // }
+      // // 若当前点击项是音频 mp3、flac 格式
+      // const AUDIO = ['mp3', 'flac']
+      // if (AUDIO.includes(row.extendName.toLowerCase())) {
+      //   this.handleAudioPreview(currentIndex, row, fileList)
+      //   return false
+      // }
     }
   },
   /**

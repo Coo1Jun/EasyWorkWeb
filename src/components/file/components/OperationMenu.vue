@@ -113,7 +113,7 @@
     <el-input
       v-model="searchFile.fileName"
       class="select-file-input"
-      placeholder="搜索您的文件"
+      placeholder="在当前目录搜索您的文件"
       size="mini"
       maxlength="255"
       :clearable="true"
@@ -130,13 +130,13 @@
     </el-input>
 
     <!-- 批量操作 -->
-    <i
+    <!-- <i
       v-if="fileModel === 1"
       class="batch-icon el-icon-finished"
       :class="isBatchOperation ? 'active' : ''"
       :title="isBatchOperation ? '取消批量操作' : '批量操作'"
       @click="handleBatchOperationChange()"
-    />
+    /> -->
     <i
       class="refresh-icon el-icon-refresh"
       title="刷新文件列表"
