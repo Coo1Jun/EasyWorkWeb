@@ -7,8 +7,9 @@
     width="550px"
     @close="handleDialogClose"
   >
-    <div v-if="deleteMode === 1">删除后可在回收站查看, 是否继续删除？</div>
-    <div v-else-if="deleteMode === 2">此操作将永久删除该文件, 是否继续？</div>
+    <!-- <div v-if="deleteMode === 1">删除后可在回收站查看, 是否继续删除？</div> -->
+    <!-- <div v-else-if="deleteMode === 2">此操作将永久删除该文件, 是否继续？</div> -->
+    <div>此操作将永久删除该文件, 是否继续？</div>
     <div slot="footer" class="dialog-footer">
       <el-button @click="handleDialogClose">取 消</el-button>
       <el-button
@@ -22,8 +23,7 @@
 </template>
 
 <script>
-// import * as fileApi from '@/api/fileApi'
-// import * as recoveryFileApi from '@/api/recoveryFileApi'
+import { deleteFileApi } from '@/api/netdisk'
 
 export default {
   name: 'DeleteFileDialog',
@@ -48,61 +48,71 @@ export default {
      */
     async handleDialogSure() {
       this.sureBtnLoading = true
-      let res = null
-      // 批量删除模式
-      if (this.isBatchOperation) {
-        // 区分删除类型
-        switch (this.deleteMode) {
-          // 删除文件到回收站
-          case 1: {
-            const data = {
-              userFileIds: this.fileInfo
-                .map((item) => item.userFileId)
-                .join(',')
-            }
-            // res = await fileApi.deleteFile(data)
-            break
-          }
-          // 回收站中彻底删除
-          case 2: {
-            const data = {
-              userFileIds: this.fileInfo
-                .map((item) => item.userFileId)
-                .join(',')
-            }
-            // res = await recoveryFileApi.deleteRecoveryFile(data)
-            break
-          }
+      console.log(this.fileInfo)
+      deleteFileApi(this.fileInfo.id).then(res => {
+        if (res.success) {
+          this.visible = false
+          this.sureBtnLoading = false
+          this.callback('confirm')
+          this.$message.success('删除成功')
         }
-      } else {
-        // 单文件删除模式
-        // 区分删除类型
-        switch (this.deleteMode) {
-          // 删除文件到回收站
-          case 1: {
-            const data = {
-              userFileIds: this.fileInfo.userFileId
-            }
-            // res = await fileApi.deleteFile(data)
-            break
-          }
-          // 回收站中彻底删除
-          case 2: {
-            const data = {
-              userFileIds: this.fileInfo.userFileId
-            }
-            // res = await recoveryFileApi.deleteRecoveryFile(data)
-            break
-          }
-        }
-      }
-      if (res.code === 200 || res.success) {
-        console.log(res)
-        this.visible = false
-        this.callback('confirm')
-        this.$message.success('删除成功')
-      }
-      this.sureBtnLoading = false
+      }).catch(() => {
+        this.sureBtnLoading = false
+      })
+      // let res = null
+      // // 批量删除模式
+      // if (this.isBatchOperation) {
+      //   // 区分删除类型
+      //   switch (this.deleteMode) {
+      //     // 删除文件到回收站
+      //     case 1: {
+      //       const data = {
+      //         userFileIds: this.fileInfo
+      //           .map((item) => item.userFileId)
+      //           .join(',')
+      //       }
+      //       // res = await fileApi.deleteFile(data)
+      //       break
+      //     }
+      //     // 回收站中彻底删除
+      //     case 2: {
+      //       const data = {
+      //         userFileIds: this.fileInfo
+      //           .map((item) => item.userFileId)
+      //           .join(',')
+      //       }
+      //       // res = await recoveryFileApi.deleteRecoveryFile(data)
+      //       break
+      //     }
+      //   }
+      // } else {
+      //   // 单文件删除模式
+      //   // 区分删除类型
+      //   switch (this.deleteMode) {
+      //     // 删除文件到回收站
+      //     case 1: {
+      //       const data = {
+      //         userFileIds: this.fileInfo.userFileId
+      //       }
+      //       // res = await fileApi.deleteFile(data)
+      //       break
+      //     }
+      //     // 回收站中彻底删除
+      //     case 2: {
+      //       const data = {
+      //         userFileIds: this.fileInfo.userFileId
+      //       }
+      //       // res = await recoveryFileApi.deleteRecoveryFile(data)
+      //       break
+      //     }
+      //   }
+      // }
+      // if (res.code === 200 || res.success) {
+      //   console.log(res)
+      //   this.visible = false
+      //   this.callback('confirm')
+      //   this.$message.success('删除成功')
+      // }
     }
   }
 }

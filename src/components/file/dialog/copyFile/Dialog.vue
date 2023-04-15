@@ -148,6 +148,7 @@ export default {
         if (res.success) {
           this.visible = false
           this.callback('confirm')
+          this.$message.success('复制成功')
         }
       }).catch(() => {
         this.sureBtnLoading = false

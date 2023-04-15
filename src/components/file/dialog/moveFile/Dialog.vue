@@ -153,6 +153,7 @@ export default {
           this.visible = false
           this.fileInfo = {}
           this.callback('confirm')
+          this.$message.success('移动成功')
         }
       }).catch(() => {
         this.sureBtnLoading = false

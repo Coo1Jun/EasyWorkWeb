@@ -90,3 +90,15 @@ export function copyFileApi(data) {
     data
   })
 }
+
+/**
+ * 删除文件(彻底删除)
+ * @param {*}
+ * @returns
+ */
+export function deleteFileApi(ids) {
+  return request({
+    url: `/api/ew-project/netdisk/${ids}`,
+    method: 'delete'
+  })
+}
