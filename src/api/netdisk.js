@@ -77,3 +77,16 @@ export function moveFileApi(data) {
     data
   })
 }
+
+/**
+ * 移动文件
+ * @param {*}
+ * @returns
+ */
+export function copyFileApi(data) {
+  return request({
+    url: '/api/ew-project/netdisk/copy',
+    method: 'put',
+    data
+  })
+}

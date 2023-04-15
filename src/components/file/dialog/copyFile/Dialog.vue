@@ -24,7 +24,7 @@
         :data="fileTree"
         :props="{
           children: 'children',
-          label: 'label'
+          label: 'fileName'
         }"
         :highlight-current="true"
         :expand-on-click-node="false"
@@ -58,7 +58,7 @@
 </template>
 
 <script>
-// import * as fileApi from '@/api/fileApi'
+import { getDirTreeNodeApi, copyFileApi } from '@/api/netdisk'
 
 export default {
   name: 'CopyFileDialog',
@@ -66,6 +66,7 @@ export default {
     return {
       visible: false, //  对话框是否可见
       targetPath: '/', //  目标路径
+      targetData: null,
       fileTree: [], //  文件夹目录树
       loading: false, //  文件夹目录树 loading 状态
       defaultExpandedKeys: [],
@@ -91,13 +92,15 @@ export default {
 		 */
     initFileTree(id) {
       this.loading = true
-      // fileApi.getFoldTree().then((res) => {
-      //   this.loading = false
-      //   if (res.success) {
-      //     this.fileTree = [res.data]
-      //     this.defaultExpandedKeys = id ? [id] : [this.fileTree[0].id]
-      //   }
-      // })
+      getDirTreeNodeApi({
+        excludeId: this.fileInfo.id
+      }).then(res => {
+        this.loading = false
+        if (res.success) {
+          this.fileTree = res.data
+          this.defaultExpandedKeys = id ? [id] : [this.fileTree[0].id]
+        }
+      })
     },
     /**
 		 * 目录树节点点击回调函数
@@ -106,6 +109,7 @@ export default {
 		 */
     handleNodeClick(data) {
       this.targetPath = data.filePath ? data.filePath : '/'
+      this.targetData = data
     },
     /**
 		 * 新建文件夹按钮点击事件
@@ -114,7 +118,8 @@ export default {
     handleAddFolderBtnClick(data) {
       this.$openDialog
         .addFolder({
-          filePath: data.filePath || '/'
+          filePath: data.filePath || '/',
+          dirId: data.id
         })
         .then(() => {
           this.initFileTree(data.id)
@@ -125,23 +130,28 @@ export default {
 		 * @description 调用复制文件接口
 		 */
     handleDialogSure() {
-      this.sureBtnLoading = true
-      const data = {
-        filePath: this.targetPath,
-        userFileIds: this.fileInfo.userFileId
+      if (!this.targetData) {
+        this.$message({
+          type: 'error',
+          message: '请选择一个目标路径',
+          duration: 3000
+        })
+        return
       }
-      fileApi
-        .copyFile(data)
-        .then((res) => {
-          this.sureBtnLoading = false
-          if (res.code === 200) {
-            this.visible = false
-            this.callback('confirm')
-          }
-        })
-        .catch(() => {
-          this.sureBtnLoading = false
-        })
+      this.sureBtnLoading = true
+      copyFileApi({
+        id: this.fileInfo.id,
+        dirId: this.targetData.id,
+        filePath: this.targetData.filePath
+      }).then(res => {
+        this.sureBtnLoading = false
+        if (res.success) {
+          this.visible = false
+          this.callback('confirm')
+        }
+      }).catch(() => {
+        this.sureBtnLoading = false
+      })
     }
   }
 }
