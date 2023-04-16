@@ -303,6 +303,7 @@ const fileFunction = {
         this.handleImgPreview(currentIndex, row, fileList)
         return false
       }
+      // 使用kkfileview在线预览 官网链接https://file.kkview.cn 自己的服务器：http://47.120.39.20:8012
       window.open(`https://file.kkview.cn/onlinePreview?url=` + encodeURIComponent(base64Encode.encode(row.fileUrl)))
       // 若当前点击项是可以使用office在线预览的
       // if ([...officeFileType].includes(row.extendName)) {
