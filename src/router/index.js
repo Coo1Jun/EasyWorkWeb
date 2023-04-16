@@ -111,7 +111,7 @@ export const constantRoutes = [
       {
         path: 'chat',
         name: 'Chat',
-        component: () => import('@/views/404'),
+        component: () => import('@/views/chat/index'),
         meta: { title: '消息', icon: 'el-icon-chat-dot-square' }
       }
     ]

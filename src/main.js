@@ -27,6 +27,10 @@ import '_a/styles/iconfont/iconfont.css'
 import '_a/styles/iconfontCover.styl'
 import '_a/styles/elementCover.styl'
 import '_a/styles/mediaScreenXs.styl'
+// 聊天组件
+import LemonIMUI from 'lemon-imui'
+import 'lemon-imui/dist/index.css'
+Vue.use(LemonIMUI)
 
 /**
  * 如果不想使用模拟服务器
