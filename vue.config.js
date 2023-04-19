@@ -44,6 +44,10 @@ module.exports = {
       '/api/ew-project': {
         target: 'http://localhost:8021',
         changeOrigin: true
+      },
+      '/api/ew-chat': {
+        target: 'http://localhost:8022',
+        changeOrigin: true
       }
     }
     // before: require('./mock/mock-server.js')
