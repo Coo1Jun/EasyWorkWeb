@@ -36,11 +36,18 @@
         <br>
       </template>
     </lemon-imui>
+    <a
+      ref="downloadFile"
+      target="_blank"
+      :href="download.url"
+      :download="download.fileName"
+    />
   </div>
 </template>
 
 <script>
 import EmojiData from '@/chatdata/emoji'
+import { uploadFileApi } from '@/api/file'
 
 const getTime = () => {
   return new Date().getTime()
@@ -80,6 +87,10 @@ export default {
   name: 'Chat',
   data() {
     return {
+      download: {
+        url: '',
+        fileName: ''
+      },
       user: {
         id: '1',
         displayName: 'June',
@@ -142,18 +153,27 @@ export default {
           visible: instance => {
             return instance.message.type === 'image'
           },
-          text: '下载图片'
+          text: '下载图片',
+          click: (e, instance, hide) => {
+            this.downloadFile(instance.message)
+            hide()
+          }
         },
         {
           visible: instance => {
             return instance.message.type === 'file'
           },
-          text: '下载文件'
+          text: '下载文件',
+          click: (e, instance, hide) => {
+            this.downloadFile(instance.message)
+            hide()
+          }
         },
         {
           click: (e, instance, hide) => {
             const { IMUI, message } = instance
             IMUI.removeMessage(message.id)
+            console.log('删除消息', message)
             hide()
           },
           icon: 'lemon-icon-folder',
@@ -287,24 +307,24 @@ export default {
       {
         name: 'uploadImage'
       },
-      {
-        name: 'test1',
-        click: () => {
-          IMUI.$refs.editor.selectFile('application/vnd.ms-excel')
-        },
-        render: () => {
-          return <span>Excel</span>
-        }
-      },
-      {
-        name: 'test1',
-        click: () => {
-          IMUI.initEditorTools([{ name: 'uploadFile' }, { name: 'emoji' }])
-        },
-        render: () => {
-          return <span>重制工具栏</span>
-        }
-      },
+      // {
+      //   name: 'test1',
+      //   // click: () => {
+      //   //   IMUI.$refs.editor.selectFile('application/vnd.ms-excel')
+      //   // },
+      //   render: () => {
+      //     return <span>Excel</span>
+      //   }
+      // },
+      // {
+      //   name: 'test1',
+      //   click: () => {
+      //     IMUI.initEditorTools([{ name: 'uploadFile' }, { name: 'emoji' }])
+      //   },
+      //   render: () => {
+      //     return <span>重制工具栏</span>
+      //   }
+      // },
       {
         name: 'test2',
         isRight: true,
@@ -344,6 +364,10 @@ export default {
           })
         }, 2000)
       }
+      if (message.type === 'image') {
+        const imgList = [{ fileName: '图片', fileUrl: message.content, downloadLink: message.content }]
+        this.$openBox.imgPreview({ imgList, defaultIndex: 0 })
+      }
     },
     changeDrawer(contact, instance) {
       const IMUI = this.$refs.IMUI
@@ -370,8 +394,17 @@ export default {
       })
       instance.closeDrawer()
     },
-    handleSend(message, next, file) {
-      console.log(message, next, file)
+    async handleSend(message, next, file) {
+      console.log('发送了消息：', message)
+      if (file) {
+        console.log('发送的消息类型是文件', file)
+        const form = new FormData()
+        form.append('file', file)
+        // const { data } = await uploadFileApi(form)
+        // message.content = data.url
+      }
+
+      // console.log(message, next, file)
       setTimeout(() => {
         next()
       }, 1000)
@@ -408,7 +441,14 @@ export default {
     handleChangeMenu() {
       console.log('Event:change-menu')
     },
-    openCustomContainer() {}
+    openCustomContainer() {},
+    downloadFile(file) {
+      console.log('下载文件start')
+      this.download.url = file.content
+      this.download.fileName = file.type === 'image' ? '图片' : '文件'
+      this.$refs.downloadFile.click()
+      console.log('下载文件end')
+    }
   }
 }
 
