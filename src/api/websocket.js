@@ -22,8 +22,8 @@ function open() {
   externalFun.onOpen()
 }
 
-function message() {
-  externalFun.onMessage()
+function message(msg) {
+  externalFun.onMessage(msg.data)
 }
 
 function close() {

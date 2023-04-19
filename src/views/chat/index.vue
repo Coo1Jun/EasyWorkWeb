@@ -93,11 +93,7 @@ export default {
         url: '',
         fileName: ''
       },
-      user: {
-        id: '1',
-        displayName: 'June',
-        avatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/d534b989bc074da0b190f2a9e87c9e45.png'
-      },
+      user: {},
       contextmenu: [
         {
           click: (e, instance, hide) => {
@@ -239,46 +235,53 @@ export default {
     ...mapGetters(['userInfo'])
   },
   mounted() {
+    // console.log(this.userInfo)
+    // 初始化当前用户
+    this.user = {
+      id: this.userInfo.userid,
+      displayName: this.userInfo.realName,
+      avatar: this.userInfo.portrait
+    }
     // 初始化websocket
     WebSocket.init(this.userInfo.userid, this.onOpen, this.onMessage)
-    const contactData1 = {
-      id: 'contact-1',
-      displayName: '工作协作群',
-      avatar: 'http://upload.qqbodys.com/img/weixin/20170804/ji5qxg1am5ztm.jpg',
-      index: '[1]群组',
-      unread: 0,
-      lastSendTime: 1566047865417,
-      lastContent: '2'
-    }
-    const contactData2 = {
-      id: 'contact-2',
-      displayName: '自定义内容',
-      avatar: 'http://upload.qqbodys.com/img/weixin/20170807/jibfvfd00npin.jpg',
-      // index: "Z",
-      click(next) {
-        next()
-      },
-      renderContainer: () => {
-        return <h1 style='text-indent:20px'>自定义页面</h1>
-      },
-      lastSendTime: 1345209465000,
-      lastContent: '12312',
-      unread: 2
-    }
+    // const contactData1 = {
+    //   id: 'contact-1',
+    //   displayName: '工作协作群',
+    //   avatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/d534b989bc074da0b190f2a9e87c9e45.png',
+    //   index: '[1]群组',
+    //   unread: 0,
+    //   lastSendTime: 1566047865417,
+    //   lastContent: '2'
+    // }
+    // const contactData2 = {
+    //   id: 'contact-2',
+    //   displayName: '自定义内容',
+    //   avatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/d534b989bc074da0b190f2a9e87c9e45.png',
+    //   // index: "Z",
+    //   click(next) {
+    //     next()
+    //   },
+    //   renderContainer: () => {
+    //     return <h1 style='text-indent:20px'>自定义页面</h1>
+    //   },
+    //   lastSendTime: 1345209465000,
+    //   lastContent: '12312',
+    //   unread: 2
+    // }
     const contactData3 = {
-      id: 'contact-3',
-      displayName: '铁牛',
-      avatar: 'http://upload.qqbodys.com/img/weixin/20170803/jiq4nzrkrnd0e.jpg',
-      index: 'T',
+      id: '1634404380204183554',
+      displayName: '李正帆测试',
+      avatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/d534b989bc074da0b190f2a9e87c9e45.png',
+      index: '2',
       unread: 32,
       lastSendTime: 3,
       lastContent: '你好123'
     }
     const contactData4 = {
-      id: 'contact-4',
-      displayName: '如花',
+      id: '1557662367922384897',
+      displayName: '小明',
       avatar:
-        'https://dss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=4275424924,2201401076&fm=111&gp=0.jpg',
+        'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/db02c8745a314524b18cbf5b9e310730.png',
       index: '',
       unread: 1,
       lastSendTime: 3,
@@ -291,15 +294,12 @@ export default {
     }, 500)
 
     IMUI.setLastContentRender('text', message => {
-      return `[自定义通知内容]`
+      return message.content
     })
 
     const contactList = [
-      { ...contactData1 },
-      { ...contactData2 },
       { ...contactData3 },
       { ...contactData4 }
-      // ...Array(100).fill(contactData1)
     ]
 
     IMUI.initContacts(contactList)
@@ -423,7 +423,10 @@ export default {
         const { data } = await uploadFileApi(form).catch(() => {
           next({ status: 'failed' })
         })
+        // console.log(data)
         message.content = data.url
+        message.fileName = data.name
+        message.fileSize = data.fileSize
       }
       if (!WebSocket.connectSuccess()) {
         WebSocket.reconnect() // 重新连接
@@ -432,16 +435,16 @@ export default {
           if (WebSocket.reconnectOver()) {
             clearInterval(intervalId) // 清除定时器
             if (WebSocket.connectSuccess()) {
-              WebSocket.send(JSON.stringify(message))
               next()
+              WebSocket.send(JSON.stringify(message))
             } else {
               next({ status: 'failed' })
             }
           }
         }, 500)
       } else {
-        WebSocket.send(JSON.stringify(message))
         next()
+        WebSocket.send(JSON.stringify(message))
       }
     },
     handlePullMessages(contact, next, instance) {
@@ -484,12 +487,14 @@ export default {
       this.$refs.downloadFile.click()
       console.log('下载文件end')
     },
-    onMessage() {
-
+    onMessage(msg) {
+      const message = JSON.parse(msg)
+      // console.log(message)
+      const IMUI = this.$refs.IMUI
+      message.toContactId = message.fromUser.id // 接收到消息，将聊天框的id改为对方的id，这样才能定位到对方的聊天框
+      IMUI.appendMessage(message, true)
     },
-    onOpen() {
-
-    }
+    onOpen() {}
   }
 }
 
