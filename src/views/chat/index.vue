@@ -22,7 +22,8 @@
       <template #cover>
         <div class="cover">
           <i class="lemon-icon-message" />
-          <p><b>自定义封面 Lemon</b> IMUI</p>
+          <p><b>尽情畅聊 ！</b></p>
+          <p><b>HAVE A NICE CHAT !</b></p>
         </div>
       </template>
       <template #message-title="contact">
@@ -51,6 +52,7 @@ import SnowflakeId from 'snowflake-id'
 import WebSocket from '@/api/websocket'
 import { mapGetters } from 'vuex'
 import { uploadFileApi } from '@/api/file'
+import { getChatRecordsApi } from '@/api/chat'
 
 const getTime = () => {
   return new Date().getTime()
@@ -228,7 +230,12 @@ export default {
       hideMenu: false,
       hideMenuAvatar: false,
       hideMessageName: false,
-      hideMessageTime: false
+      hideMessageTime: false,
+      curContact: {
+        id: '',
+        pageNo: 1, // 第几页
+        limit: 30 // 每页几条记录
+      }
     }
   },
   computed: {
@@ -289,13 +296,10 @@ export default {
     }
 
     const { IMUI } = this.$refs
-    setTimeout(() => {
-      IMUI.changeContact('contact-1')
-    }, 500)
 
-    IMUI.setLastContentRender('text', message => {
-      return message.content
-    })
+    // IMUI.setLastContentRender('text', message => {
+    //   return message.content
+    // })
 
     const contactList = [
       { ...contactData3 },
@@ -411,7 +415,7 @@ export default {
       IMUI.openDrawer(params)
     },
     handleChangeContact(contact, instance) {
-      console.log('Event:change-contact')
+      // console.log('切换聊天窗口')
       instance.updateContact({
         id: contact.id,
         unread: 0
@@ -451,37 +455,33 @@ export default {
         WebSocket.send(JSON.stringify(message))
       }
     },
-    handlePullMessages(contact, next, instance) {
-      const otheruser = {
-        id: contact.id,
-        displayName: contact.displayName,
-        avatar: contact.avatar
+    async handlePullMessages(contact, next, instance) {
+      if (JSON.stringify(contact) === '{}') {
+        return
       }
-      setTimeout(() => {
-        const messages = [
-          generateMessage(instance.currentContactId, this.user),
-          generateMessage(instance.currentContactId, otheruser),
-          generateMessage(instance.currentContactId, this.user),
-          generateMessage(instance.currentContactId, otheruser),
-          generateMessage(instance.currentContactId, this.user),
-          generateMessage(instance.currentContactId, this.user),
-          generateMessage(instance.currentContactId, otheruser),
-          {
-            ...generateMessage(instance.currentContactId, this.user),
-            ...{ status: 'failed' }
-          }
-        ]
-        let isEnd = false
-        if (
-          instance.getMessages(instance.currentContactId).length +
-            messages.length >
-          11
-        ) { isEnd = true }
+      // 第一次进入该聊天窗口，或者切换了聊天窗口
+      if (this.curContact.id === '' || this.curContact.id !== contact.id) {
+        this.curContact.id = contact.id
+        this.curContact.pageNo = 1
+        this.curContact.limit = 30
+      } else {
+        this.curContact.pageNo++
+      }
+      const response = await getChatRecordsApi({
+        toContactId: contact.id,
+        pageNo: this.curContact.pageNo,
+        limit: this.curContact.limit
+      }).catch(() => { next([], true) })
+      if (response && response.success) {
+        const messages = response.data
+        const isEnd = messages.length === 0 || messages.length < this.curContact.limit
         next(messages, isEnd)
-      }, 500)
+      } else {
+        next([], true)
+      }
     },
-    handleChangeMenu() {
-      console.log('Event:change-menu')
+    handleChangeMenu(menuName) {
+      console.log('Event:change-menu, menuName -> ', menuName)
     },
     openCustomContainer() {},
     downloadFile(file) {
