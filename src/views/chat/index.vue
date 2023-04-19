@@ -47,15 +47,17 @@
 
 <script>
 import EmojiData from '@/chatdata/emoji'
+import SnowflakeId from 'snowflake-id'
+import WebSocket from '@/api/websocket'
+import { mapGetters } from 'vuex'
 import { uploadFileApi } from '@/api/file'
 
 const getTime = () => {
   return new Date().getTime()
 }
+const snowflake = new SnowflakeId()
 const generateRandId = () => {
-  return Math.random()
-    .toString(36)
-    .substr(-8)
+  return snowflake.generate() // 生成雪花id
 }
 const generateRandWord = () => {
   return Math.random()
@@ -233,7 +235,12 @@ export default {
       hideMessageTime: false
     }
   },
+  computed: {
+    ...mapGetters(['userInfo'])
+  },
   mounted() {
+    // 初始化websocket
+    WebSocket.init(this.userInfo.userid, this.onOpen, this.onMessage)
     const contactData1 = {
       id: 'contact-1',
       displayName: '工作协作群',
@@ -339,30 +346,43 @@ export default {
     ])
     IMUI.initEmoji(EmojiData)
 
-    IMUI.setLastContentRender('voice', message => {
-      return <span>[语音]</span>
-    })
+    // IMUI.setLastContentRender('voice', message => {
+    //   return <span>[语音]</span>
+    // })
   },
   methods: {
     handleMenuAvatarClick() {
       console.log('Event:menu-avatar-click')
     },
     handleMessageClick(e, key, message, instance) {
-      console.log('点击了消息', e, key, message)
+      // console.log('点击了消息', e, key, message)
 
       if (key === 'status') {
-        instance.updateMessage({
-          id: message.id,
-          status: 'going',
-          content: '正在重新发送消息...'
-        })
-        setTimeout(() => {
-          instance.updateMessage({
-            id: message.id,
-            status: 'succeed',
-            content: '发送成功'
-          })
-        }, 2000)
+        message.status = 'going'
+        instance.updateMessage(message)
+        if (!WebSocket.connectSuccess()) {
+          WebSocket.reconnect() // 重新连接
+          const intervalId = setInterval(() => {
+            if (WebSocket.reconnectOver()) {
+              clearInterval(intervalId) // 清除定时器
+              if (WebSocket.connectSuccess()) {
+                message.status = 'succeed'
+                WebSocket.send(JSON.stringify(message))
+                instance.updateMessage(message)
+              } else {
+                instance.updateMessage({
+                  id: message.id,
+                  status: 'failed',
+                  content: message.content
+                })
+              }
+            }
+          }, 500)
+        } else {
+          message.status = 'succeed'
+          WebSocket.send(JSON.stringify(message))
+          instance.updateMessage(message)
+        }
       }
       if (message.type === 'image') {
         const imgList = [{ fileName: '图片', fileUrl: message.content, downloadLink: message.content }]
@@ -395,19 +415,34 @@ export default {
       instance.closeDrawer()
     },
     async handleSend(message, next, file) {
-      console.log('发送了消息：', message)
+      message.id = generateRandId() // 生成雪花id
       if (file) {
         console.log('发送的消息类型是文件', file)
         const form = new FormData()
         form.append('file', file)
-        // const { data } = await uploadFileApi(form)
-        // message.content = data.url
+        const { data } = await uploadFileApi(form).catch(() => {
+          next({ status: 'failed' })
+        })
+        message.content = data.url
       }
-
-      // console.log(message, next, file)
-      setTimeout(() => {
+      if (!WebSocket.connectSuccess()) {
+        WebSocket.reconnect() // 重新连接
+        const intervalId = setInterval(() => {
+          console.log('继续连接')
+          if (WebSocket.reconnectOver()) {
+            clearInterval(intervalId) // 清除定时器
+            if (WebSocket.connectSuccess()) {
+              WebSocket.send(JSON.stringify(message))
+              next()
+            } else {
+              next({ status: 'failed' })
+            }
+          }
+        }, 500)
+      } else {
+        WebSocket.send(JSON.stringify(message))
         next()
-      }, 1000)
+      }
     },
     handlePullMessages(contact, next, instance) {
       const otheruser = {
@@ -448,6 +483,12 @@ export default {
       this.download.fileName = file.type === 'image' ? '图片' : '文件'
       this.$refs.downloadFile.click()
       console.log('下载文件end')
+    },
+    onMessage() {
+
+    },
+    onOpen() {
+
     }
   }
 }
