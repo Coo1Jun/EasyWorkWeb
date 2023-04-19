@@ -350,6 +350,10 @@ export default {
     //   return <span>[语音]</span>
     // })
   },
+  beforeDestroy() {
+    WebSocket.closeConnect()
+    // console.log('聊天模块销毁了')
+  },
   methods: {
     handleMenuAvatarClick() {
       console.log('Event:menu-avatar-click')

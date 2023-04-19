@@ -105,6 +105,11 @@ export function send(msg) {
   websocket.send(msg)
 }
 
+// 主动关闭连接
+function closeConnect() {
+  websocket.close()
+}
+
 export default {
   init,
   setOnMessage,
@@ -114,5 +119,6 @@ export default {
   send,
   reconnect,
   reconnectOver,
-  connectSuccess
+  connectSuccess,
+  closeConnect
 }
