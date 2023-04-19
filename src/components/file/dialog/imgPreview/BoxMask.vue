@@ -356,7 +356,7 @@ export default {
   overflow: auto;
   width: 100%;
   height: 100%;
-  z-index: 2;
+  z-index: 1001;
   text-align: center;
   display: flex;
   align-items: center;
