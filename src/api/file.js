@@ -10,3 +10,15 @@ export function getFilePath(fileId) {
     method: 'get'
   })
 }
+
+export function uploadFileApi(data) {
+  return request({
+    url: uploadUrl,
+    method: 'post',
+    data,
+    headers: {
+      'content-type': 'multipart/form-data'
+    }
+  })
+}
+
