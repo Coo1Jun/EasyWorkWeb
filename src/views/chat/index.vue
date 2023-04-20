@@ -56,7 +56,7 @@ import SnowflakeId from 'snowflake-id'
 import WebSocket from '@/api/websocket'
 import { mapGetters } from 'vuex'
 import { uploadFileApi } from '@/api/file'
-import { getChatRecordsApi, getContactListApi } from '@/api/chat'
+import { getChatRecordsApi, getContactListApi, deleteContactApi } from '@/api/chat'
 
 const getTime = () => {
   return new Date().getTime()
@@ -171,6 +171,7 @@ export default {
             })
             if (IMUI.currentContactId === contact.id) IMUI.changeContact(null)
             hide()
+            deleteContactApi(contact.keyId)
           }
         },
         {

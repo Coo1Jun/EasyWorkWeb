@@ -25,3 +25,15 @@ export function getContactListApi(params) {
     params
   })
 }
+
+/**
+ * 删除联系人
+ * @param {*} params
+ * @returns
+ */
+export function deleteContactApi(ids) {
+  return request({
+    url: `/api/ew-chat/contact/${ids}`,
+    method: 'delete'
+  })
+}
