@@ -47,6 +47,17 @@
       :href="download.url"
       :download="download.fileName"
     />
+    <el-dialog
+      title="修改备注"
+      :visible.sync="editRemarkVisible"
+      width="30%"
+    >
+      <el-input v-model="editRemark" />
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="editRemarkVisible = false">取 消</el-button>
+        <el-button type="primary" @click="editRemarkConfirm">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -56,7 +67,7 @@ import SnowflakeId from 'snowflake-id'
 import WebSocket from '@/api/websocket'
 import { mapGetters } from 'vuex'
 import { uploadFileApi } from '@/api/file'
-import { getChatRecordsApi, getContactListApi, deleteContactApi } from '@/api/chat'
+import { getChatRecordsApi, getContactListApi, deleteContactApi, updateContactApi } from '@/api/chat'
 
 const getTime = () => {
   return new Date().getTime()
@@ -70,6 +81,9 @@ export default {
   name: 'Chat',
   data() {
     return {
+      editRemarkVisible: false,
+      editRemark: '',
+      contactEditor: {},
       download: {
         url: '',
         fileName: ''
@@ -165,17 +179,29 @@ export default {
           text: '删除该聊天',
           click: (e, instance, hide) => {
             const { IMUI, contact } = instance
-            IMUI.updateContact({
-              id: contact.id,
-              lastContent: null
+            this.$confirm('此操作将删除该聊天窗口, 是否继续?', '提示', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            }).then(async() => {
+              const { success } = await deleteContactApi(contact.keyId)
+              if (success) {
+                IMUI.updateContact({
+                  id: contact.id,
+                  lastContent: null
+                })
+                if (IMUI.currentContactId === contact.id) IMUI.changeContact(null)
+              }
             })
-            if (IMUI.currentContactId === contact.id) IMUI.changeContact(null)
             hide()
-            deleteContactApi(contact.keyId)
           }
         },
         {
-          text: '设置备注和标签'
+          text: '设置备注和标签',
+          click: (e, instance, hide) => {
+            this.openEditRemark(instance.contact)
+            hide()
+          }
         }
         // {
         //   text: '投诉'
@@ -439,7 +465,27 @@ export default {
       message.toContactId = message.fromUser.id // 接收到消息，将聊天框的id改为对方的id，这样才能定位到对方的聊天框
       IMUI.appendMessage(message, true)
     },
-    onOpen() {}
+    onOpen() {},
+    openEditRemark(contact) {
+      this.editRemarkVisible = true
+      this.editRemark = contact.displayName
+      this.contactEditor = contact
+    },
+    async editRemarkConfirm() {
+      this.editRemarkVisible = false
+      if (this.editRemark !== '' && this.editRemark !== this.contactEditor.displayName) {
+        const { success } = await updateContactApi({
+          id: this.contactEditor.keyId,
+          remarkName: this.editRemark
+        })
+        if (success) {
+          this.$refs.IMUI.updateContact({
+            id: this.contactEditor.id,
+            displayName: this.editRemark
+          })
+        }
+      }
+    }
   }
 }
 
