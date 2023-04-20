@@ -9,14 +9,14 @@
       :user="user"
       :contextmenu="contextmenu"
       :contact-contextmenu="contactContextmenu"
+      :wrap-key="(e)=>e.keyCode === 13 && (e.shiftKey || e.ctrlKey)"
+      :send-key="(e)=>e.keyCode === 13 && (!e.ctrlKey && !e.shiftKey)"
       hide-menu
       :hide-message-name="hideMessageName"
       :hide-message-time="hideMessageTime"
-      @change-menu="handleChangeMenu"
       @change-contact="handleChangeContact"
       @pull-messages="handlePullMessages"
       @message-click="handleMessageClick"
-      @menu-avatar-click="handleMenuAvatarClick"
       @send="handleSend"
     >
       <template #cover>
@@ -35,6 +35,9 @@
           ($refs.IMUI ? $refs.IMUI.drawerVisible : false) ? "关闭" : "打开"
         }}抽屉</small>
         <br>
+      </template>
+      <template #editor-footer>
+        <p>使用 enter 快捷发送消息</p>
       </template>
     </lemon-imui>
     <a
@@ -302,9 +305,6 @@ export default {
     // console.log('聊天模块销毁了')
   },
   methods: {
-    handleMenuAvatarClick() {
-      console.log('Event:menu-avatar-click')
-    },
     handleMessageClick(e, key, message, instance) {
       // console.log('点击了消息', e, key, message)
 
@@ -423,10 +423,6 @@ export default {
         next([], true)
       }
     },
-    handleChangeMenu(menuName) {
-      console.log('Event:change-menu, menuName -> ', menuName)
-    },
-    openCustomContainer() {},
     downloadFile(file) {
       console.log('下载文件start')
       this.download.url = file.content
