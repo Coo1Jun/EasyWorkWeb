@@ -250,7 +250,7 @@ export default {
       avatar: this.userInfo.portrait
     }
     // 初始化websocket
-    WebSocket.init(this.userInfo.userid, this.onOpen, this.onMessage)
+    WebSocket.init(this.userInfo.userid + ',' + getTime().toString(), this.onOpen, this.onMessage)
     // const contactData1 = {
     //   id: 'contact-1',
     //   displayName: '工作协作群',
