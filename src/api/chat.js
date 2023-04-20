@@ -12,3 +12,16 @@ export function getChatRecordsApi(params) {
     params
   })
 }
+
+/**
+ * 获取联系人列表
+ * @param {*} params
+ * @returns
+ */
+export function getContactListApi(params) {
+  return request({
+    url: '/api/ew-chat/contact/list',
+    method: 'get',
+    params
+  })
+}

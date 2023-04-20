@@ -52,7 +52,7 @@ import SnowflakeId from 'snowflake-id'
 import WebSocket from '@/api/websocket'
 import { mapGetters } from 'vuex'
 import { uploadFileApi } from '@/api/file'
-import { getChatRecordsApi } from '@/api/chat'
+import { getChatRecordsApi, getContactListApi } from '@/api/chat'
 
 const getTime = () => {
   return new Date().getTime()
@@ -60,31 +60,6 @@ const getTime = () => {
 const snowflake = new SnowflakeId()
 const generateRandId = () => {
   return snowflake.generate() // 生成雪花id
-}
-const generateRandWord = () => {
-  return Math.random()
-    .toString(36)
-    .substr(2)
-}
-const generateMessage = (toContactId = '', fromUser) => {
-  if (!fromUser) {
-    fromUser = {
-      id: 'system',
-      displayName: '系统测试',
-      avatar: 'http://upload.qqbodys.com/allimg/1710/1035512943-0.jpg'
-    }
-  }
-  return {
-    id: generateRandId(),
-    status: 'succeed',
-    type: 'text',
-    sendTime: getTime(),
-    content: generateRandWord(),
-    // fileSize: 1231,
-    // fileName: "asdasd.doc",
-    toContactId,
-    fromUser
-  }
 }
 
 export default {
@@ -241,7 +216,7 @@ export default {
   computed: {
     ...mapGetters(['userInfo'])
   },
-  mounted() {
+  async mounted() {
     // console.log(this.userInfo)
     // 初始化当前用户
     this.user = {
@@ -251,15 +226,9 @@ export default {
     }
     // 初始化websocket
     WebSocket.init(this.userInfo.userid + ',' + getTime().toString(), this.onOpen, this.onMessage)
-    // const contactData1 = {
-    //   id: 'contact-1',
-    //   displayName: '工作协作群',
-    //   avatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/d534b989bc074da0b190f2a9e87c9e45.png',
-    //   index: '[1]群组',
-    //   unread: 0,
-    //   lastSendTime: 1566047865417,
-    //   lastContent: '2'
-    // }
+    // 初始化联系人列表
+    const { data } = await getContactListApi().catch(() => {})
+
     // const contactData2 = {
     //   id: 'contact-2',
     //   displayName: '自定义内容',
@@ -275,25 +244,15 @@ export default {
     //   lastContent: '12312',
     //   unread: 2
     // }
-    const contactData3 = {
-      id: '1634404380204183554',
-      displayName: '李正帆测试',
-      avatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/d534b989bc074da0b190f2a9e87c9e45.png',
-      index: '2',
-      unread: 32,
-      lastSendTime: 3,
-      lastContent: '你好123'
-    }
-    const contactData4 = {
-      id: '1557662367922384897',
-      displayName: '小明',
-      avatar:
-        'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/db02c8745a314524b18cbf5b9e310730.png',
-      index: '',
-      unread: 1,
-      lastSendTime: 3,
-      lastContent: '吃饭了嘛'
-    }
+    // const contactData3 = {
+    //   id: '1634404380204183554',
+    //   displayName: '李正帆测试',
+    //   avatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/d534b989bc074da0b190f2a9e87c9e45.png',
+    //   // index: '2',
+    //   unread: 32,
+    //   lastSendTime: 1566047865417,
+    //   lastContent: '你好123'
+    // }
 
     const { IMUI } = this.$refs
 
@@ -301,12 +260,12 @@ export default {
     //   return message.content
     // })
 
-    const contactList = [
-      { ...contactData3 },
-      { ...contactData4 }
-    ]
+    // const contactList = [
+    //   { ...contactData3 },
+    //   { ...contactData1 },
+    // ]
 
-    IMUI.initContacts(contactList)
+    IMUI.initContacts(data)
 
     IMUI.initEditorTools([
       {
