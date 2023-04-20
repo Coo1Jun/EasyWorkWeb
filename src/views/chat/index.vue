@@ -83,7 +83,7 @@ export default {
     return {
       editRemarkVisible: false,
       editRemark: '',
-      contactEditor: {},
+      CurrentContact: null,
       download: {
         url: '',
         fileName: ''
@@ -219,7 +219,6 @@ export default {
       ],
       hideMenu: false,
       hideMenuAvatar: false,
-      hideMessageName: false,
       hideMessageTime: false,
       curContact: {
         id: '',
@@ -229,7 +228,13 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['userInfo'])
+    ...mapGetters(['userInfo']),
+    hideMessageName() {
+      if (this.CurrentContact !== null) {
+        return this.CurrentContact.type === 'person'
+      }
+      return false
+    }
   },
   async mounted() {
     // console.log(this.userInfo)
@@ -387,6 +392,7 @@ export default {
     },
     handleChangeContact(contact, instance) {
       // console.log('切换聊天窗口，当前为=》', contact)
+      this.CurrentContact = contact
       instance.updateContact({
         id: contact.id,
         unread: 0
@@ -469,18 +475,18 @@ export default {
     openEditRemark(contact) {
       this.editRemarkVisible = true
       this.editRemark = contact.displayName
-      this.contactEditor = contact
+      this.CurrentContact = contact
     },
     async editRemarkConfirm() {
       this.editRemarkVisible = false
-      if (this.editRemark !== '' && this.editRemark !== this.contactEditor.displayName) {
+      if (this.editRemark !== '' && this.editRemark !== this.CurrentContact.displayName) {
         const { success } = await updateContactApi({
-          id: this.contactEditor.keyId,
+          id: this.CurrentContact.keyId,
           remarkName: this.editRemark
         })
         if (success) {
           this.$refs.IMUI.updateContact({
-            id: this.contactEditor.id,
+            id: this.CurrentContact.id,
             displayName: this.editRemark
           })
         }
