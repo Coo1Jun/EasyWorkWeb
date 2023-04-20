@@ -72,58 +72,58 @@ export default {
       },
       user: {},
       contextmenu: [
-        {
-          click: (e, instance, hide) => {
-            const { IMUI, message } = instance
-            const data = {
-              id: generateRandId(),
-              type: 'event',
-              // 使用 jsx 时 click必须使用箭头函数（使上下文停留在vue内）
-              content: (
-                <div>
-                  <span>
-                    你撤回了一条消息{' '}
-                  <span
-                    v-show={message.type === 'text'}
-                    style='color:#333;cursor:pointer'
-                    content={message.content}
-                    on-click={e => {
-                      IMUI.setEditorValue(e.target.getAttribute('content'))
-                    }}
-                  >
-                      重新编辑
-                  </span>
-                  </span>
-                </div>
-              ),
+        // {
+        //   click: (e, instance, hide) => {
+        //     const { IMUI, message } = instance
+        //     const data = {
+        //       id: generateRandId(),
+        //       type: 'event',
+        //       // 使用 jsx 时 click必须使用箭头函数（使上下文停留在vue内）
+        //       content: (
+        //         <div>
+        //           <span>
+        //             你撤回了一条消息{' '}
+        //           <span
+        //             v-show={message.type === 'text'}
+        //             style='color:#333;cursor:pointer'
+        //             content={message.content}
+        //             on-click={e => {
+        //               IMUI.setEditorValue(e.target.getAttribute('content'))
+        //             }}
+        //           >
+        //               重新编辑
+        //           </span>
+        //           </span>
+        //         </div>
+        //       ),
 
-              toContactId: message.toContactId,
-              sendTime: getTime()
-            }
-            IMUI.removeMessage(message.id)
-            IMUI.appendMessage(data, true)
-            hide()
-          },
-          visible: instance => {
-            return instance.message.fromUser.id === this.user.id
-          },
-          text: '撤回消息'
-        },
-        {
-          visible: instance => {
-            return instance.message.fromUser.id !== this.user.id
-          },
-          text: '举报'
-        },
-        {
-          text: '转发'
-        },
-        {
-          visible: instance => {
-            return instance.message.type === 'text'
-          },
-          text: '复制文字'
-        },
+        //       toContactId: message.toContactId,
+        //       sendTime: getTime()
+        //     }
+        //     IMUI.removeMessage(message.id)
+        //     IMUI.appendMessage(data, true)
+        //     hide()
+        //   },
+        //   visible: instance => {
+        //     return instance.message.fromUser.id === this.user.id
+        //   },
+        //   text: '撤回消息'
+        // },
+        // {
+        //   visible: instance => {
+        //     return instance.message.fromUser.id !== this.user.id
+        //   },
+        //   text: '举报'
+        // },
+        // {
+        //   text: '转发'
+        // },
+        // {
+        //   visible: instance => {
+        //     return instance.message.type === 'text'
+        //   },
+        //   text: '复制文字'
+        // },
         {
           visible: instance => {
             return instance.message.type === 'image'
@@ -143,18 +143,18 @@ export default {
             this.downloadFile(instance.message)
             hide()
           }
-        },
-        {
-          click: (e, instance, hide) => {
-            const { IMUI, message } = instance
-            IMUI.removeMessage(message.id)
-            console.log('删除消息', message)
-            hide()
-          },
-          icon: 'lemon-icon-folder',
-          color: 'red',
-          text: '删除'
         }
+        // {
+        //   click: (e, instance, hide) => {
+        //     const { IMUI, message } = instance
+        //     IMUI.removeMessage(message.id)
+        //     console.log('删除消息', message)
+        //     hide()
+        //   },
+        //   icon: 'lemon-icon-folder',
+        //   color: 'red',
+        //   text: '删除'
+        // }
       ],
       contactContextmenu: [
         {
@@ -171,36 +171,20 @@ export default {
         },
         {
           text: '设置备注和标签'
-        },
-        {
-          text: '投诉'
-        },
-        {
-          icon: 'lemon-icon-message',
-          render: (h, instance, hide) => {
-            return (
-              <div style='display:flex;justify-content:space-between;align-items:center;width:130px'>
-                <span>加入黑名单</span>
-                <span>
-                  <input type='checkbox' id='switch' />
-                  <label id='switch-label' for='switch'>
-                    Toggle
-                  </label>
-                </span>
-              </div>
-            )
-          }
-        },
-        {
-          click(e, instance, hide) {
-            const { IMUI, contact } = instance
-            IMUI.removeContact(contact.id)
-            if (IMUI.currentContactId === contact.id) IMUI.changeContact(null)
-            hide()
-          },
-          color: 'red',
-          text: '删除好友'
         }
+        // {
+        //   text: '投诉'
+        // },
+        // {
+        //   click(e, instance, hide) {
+        //     const { IMUI, contact } = instance
+        //     IMUI.removeContact(contact.id)
+        //     if (IMUI.currentContactId === contact.id) IMUI.changeContact(null)
+        //     hide()
+        //   },
+        //   color: 'red',
+        //   text: '删除好友'
+        // }
       ],
       hideMenu: false,
       hideMenuAvatar: false,
