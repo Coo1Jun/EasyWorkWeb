@@ -24,6 +24,7 @@
           <i class="lemon-icon-message" />
           <p><b>尽情畅聊 ！</b></p>
           <p><b>HAVE A NICE CHAT !</b></p>
+          <p><b>点击从「 <a class="contact-a" @click="$router.push('/contacts')">通讯录</a> 」选择聊天对象</b></p>
         </div>
       </template>
       <template #message-title="contact">
@@ -358,7 +359,7 @@ export default {
       IMUI.openDrawer(params)
     },
     handleChangeContact(contact, instance) {
-      // console.log('切换聊天窗口')
+      // console.log('切换聊天窗口，当前为=》', contact)
       instance.updateContact({
         id: contact.id,
         unread: 0
@@ -446,6 +447,10 @@ export default {
 <style scoped>
 .chat-container{
   height: 600px;
+}
+.contact-a {
+  font-size: 18px;
+  color: #7768fd;
 }
 </style>
 <style lang="stylus" scoped>
