@@ -67,7 +67,12 @@ import SnowflakeId from 'snowflake-id'
 import WebSocket from '@/api/websocket'
 import { mapGetters } from 'vuex'
 import { uploadFileApi } from '@/api/file'
-import { getChatRecordsApi, getContactListApi, deleteContactApi, updateContactApi } from '@/api/chat'
+import {
+  getChatRecordsApi,
+  getContactListApi,
+  deleteContactApi,
+  updateContactApi,
+  addContactApi } from '@/api/chat'
 
 const getTime = () => {
   return new Date().getTime()
@@ -246,6 +251,18 @@ export default {
     }
     // 初始化websocket
     WebSocket.init(this.userInfo.userid + ',' + getTime().toString(), this.onOpen, this.onMessage)
+    // 如果query参数存在，则是由通讯录页面跳转而来，先保存联系人
+    const query = this.$route.query
+    if (query.contactId && query.type) {
+      const data = {
+        contactId: query.contactId,
+        type: query.type
+      }
+      if (query.type === 'group') {
+        data.name = query.name
+      }
+      await addContactApi(data)
+    }
     // 初始化联系人列表
     const { data } = await getContactListApi().catch(() => {})
 
@@ -328,6 +345,10 @@ export default {
       }
     ])
     IMUI.initEmoji(EmojiData)
+    // 如果参数存在，则定位到指定的聊天窗口
+    if (query.contactId) {
+      IMUI.changeContact(query.contactId)
+    }
 
     // IMUI.setLastContentRender('voice', message => {
     //   return <span>[语音]</span>
@@ -336,6 +357,9 @@ export default {
   beforeDestroy() {
     WebSocket.closeConnect()
     // console.log('聊天模块销毁了')
+    this.$refs.IMUI.clearMessages() // 清空所有的本地消息缓存，当重新进入页面是会重新请求获得消息。这样做的原因如下：
+    // 原因：由于IMUI组件可能有做全局缓存，即使离开此页面组件销毁了，缓存还在。所有如果不清空，下次重新进入此页面，
+    // 组件并不会触发pull-messages事件，导致如果页面消息不够多，最上方会一直在转圈圈
   },
   methods: {
     handleMessageClick(e, key, message, instance) {

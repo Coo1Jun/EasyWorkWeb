@@ -150,7 +150,7 @@ export const constantRoutes = [
       {
         path: '',
         name: 'Contacts',
-        component: () => import('@/views/404'),
+        component: () => import('@/views/addressbook/index'),
         meta: { title: '通讯录', icon: 'el-icon-notebook-2' }
       }
     ]

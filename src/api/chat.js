@@ -50,3 +50,16 @@ export function updateContactApi(data) {
     data
   })
 }
+
+/**
+ * 添加联系人信息
+ * @param {*} params
+ * @returns
+ */
+export function addContactApi(data) {
+  return request({
+    url: `/api/ew-chat/contact`,
+    method: 'post',
+    data
+  })
+}
