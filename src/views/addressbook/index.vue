@@ -21,7 +21,8 @@
       个人通讯录
     </div>
     <AddressBookList
-      :data="data"
+      v-loading="personAddressBookLoading"
+      :data="personAddressBookData"
       enable-page
       :total="personSearch.total"
       @page-change="handlePersonPageChange"
@@ -32,55 +33,15 @@
 <script>
 import AddressBookList from '@/components/AddressBookList'
 import { getMemberListApi, getGroupListApi } from '@/api/group'
+import { getAddressBookListApi } from '@/api/addressbook'
+
 export default {
   name: 'AddressBook',
   components: { AddressBookList },
   data() {
     return {
-      data: [
-        {
-          id: '1633362162592845826',
-          name: '小明',
-          avatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/db02c8745a314524b18cbf5b9e310730.png',
-          email: '142517@qq.com',
-          description: '我是一个帅小伙'
-        },
-        {
-          id: '1557662367922384897',
-          name: '小明',
-          avatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/db02c8745a314524b18cbf5b9e310730.png',
-          email: '142517@qq.com',
-          description: '我是一个帅小伙'
-        },
-        {
-          id: '1',
-          name: '小明',
-          avatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/db02c8745a314524b18cbf5b9e310730.png',
-          email: '142517@qq.com',
-          description: '我是一个帅小伙'
-        },
-        {
-          id: '1',
-          name: '小明',
-          avatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/db02c8745a314524b18cbf5b9e310730.png',
-          email: '142517@qq.com',
-          description: '我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙我是一个帅小伙'
-        },
-        {
-          id: '1',
-          name: '小明',
-          avatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/db02c8745a314524b18cbf5b9e310730.png',
-          email: '142517@qq.com',
-          description: '我是一个帅小伙'
-        },
-        {
-          id: '1',
-          name: '小明',
-          avatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/db02c8745a314524b18cbf5b9e310730.png',
-          email: '142517@qq.com',
-          description: '我是一个帅小伙'
-        }
-      ],
+      personAddressBookData: [],
+      personAddressBookLoading: false,
       groupActiveName: '',
       groups: [],
       groupAddressBookData: [],
@@ -112,13 +73,14 @@ export default {
     // 获取项目组信息列表
     const groupResponse = await getGroupListApi()
     this.groups = groupResponse.data.records
+    // 获取个人通讯录列表
+    this.handlePersonSearch()
   },
   methods: {
     handlePersonPageChange(currentPage, pageSize) {
       this.personSearch.currentPage = currentPage
       this.personSearch.pageSize = pageSize
-      console.log('当前页为=》', currentPage)
-      console.log('当前页大小为=》', pageSize)
+      this.handlePersonSearch()
     },
     handleGroupPageChange(currentPage, pageSize) {
       this.groupSearch.currentPage = currentPage
@@ -137,6 +99,18 @@ export default {
       this.groupAddressBookData = memberList.data.records
       this.groupSearch.total = memberList.data.total
       this.groupAddressBookLoading = false
+    },
+    async handlePersonSearch() {
+      this.personAddressBookLoading = true
+      const personResponse = await getAddressBookListApi({
+        name: this.personSearch.name,
+        email: this.personSearch.email,
+        limit: this.personSearch.pageSize,
+        pageNo: this.personSearch.currentPage
+      })
+      this.personAddressBookData = personResponse.data.records
+      this.personSearch.total = personResponse.data.total
+      this.personAddressBookLoading = false
     }
   }
 }
