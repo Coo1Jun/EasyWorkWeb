@@ -259,7 +259,7 @@ export default {
         type: query.type
       }
       if (query.type === 'group') {
-        data.name = query.name
+        data.name = '【项目组】' + query.name
       }
       await addContactApi(data)
     }
@@ -424,6 +424,7 @@ export default {
       instance.closeDrawer()
     },
     async handleSend(message, next, file) {
+      message.contactType = this.$refs.IMUI.getCurrentContact().type
       message.id = generateRandId() // 生成雪花id
       if (file) {
         console.log('发送的消息类型是文件', file)

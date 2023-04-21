@@ -8,6 +8,7 @@
         <template slot="title">
           <p style="font-size: 18px">{{ g.name }}</p>
         </template>
+        <el-button round size="small" type="primary" style="margin-left: 20px" @click="toGroupChat(g)">进入群聊</el-button>
         <AddressBookList
           v-loading="groupAddressBookLoading"
           :data="groupAddressBookData"
@@ -111,6 +112,9 @@ export default {
       this.personAddressBookData = personResponse.data.records
       this.personSearch.total = personResponse.data.total
       this.personAddressBookLoading = false
+    },
+    toGroupChat(data) {
+      this.$router.push({ path: '/message/chat', query: { type: 'group', contactId: data.id, name: data.name }})
     }
   }
 }
