@@ -4,7 +4,7 @@ let success = false
 let maxTimes = 10
 let curTimes = 0
 let intervalId
-const defaultUrl = 'ws://localhost:8022/api/ew-chat/websocket'
+const defaultUrl = 'ws://localhost:8022/api/ew-communication/websocket'
 
 const externalFun = {
   onOpen: () => {},

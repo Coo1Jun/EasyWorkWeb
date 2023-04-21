@@ -7,7 +7,7 @@ import request from '@/utils/request'
  */
 export function getAddressBookListApi(params) {
   return request({
-    url: '/api/ew-chat/address/list',
+    url: '/api/ew-communication/address/list',
     method: 'get',
     params
   })

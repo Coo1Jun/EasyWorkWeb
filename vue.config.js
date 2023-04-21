@@ -45,7 +45,7 @@ module.exports = {
         target: 'http://localhost:8021',
         changeOrigin: true
       },
-      '/api/ew-chat': {
+      '/api/ew-communication': {
         target: 'http://localhost:8022',
         changeOrigin: true
       }

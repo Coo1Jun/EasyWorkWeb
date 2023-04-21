@@ -7,7 +7,7 @@ import request from '@/utils/request'
  */
 export function getChatRecordsApi(params) {
   return request({
-    url: '/api/ew-chat/chat/history/list',
+    url: '/api/ew-communication/chat/history/list',
     method: 'get',
     params
   })
@@ -20,7 +20,7 @@ export function getChatRecordsApi(params) {
  */
 export function getContactListApi(params) {
   return request({
-    url: '/api/ew-chat/contact/list',
+    url: '/api/ew-communication/contact/list',
     method: 'get',
     params
   })
@@ -33,7 +33,7 @@ export function getContactListApi(params) {
  */
 export function deleteContactApi(ids) {
   return request({
-    url: `/api/ew-chat/contact/${ids}`,
+    url: `/api/ew-communication/contact/${ids}`,
     method: 'delete'
   })
 }
@@ -45,7 +45,7 @@ export function deleteContactApi(ids) {
  */
 export function updateContactApi(data) {
   return request({
-    url: `/api/ew-chat/contact`,
+    url: `/api/ew-communication/contact`,
     method: 'put',
     data
   })
@@ -58,7 +58,7 @@ export function updateContactApi(data) {
  */
 export function addContactApi(data) {
   return request({
-    url: `/api/ew-chat/contact`,
+    url: `/api/ew-communication/contact`,
     method: 'post',
     data
   })
