@@ -424,7 +424,7 @@ export default {
       instance.closeDrawer()
     },
     async handleSend(message, next, file) {
-      message.contactType = this.$refs.IMUI.getCurrentContact().type
+      message.toContactType = this.$refs.IMUI.getCurrentContact().type
       message.id = generateRandId() // 生成雪花id
       if (file) {
         console.log('发送的消息类型是文件', file)
@@ -471,6 +471,7 @@ export default {
       }
       const response = await getChatRecordsApi({
         toContactId: contact.id,
+        contactType: contact.type,
         pageNo: this.curContact.pageNo,
         limit: this.curContact.limit
       }).catch(() => { next([], true) })
@@ -493,7 +494,9 @@ export default {
       const message = JSON.parse(msg)
       // console.log(message)
       const IMUI = this.$refs.IMUI
-      message.toContactId = message.fromUser.id // 接收到消息，将聊天框的id改为对方的id，这样才能定位到对方的聊天框
+      if (message.toContactType === 'person') {
+        message.toContactId = message.fromUser.id // 接收到消息，将聊天框的id改为对方的id，这样才能定位到对方的聊天框
+      }
       IMUI.appendMessage(message, true)
     },
     onOpen() {},
