@@ -36,6 +36,19 @@
         </template>
       </el-table-column>
     </el-table>
+    <div v-if="enablePage" style="float: right;margin-top: 20px;margin-bottom: 20px">
+      <el-pagination
+        background
+        :current-page.sync="page.currentPage"
+        :page-sizes="[10, 20, 50]"
+        :page-size="page.pageSize"
+        :pager-count="5"
+        layout="sizes, prev, pager, next, jumper"
+        :total="total"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      />
+    </div>
   </div>
 </template>
 
@@ -48,11 +61,27 @@ export default {
     data: {
       type: Array,
       required: true
+    },
+    enablePage: {
+      type: Boolean,
+      default: false
+    },
+    total: {
+      type: Number,
+      default: 0
     }
   },
   data() {
     return {
+      page: {
+        currentPage: 1,
+        pageSize: 10
+      }
     }
+  },
+  beforeDestroy() {
+    // 解绑所有自定义事件
+    this.$off()
   },
   methods: {
     handleClickImg(user) {
@@ -61,6 +90,13 @@ export default {
     },
     toChat(data) {
       this.$router.push({ path: '/message/chat', query: { type: 'person', contactId: data.id }})
+    },
+    handleSizeChange(val) {
+      this.page.pageSize = val
+      this.$emit('page-change', this.page.currentPage, this.page.pageSize)
+    },
+    handleCurrentChange() {
+      this.$emit('page-change', this.page.currentPage, this.page.pageSize)
     }
   }
 }
