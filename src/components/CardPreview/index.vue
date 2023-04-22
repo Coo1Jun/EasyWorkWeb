@@ -106,6 +106,7 @@
                 class="upload-demo"
                 :action="uploadUrl"
                 :on-preview="handlePreview"
+                :before-remove="handleBeforeRemove"
                 :on-remove="handleRemove"
                 :on-success="uploadSuccess"
                 :on-error="uploadError"
@@ -561,6 +562,13 @@ export default {
         // 使用kkfileview在线预览 官网链接https://file.kkview.cn 自己的服务器：http://47.120.39.20:8012
         window.open(`https://file.kkview.cn/onlinePreview?url=` + encodeURIComponent(base64Encode.encode(file.url)))
       }
+    },
+    handleBeforeRemove() {
+      return this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
     },
     handleRemove(file, fileList) {
       console.log(file)
