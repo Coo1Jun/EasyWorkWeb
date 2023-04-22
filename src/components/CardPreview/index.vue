@@ -188,6 +188,7 @@ import { uploadUrl } from '@/api/file'
 import { getMemberListByGroupIdApi } from '@/api/group'
 import { getUserInfoApi } from '@/api/user'
 import { editWorkItemApi } from '@/api/workitem'
+import * as base64Encode from 'js-base64'
 
 export default {
   name: 'CardPreview',
@@ -548,8 +549,18 @@ export default {
       editor.destroy() // 组件销毁时，及时销毁编辑器
     },
     handlePreview(file) {
-      console.log(file)
-      console.log(this.workItem.fileList)
+      // console.log(file)
+      // console.log(this.workItem.fileList)
+      // console.log('附件预览')
+      const PIC = ['png', 'jpg', 'jpeg', 'gif', 'svg']
+      const fileExtension = file.name.split('.').pop().toLowerCase()
+      if (PIC.includes(fileExtension)) {
+        const imgList = [{ fileName: file.name, fileUrl: file.url, downloadLink: file.url }]
+        this.$openBox.imgPreview({ imgList, defaultIndex: 0 })
+      } else {
+        // 使用kkfileview在线预览 官网链接https://file.kkview.cn 自己的服务器：http://47.120.39.20:8012
+        window.open(`https://file.kkview.cn/onlinePreview?url=` + encodeURIComponent(base64Encode.encode(file.url)))
+      }
     },
     handleRemove(file, fileList) {
       console.log(file)
