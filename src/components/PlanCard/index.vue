@@ -200,12 +200,14 @@ export default {
     curEpic: {
       handler(val) {
         this.refreshData()
+        this.$emit('clearSearchData')
       },
       deep: true
     },
     searchData: {
       handler(val) {
-        console.log('搜索条件为：', val)
+        // console.log('搜索条件为：', val)
+        this.refreshData()
       },
       deep: true
     }
@@ -322,10 +324,17 @@ export default {
       this.workItemVisible = value
     },
     async refreshData() {
-      const treeResponse = await getWorkItemTreeApi({
+      const postData = {
         projectId: this.curProject.projectId,
         EpicId: this.curEpic.id
-      })
+      }
+      if (this.searchData !== null) {
+        postData.title = this.searchData.cardTitle
+        postData.workType = this.searchData.cardType
+        postData.status = this.searchData.cardStatus
+        postData.principalId = this.searchData.cardPrincipal
+      }
+      const treeResponse = await getWorkItemTreeApi(postData)
       this.workItems = treeResponse.data
     },
     refreshPlanCardData() {

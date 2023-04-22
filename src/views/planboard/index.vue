@@ -45,7 +45,7 @@
           </div>
           <div v-horizontal-scroll class="plan-completed">
             <el-menu
-              default-active="all"
+              :default-active="principalMenuActive"
               mode="horizontal"
               :style="{ width: statistics.userCount * 100 + 100 + 'px' }"
               @select="handleSelect"
@@ -198,6 +198,7 @@
               placeholder="请选择负责人"
               filterable
               clearable
+              @change="changeCardPrincipal"
             >
               <el-option
                 v-for="m in members"
@@ -208,7 +209,14 @@
             </el-select>
           </span>
         </div>
-        <PlanCard ref="PlanCard" :cur-project="curProject" :cur-epic="curEpic" :search-data="searchData" @refreshParentData="refreshParentData" />
+        <PlanCard
+          ref="PlanCard"
+          :cur-project="curProject"
+          :cur-epic="curEpic"
+          :search-data="searchData"
+          @refreshParentData="refreshParentData"
+          @clearSearchData="clearSearchData"
+        />
       </div>
       <div v-else>
         hello
@@ -611,6 +619,7 @@ export default {
       // 校验规则 end =====================
       workItemVisible: false,
       curWorkItemPreview: {},
+      principalMenuActive: 'all',
       // 操作区 =========================
       searchData: {
         cardTitle: '',
@@ -719,6 +728,9 @@ export default {
     handleSelect(key, keyPath) {
       // console.log('当前选择用户id为', key)
       this.searchData.cardPrincipal = key
+      if (key === 'all') {
+        this.searchData.cardPrincipal = ''
+      }
       // console.log(key, keyPath)
     },
     handleNodeClick(data, node) {
@@ -969,6 +981,21 @@ export default {
       getPlansApi({ projectId: this.$route.query.projectId }).then(res => {
         this.planSet = res.data
       })
+    },
+    changeCardPrincipal(val) {
+      this.principalMenuActive = val
+      if (val === '') {
+        this.principalMenuActive = 'all'
+      }
+    },
+    clearSearchData() {
+      // 清空搜索条件
+      this.searchData = {
+        cardTitle: '',
+        cardType: '',
+        cardStatus: '',
+        cardPrincipal: ''
+      }
     }
   }
 }
