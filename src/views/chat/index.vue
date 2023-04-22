@@ -497,6 +497,11 @@ export default {
       if (message.toContactType === 'person') {
         message.toContactId = message.fromUser.id // 接收到消息，将聊天框的id改为对方的id，这样才能定位到对方的聊天框
       }
+      IMUI.appendContact({
+        id: message.toContactId,
+        displayName: message.fromUser.displayName,
+        avatar: message.fromUser.avatar
+      })
       IMUI.appendMessage(message, true)
     },
     onOpen() {},
