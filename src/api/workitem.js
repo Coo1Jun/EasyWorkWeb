@@ -117,3 +117,27 @@ export function getWorkItemByIdApi(params) {
   })
 }
 
+/**
+ * 根据id删除工作项信息
+ * @param {*} params
+ * @returns
+ */
+export function deleteWorkItemByIdApi(id) {
+  return request({
+    url: `/api/ew-project/workitem/fstb/${id}`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 根据id删除工作项信息
+ * @param {*} params
+ * @returns
+ */
+export function deletePlanByIdApi(id) {
+  return request({
+    url: `/api/ew-project/workitem/pe/${id}`,
+    method: 'delete'
+  })
+}
+

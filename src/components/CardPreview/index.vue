@@ -125,6 +125,7 @@
       </div>
       <!-- 右边 -->
       <div class="cp-attribute">
+        <el-button size="small" type="danger" icon="el-icon-delete" @click="deleteWorkItem">删除工作项</el-button>
         <el-collapse v-model="collapseActiveName">
           <el-collapse-item title="属性" name="1">
             <div class="cp-attribute-item">
@@ -188,7 +189,7 @@ import config from '@/config/wangEditor'
 import { uploadUrl } from '@/api/file'
 import { getMemberListByGroupIdApi } from '@/api/group'
 import { getUserInfoApi } from '@/api/user'
-import { editWorkItemApi } from '@/api/workitem'
+import { editWorkItemApi, deleteWorkItemByIdApi } from '@/api/workitem'
 import * as base64Encode from 'js-base64'
 
 export default {
@@ -623,6 +624,24 @@ export default {
         }
         for (const file of fileList) {
           this.fileIdList.push(file.id)
+        }
+      })
+    },
+    deleteWorkItem() {
+      this.$confirm('此操作将永久删除该工作项以及其所有子工作项, 是否继续?', '警告', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async() => {
+        const { success } = await deleteWorkItemByIdApi(this.workItem.id)
+        if (success) {
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          })
+          this.$emit('set-visable', false)
+          // 刷新数据
+          this.$emit('refreshPlanCardData')
         }
       })
     }

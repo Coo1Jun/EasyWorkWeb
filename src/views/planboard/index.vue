@@ -471,7 +471,8 @@ import {
   getWorkItemListApi,
   getWorkItemUserListApi,
   getWorkItemStatisticsApi,
-  getWorkItemByIdApi
+  getWorkItemByIdApi,
+  deletePlanByIdApi
 } from '@/api/workitem'
 import { getProjectInfoApi } from '@/api/project'
 import { getMemberListByGroupIdApi } from '@/api/group'
@@ -756,24 +757,20 @@ export default {
       this.visible = false
     },
     delPlan() {
-      this.$confirm('此操作将永久删除该计划及其任务, 是否继续?', '警告', {
+      this.$confirm('此操作将永久删除该计划及其所有子任务, 是否继续?', '警告', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       })
-        .then(() => {
+        .then(async() => {
           this.$refs.planTree.remove(this.curNode)
-          // todo 发请求给后端
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          })
-        })
-        .catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消删除'
-          })
+          const { success } = await deletePlanByIdApi(this.curData.id)
+          if (success) {
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+          }
         })
     },
     closePlanDialog() {
