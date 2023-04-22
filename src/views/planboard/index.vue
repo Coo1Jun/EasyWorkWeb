@@ -26,6 +26,7 @@
           :data="planSet"
           node-key="id"
           highlight-current
+          default-expand-all
           :props="planSetProps"
           @node-click="handleNodeClick"
           @node-contextmenu="handleContextmenu"
@@ -219,7 +220,7 @@
         />
       </div>
       <div v-else>
-        hello
+        <NoEpicDefault />
       </div>
     </div>
 
@@ -458,6 +459,7 @@
 import PlanNavbar from '@/components/PlanNavbar'
 import PlanCard from '@/components/PlanCard'
 import CardPreview from '@/components/CardPreview'
+import NoEpicDefault from '@/components/NoEpicDefault'
 import Vue from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import config from '@/config/wangEditor'
@@ -488,7 +490,7 @@ Vue.directive('horizontal-scroll', {
 
 export default {
   name: 'Planboard',
-  components: { PlanNavbar, Editor, Toolbar, PlanCard, CardPreview },
+  components: { PlanNavbar, Editor, Toolbar, PlanCard, CardPreview, NoEpicDefault },
   data() {
     const { editorConfig, toolbarConfig } = config
     const validTitle = (rule, value, callback) => {
