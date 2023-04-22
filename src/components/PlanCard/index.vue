@@ -165,6 +165,10 @@ export default {
     curEpic: {
       type: Object,
       required: true
+    },
+    searchData: {
+      type: Object,
+      default: null
     }
   },
   data() {
@@ -196,6 +200,12 @@ export default {
     curEpic: {
       handler(val) {
         this.refreshData()
+      },
+      deep: true
+    },
+    searchData: {
+      handler(val) {
+        console.log('搜索条件为：', val)
       },
       deep: true
     }

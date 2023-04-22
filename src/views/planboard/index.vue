@@ -108,7 +108,107 @@
             <i class="el-icon-arrow-down" />
           </button>
         </div>
-        <PlanCard ref="PlanCard" :cur-project="curProject" :cur-epic="curEpic" @refreshParentData="refreshParentData" />
+        <div>
+          <span style="color: #606266;font-size: 14px">标题：</span>
+          <span style="display: inline-block;">
+            <el-input
+              v-model="searchData.cardTitle"
+              placeholder="请输入标题"
+              clearable
+              size="mini"
+            />
+          </span>
+          <span style="margin-left: 20px">
+            <span style="color: #606266;font-size: 14px">类型：</span>
+            <el-select
+              v-model="searchData.cardType"
+              size="mini"
+              style="width: 140px"
+              placeholder="请选择卡片类型"
+              clearable
+            >
+              <el-option
+                label="Feature"
+                value="Feature"
+              />
+              <el-option
+                label="Story"
+                value="Story"
+              />
+              <el-option
+                label="Task"
+                value="Task"
+              />
+              <el-option
+                label="Bug"
+                value="Bug"
+              />
+            </el-select>
+          </span>
+          <span style="margin-left: 20px">
+            <span style="color: #606266;font-size: 14px">状态：</span>
+            <el-select
+              v-model="searchData.cardStatus"
+              size="mini"
+              style="width: 140px"
+              placeholder="请选择流程状态"
+              filterable
+              clearable
+            >
+              <el-option
+                label="新建"
+                value="新建"
+              />
+              <el-option
+                label="开发中"
+                value="开发中"
+              />
+              <el-option
+                label="复现中"
+                value="复现中"
+              />
+              <el-option
+                label="进行中"
+                value="进行中"
+              />
+              <el-option
+                label="已完成"
+                value="已完成"
+              />
+              <el-option
+                label="已取消"
+                value="已取消"
+              />
+              <el-option
+                label="未复现"
+                value="未复现"
+              />
+              <el-option
+                label="关闭"
+                value="关闭"
+              />
+            </el-select>
+          </span>
+          <span style="margin-left: 20px">
+            <span style="color: #606266;font-size: 14px">负责人：</span>
+            <el-select
+              v-model="searchData.cardPrincipal"
+              size="mini"
+              style="width: 140px"
+              placeholder="请选择负责人"
+              filterable
+              clearable
+            >
+              <el-option
+                v-for="m in members"
+                :key="m.userId"
+                :label="m.name"
+                :value="m.userId"
+              />
+            </el-select>
+          </span>
+        </div>
+        <PlanCard ref="PlanCard" :cur-project="curProject" :cur-epic="curEpic" :search-data="searchData" @refreshParentData="refreshParentData" />
       </div>
       <div v-else>
         hello
@@ -510,7 +610,14 @@ export default {
       },
       // 校验规则 end =====================
       workItemVisible: false,
-      curWorkItemPreview: {}
+      curWorkItemPreview: {},
+      // 操作区 =========================
+      searchData: {
+        cardTitle: '',
+        cardType: '',
+        cardStatus: '',
+        cardPrincipal: ''
+      }
     }
   },
   computed: {
@@ -610,7 +717,9 @@ export default {
   },
   methods: {
     handleSelect(key, keyPath) {
-      console.log(key, keyPath)
+      // console.log('当前选择用户id为', key)
+      this.searchData.cardPrincipal = key
+      // console.log(key, keyPath)
     },
     handleNodeClick(data, node) {
       if (data.workType === 'Epic') {
