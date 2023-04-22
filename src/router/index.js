@@ -160,8 +160,9 @@ export const constantRoutes = [
     path: '/console',
     name: 'Console',
     component: Layout,
-    redirect: '/console/department',
-    meta: { title: '管理后台', icon: 'el-icon-setting' },
+    redirect: '/console/group',
+    meta: { title: '项目组', icon: 'el-icon-user' },
+    // meta: { title: '管理后台', icon: 'el-icon-setting' },
     children: [
       {
         path: 'account',
@@ -170,26 +171,27 @@ export const constantRoutes = [
         component: () => import('@/views/account/index'),
         meta: { title: '账户资料设置' }
       },
+      // {
+      //   path: 'department',
+      //   name: 'Department',
+      //   component: () => import('@/views/department/index'),
+      //   meta: { title: '部门', icon: 'department' },
+      //   children: [
+      //     {
+      //       hidden: true,
+      //       path: 'member',
+      //       name: 'Member',
+      //       component: () => import('@/views/department/member/index'),
+      //       meta: { title: '成员' }
+      //     }
+      //   ]
+      // },
       {
-        path: 'department',
-        name: 'Department',
-        component: () => import('@/views/department/index'),
-        meta: { title: '部门', icon: 'department' },
-        children: [
-          {
-            hidden: true,
-            path: 'member',
-            name: 'Member',
-            component: () => import('@/views/department/member/index'),
-            meta: { title: '成员' }
-          }
-        ]
-      },
-      {
+        hidden: true,
         path: 'group',
         name: 'Group',
         component: () => import('@/views/group/index'),
-        meta: { title: '组', icon: 'el-icon-user' },
+        // meta: { title: '组', icon: 'el-icon-user' },
         children: [
           {
             hidden: true,
