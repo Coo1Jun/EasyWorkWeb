@@ -26,11 +26,12 @@
       <el-table-column
         prop="title"
         label="标题"
-        :min-width="250"
+        :min-width="190"
         show-overflow-tooltip
         class-name="wil-title"
       />
       <el-table-column
+        v-if="$route.name !== 'Dashboard'"
         prop="principal"
         label="负责人"
         :width="100"
@@ -66,11 +67,11 @@
         :width="80"
       />
       <!-- 占位 使table不太靠近右边 -->
-      <el-table-column :width="30">
+      <!-- <el-table-column :width="30">
         <template>
           <span />
         </template>
-      </el-table-column>
+      </el-table-column> -->
     </el-table>
   </div>
 </template>
@@ -96,7 +97,11 @@ export default {
     }
   },
   methods: {
-    cellClick(row, column, cell, event) {}
+    cellClick(row, column, cell, event) {
+      if (this.$route.name === 'Dashboard') {
+        this.$router.push({ path: '/mission/projects/details', query: { projectId: row.projectId, epicId: row.epicId }})
+      }
+    }
   }
 }
 </script>

@@ -164,6 +164,7 @@ export default {
       }
     }
     return {
+      curProject: null,
       search: { name: '', tab: '' },
       page: {
         currentPage: 1,
@@ -193,7 +194,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['userInfo', 'curProject'])
+    ...mapGetters(['userInfo'])
   },
   watch: {
     'projectInfo.tab'(newVal, oldVal) {
@@ -208,15 +209,23 @@ export default {
     const projectResponse = await getProjectListApi()
     this.projects = projectResponse.data.records
     this.page.total = projectResponse.data.total
+    // localStorage获取项目信息
+    if (localStorage.getItem('cur_project')) {
+      this.curProject = localStorage.getItem('cur_project')
+    }
   },
   beforeRouteEnter(to, from, next) {
     next(vm => {
+      let proInfo
+      if (localStorage.getItem('cur_project')) {
+        proInfo = JSON.parse(localStorage.getItem('cur_project'))
+      }
       // 如果不是由项目概览页面跳转来的，且项目id不为空，直接跳转到
-      if (from.name !== 'Details' && vm.curProject && vm.curProject.projectId) {
-        next({ path: `/mission/projects/details?projectId=${vm.curProject.projectId}` })
+      if (from.name !== 'Details' && proInfo && proInfo.projectId) {
+        next({ path: `/mission/projects/details?projectId=${proInfo.projectId}` })
       } else {
         // 否则则进入到当前组件，且设置curPro为空
-        vm.$store.dispatch('project/setCurProject', null)
+        localStorage.setItem('cur_project', null)
         next()
       }
     })
@@ -257,11 +266,12 @@ export default {
       this.$refs.projectInfo.resetFields()
     },
     handleRowClick(row, column, event) {
-      console.log(row)
-      console.log(column)
-      console.log(event)
+      // console.log(row)
+      // console.log(column)
+      // console.log(event)
       // 将当前选择的项目id放在vuex里
-      this.$store.dispatch('project/setCurProject', row)
+      // this.$store.dispatch('project/setCurProject', row)
+      localStorage.setItem('cur_project', JSON.stringify(row))
       // 跳转到/mission/projects/details
       this.$router.push({ path: '/mission/projects/details', query: { projectId: row.projectId }})
     },

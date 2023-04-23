@@ -152,3 +152,25 @@ export function getSubWorkItemApi(parentId) {
   })
 }
 
+/**
+ * 获取用户已经延期的工作项
+ * @returns
+ */
+export function getDelayedWorkItemApi() {
+  return request({
+    url: `/api/ew-project/workitem/delayed`,
+    method: 'get'
+  })
+}
+
+/**
+ * 获取用户即将延期的工作项（截止日期小于三天）
+ * @returns
+ */
+export function getNearDelayWorkItemApi() {
+  return request({
+    url: `/api/ew-project/workitem/near/delay`,
+    method: 'get'
+  })
+}
+

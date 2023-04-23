@@ -694,6 +694,7 @@ export default {
     if (this.curProject == null) {
       this.$router.push('/mission/projects')
     }
+    localStorage.setItem('cur_project', JSON.stringify(this.curProject))
     // 后端获取计划集
     getPlansApi({ projectId: this.$route.query.projectId }).then(res => {
       this.planSet = res.data
@@ -702,6 +703,10 @@ export default {
     getMemberListByGroupIdApi(this.curProject.groupId).then(res => {
       this.members = res.data
     })
+    if (this.$route.query.epicId) {
+      this.curEpicId = this.$route.query.epicId
+      this.$route.query.epicId = ''
+    }
     // 根据当前EpicId查出工作项
     if (this.curEpicId !== null) {
       getWorkItemByIdApi({
