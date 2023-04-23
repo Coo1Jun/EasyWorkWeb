@@ -118,7 +118,7 @@
               </el-upload>
             </el-tab-pane>
             <el-tab-pane v-if="workItem.workType !== 'Epic'" :label="tabPaneSubWorkLabel" name="subWorkItem">
-              <!-- <PlanCard v-if="workItem.children&&workItem.children.length>0" /> -->
+              <WorkItemList :work-items="workItem.children" />
             </el-tab-pane>
           </el-tabs>
         </div>
@@ -186,15 +186,16 @@
 import { mapGetters } from 'vuex'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import config from '@/config/wangEditor'
+import WorkItemList from '@/components/WorkItemList'
 import { uploadUrl } from '@/api/file'
 import { getMemberListByGroupIdApi } from '@/api/group'
 import { getUserInfoApi } from '@/api/user'
-import { editWorkItemApi, deleteWorkItemByIdApi } from '@/api/workitem'
+import { editWorkItemApi, deleteWorkItemByIdApi, getSubWorkItemApi } from '@/api/workitem'
 import * as base64Encode from 'js-base64'
 
 export default {
   name: 'CardPreview',
-  components: { Editor, Toolbar },
+  components: { Editor, Toolbar, WorkItemList },
   props: {
     visable: {
       type: Boolean,
@@ -278,6 +279,12 @@ export default {
     },
     workItemPreview(value) {
       this.workItem = value
+      // 获取子工作项
+      if (!this.workItem.children) {
+        getSubWorkItemApi(this.workItemPreview.id).then(res => {
+          this.workItem.children = res.data
+        }).catch(() => {})
+      }
       // console.log(value)
       // 判断当前的workType，选择对应的states
       if (this.workItem.workType === 'Feature' || this.workItem.workType === 'Story') {

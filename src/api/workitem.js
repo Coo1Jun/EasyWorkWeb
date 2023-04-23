@@ -141,3 +141,14 @@ export function deletePlanByIdApi(id) {
   })
 }
 
+/**
+ * 根据工作项id获取子工作项
+ * @returns
+ */
+export function getSubWorkItemApi(parentId) {
+  return request({
+    url: `/api/ew-project/workitem/sub/${parentId}`,
+    method: 'get'
+  })
+}
+
