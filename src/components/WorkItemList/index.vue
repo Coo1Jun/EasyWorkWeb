@@ -42,24 +42,16 @@
         </template>
       </el-table-column>
       <el-table-column
-        prop="remainingTime"
-        label="剩余时间"
+        prop="endTime"
+        label="截止日期"
         show-overflow-tooltip
-        :width="80"
-      >
-        <template slot-scope="scope">
-          <span v-if="scope.row.remainingTime === '0' && scope.row.endFlag === 0" style="color: red">{{ scope.row.remainingTime }} 天</span>
-          <span v-else>{{ scope.row.remainingTime }} 天</span>
-        </template>
-      </el-table-column>
+        width="100"
+      />
       <el-table-column
-        prop="manHour"
-        label="估算工时"
-        show-overflow-tooltip
-        :width="80"
+        width="80"
       >
         <template slot-scope="scope">
-          <span>{{ scope.row.manHour }} 天</span>
+          <el-tag v-if="scope.row.remainingTime === '0' && scope.row.endFlag === 0" type="danger">已延期</el-tag>
         </template>
       </el-table-column>
       <el-table-column
