@@ -9,17 +9,23 @@
           </div>
           <div class="db-work-item">
             <el-collapse v-model="workActiveNames">
-              <el-collapse-item title="已延期" name="delayed">
+              <el-collapse-item v-if="delayedWorkItem && delayedWorkItem.length > 0" title="已延期" name="delayed">
                 <template slot="title">
                   <span style="font-size: 16px;color: #333333">已延期</span>
                 </template>
                 <WorkItemList :work-items="delayedWorkItem" />
               </el-collapse-item>
-              <el-collapse-item title="即将截止" name="nearDelay">
+              <el-collapse-item v-if="nearDelayWorkItem && nearDelayWorkItem.length > 0" title="即将截止" name="nearDelay">
                 <template slot="title">
                   <span style="font-size: 16px;color: #333333">即将截止</span>
                 </template>
                 <WorkItemList :work-items="nearDelayWorkItem" />
+              </el-collapse-item>
+              <el-collapse-item title="工作项" name="other">
+                <template slot="title">
+                  <span style="font-size: 16px;color: #333333">工作项</span>
+                </template>
+                <WorkItemList :work-items="otherWorkItem" />
               </el-collapse-item>
             </el-collapse>
           </div>
@@ -33,16 +39,17 @@
 <script>
 import { mapGetters } from 'vuex'
 import WorkItemList from '@/components/WorkItemList'
-import { getNearDelayWorkItemApi, getDelayedWorkItemApi } from '@/api/workitem'
+import { getNearDelayWorkItemApi, getDelayedWorkItemApi, getOtherWorkItemApi } from '@/api/workitem'
 
 export default {
   name: 'Dashboard',
   components: { WorkItemList },
   data() {
     return {
-      workActiveNames: ['delayed', 'nearDelay'],
+      workActiveNames: ['delayed', 'nearDelay', 'other'],
       delayedWorkItem: [],
-      nearDelayWorkItem: []
+      nearDelayWorkItem: [],
+      otherWorkItem: []
     }
   },
   computed: {
@@ -58,6 +65,10 @@ export default {
     // 获取用户即将延期的工作项（截止日期小于三天）
     getNearDelayWorkItemApi().then(res => {
       this.nearDelayWorkItem = res.data
+    })
+    // 获取还未延期，并且截止日期大于三天，还没完成的工作项
+    getOtherWorkItemApi().then(res => {
+      this.otherWorkItem = res.data
     })
   }
 }
