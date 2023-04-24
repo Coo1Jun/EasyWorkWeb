@@ -7,8 +7,13 @@
     />
 
     <breadcrumb class="breadcrumb-container" />
-
     <div class="right-menu">
+      <el-tooltip content="通知" placement="bottom" effect="light" :hide-after="1000">
+        <div class="n-notification">
+          <i class="el-icon-bell" @click="notificationDrawer = true" />
+          <el-badge is-dot class="item" :hidden="notifications && notifications.length === 0" />
+        </div>
+      </el-tooltip>
       <el-popover
         v-model="visible"
         class="avatar-container"
@@ -64,6 +69,28 @@
         </div>
       </el-popover>
     </div>
+    <el-drawer
+      :visible.sync="notificationDrawer"
+      :modal="false"
+    >
+      <template slot="title">
+        <div>
+          通知
+          <el-link type="primary" style="margin-left: 20px" @click="toNotification">通知中心</el-link>
+        </div>
+      </template>
+      <div class="n-notification-list">
+        <el-card v-for="n in notifications" :key="n.id" shadow="hover" class="n-notification-card">
+          <div class="n-notification-card-body">
+            <NotificationContent :data="n" />
+          </div>
+          <div class="n-notification-card-foot">
+            <span>2023-04-24 20:18:16</span>
+            <span style="margin-left: 20px;font-size: 14px">未读</span>
+          </div>
+        </el-card>
+      </div>
+    </el-drawer>
   </div>
 </template>
 
@@ -71,15 +98,94 @@
 import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
+import NotificationContent from '@/components/NotificationContent'
 
 export default {
   components: {
     Breadcrumb,
-    Hamburger
+    Hamburger,
+    NotificationContent
   },
   data() {
     return {
-      visible: false
+      visible: false,
+      notificationDrawer: false,
+      notifications: [
+        {
+          id: '1',
+          type: 'friend',
+          fromName: '某某某',
+          workItem: {
+            id: '1',
+            title: '我是工作项标题'
+          },
+          group: {
+            id: '1',
+            name: '我是项目组'
+          },
+          isRead: 0
+        },
+        {
+          id: '5',
+          type: 'work',
+          fromName: '某某某',
+          workItem: {
+            id: '1',
+            title: '我是工作项标题',
+            number: 22
+          },
+          projectTab: 'EW',
+          group: {
+            id: '1',
+            name: '我是项目组'
+          },
+          isRead: 0
+        },
+        {
+          id: '2',
+          type: 'group',
+          fromName: '某某某',
+          workItem: {
+            id: '1',
+            title: '我是工作项标题'
+          },
+          group: {
+            id: '1',
+            name: '我是项目组'
+          },
+          isRead: 1
+        },
+        {
+          id: '3',
+          type: 'warn',
+          fromName: '某某某',
+          workItem: {
+            id: '1',
+            title: '我是工作项标题',
+            number: 22
+          },
+          projectTab: 'EW',
+          group: {
+            id: '1',
+            name: '我是项目组'
+          },
+          isRead: 1
+        },
+        {
+          id: '4',
+          type: 'friend',
+          fromName: '我是某某某',
+          workItem: {
+            id: '1',
+            title: '我是工作项标题'
+          },
+          group: {
+            id: '1',
+            name: '我是项目组'
+          },
+          isRead: 1
+        }
+      ]
     }
   },
   computed: {
@@ -92,13 +198,10 @@ export default {
     async logout() {
       await this.$store.dispatch('user/logout')
       this.$router.push(`/login`)
+    },
+    toNotification() {
+      this.$router.push({ path: '/console/notification' })
     }
-    // async filePath(fileId) {
-    //   if (fileId !== null) {
-    //     const {data} = await getFilePath(fileId)
-    //     this.avatar = data.location
-    //   }
-    // }
   }
 }
 </script>
@@ -215,5 +318,39 @@ $bg-image: url("../../assets/background/user_bg.jpg");
   &:hover {
     cursor: pointer;
   }
+}
+</style>
+<style lang="css" scoped>
+.n-notification {
+  font-size: 25px;
+  margin-right: 20px;
+  cursor: pointer;
+}
+.n-notification-list {
+  overflow: auto;
+  height: 620px;
+}
+.n-notification-card {
+  margin: 10px 0;
+  cursor: pointer;
+  height: 8em;
+}
+.n-notification-card-body {
+  height: 74px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 3; /* 确保文本的行数不超过 3 行 */
+  line-height: 1.5; /* 设置行高 */
+}
+.n-notification-card-foot {
+  color: #aaa;
+  margin-top: 5px;
+}
+::v-deep .el-drawer__header {
+  margin-bottom: 0;
+  padding-bottom: 32px;
+  border-bottom: 1px solid #eee
 }
 </style>
