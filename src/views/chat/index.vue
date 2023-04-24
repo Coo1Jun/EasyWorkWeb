@@ -740,3 +740,11 @@ label#switch-label:active:after {
 	width: 20px;
 }
 </style>
+<style scoped>
+::v-deep .lemon-container {
+  z-index: 7;
+}
+::v-deep .lemon-drawer {
+  z-index: 7;
+}
+</style>
