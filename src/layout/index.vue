@@ -31,7 +31,7 @@ export default {
       return this.$store.state.app.sidebar
     },
     device() {
-      return this.$store.state.app.device
+      return ''
     },
     fixedHeader() {
       return this.$store.state.settings.fixedHeader
