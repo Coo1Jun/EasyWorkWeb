@@ -75,3 +75,16 @@ export function getUserInfoApi(id) {
   })
 }
 
+/**
+ * 根据用户邮箱获取用户基本信息
+ * @param {*} params
+ * @returns
+ */
+export function getUserByEmailApi(params) {
+  return request({
+    url: `/api/ew-server/user/find`,
+    method: 'get',
+    params
+  })
+}
+

@@ -12,3 +12,16 @@ export function getAddressBookListApi(params) {
     params
   })
 }
+
+/**
+ * 判断用户是否在通讯录当中
+ * @param {*} params
+ * @returns
+ */
+export function isUserAlreadyExistApi(params) {
+  return request({
+    url: '/api/ew-communication/address/user/exist',
+    method: 'get',
+    params
+  })
+}
