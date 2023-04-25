@@ -12,3 +12,15 @@ export function sendNotification(data) {
     data
   })
 }
+
+/**
+ * 获取通知列表
+ * @returns
+ */
+export function getNotificationListApi() {
+  return request({
+    url: '/api/ew-communication/notification/list',
+    method: 'get'
+  })
+}
+

@@ -10,8 +10,8 @@
     <div class="right-menu">
       <el-tooltip content="通知" placement="bottom" effect="light" :hide-after="1000">
         <div class="n-notification">
-          <i class="el-icon-bell" @click="notificationDrawer = true" />
-          <el-badge is-dot class="item" :hidden="notifications && notifications.length === 0" />
+          <i class="el-icon-bell" @click="openNotificationDrawer" />
+          <el-badge is-dot class="item" :hidden="unread === 0" />
         </div>
       </el-tooltip>
       <el-popover
@@ -84,11 +84,11 @@
         <div v-for="n in notifications" :key="n.id" class="n-notification-card" @click="handleCardClick(n)">
           <el-card shadow="hover">
             <div class="n-notification-card-body">
-              <NotificationContent :ref="`NotificationContent${n.id}`" :data="n" />
+              <NotificationContent :data="n" />
             </div>
             <div class="n-notification-card-foot">
-              <span>2023-04-24 20:18:16</span>
-              <span style="margin-left: 20px;font-size: 14px">未读</span>
+              <span>{{ n.createTime }}</span>
+              <span style="margin-left: 20px;font-size: 14px">{{ n.isRead === 0 ? '未读' : '已读' }}</span>
             </div>
           </el-card>
         </div>
@@ -161,6 +161,7 @@ import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
 import NotificationContent from '@/components/NotificationContent'
+import { getNotificationListApi } from '@/api/notification'
 
 export default {
   components: {
@@ -177,99 +178,15 @@ export default {
       clickId: '',
       friendDialog: {},
       groupDialog: {},
-      notifications: [
-        {
-          id: '1',
-          type: 'friend',
-          fromName: '某某某',
-          fromAvatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/d534b989bc074da0b190f2a9e87c9e45.png',
-          fromEmail: '14223423@qq.com',
-          workItem: {
-            id: '1',
-            title: '我是工作项标题'
-          },
-          group: {
-            id: '1',
-            name: '我是项目组'
-          },
-          isRead: 0,
-          isHandle: 2
-        },
-        {
-          id: '5',
-          type: 'work',
-          fromName: '某某某',
-          fromAvatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/d534b989bc074da0b190f2a9e87c9e45.png',
-          workItem: {
-            id: '1',
-            title: '我是工作项标题',
-            number: 22,
-            epicId: '1644568941284655105',
-            projectId: '1643912347064541186'
-          },
-          projectTab: 'EW',
-          group: {
-            id: '1',
-            name: '我是项目组'
-          },
-          isRead: 0
-        },
-        {
-          id: '2',
-          type: 'group',
-          fromName: '某某某',
-          fromAvatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/d534b989bc074da0b190f2a9e87c9e45.png',
-          fromEmail: '14223423@qq.com',
-          workItem: {
-            id: '1',
-            title: '我是工作项标题'
-          },
-          group: {
-            id: '1',
-            name: '我是项目组'
-          },
-          isRead: 1,
-          isHandle: 0
-        },
-        {
-          id: '3',
-          type: 'warn',
-          fromName: '某某某',
-          fromAvatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/d534b989bc074da0b190f2a9e87c9e45.png',
-          workItem: {
-            id: '1',
-            title: '我是工作项标题',
-            number: 22
-          },
-          projectTab: 'EW',
-          group: {
-            id: '1',
-            name: '我是项目组'
-          },
-          isRead: 1
-        },
-        {
-          id: '4',
-          type: 'friend',
-          fromName: '我是某某某',
-          fromAvatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/d534b989bc074da0b190f2a9e87c9e45.png',
-          fromEmail: '14223423@qq.com',
-          workItem: {
-            id: '1',
-            title: '我是工作项标题'
-          },
-          group: {
-            id: '1',
-            name: '我是项目组'
-          },
-          isRead: 1,
-          isHandle: 1
-        }
-      ]
+      unread: 0,
+      notifications: []
     }
   },
   computed: {
     ...mapGetters(['sidebar', 'userInfo'])
+  },
+  mounted() {
+    this.refreshNotification()
   },
   methods: {
     toggleSideBar() {
@@ -281,6 +198,10 @@ export default {
     },
     toNotification() {
       this.$router.push({ path: '/console/notification' })
+    },
+    openNotificationDrawer() {
+      this.notificationDrawer = true
+      this.refreshNotification()
     },
     handleCardClick(data) {
       if (data.type === 'friend') {
@@ -308,6 +229,12 @@ export default {
     handleDisagreeJoin() {
       console.log('不同意加入')
       this.groupDialogVisible = false
+    },
+    refreshNotification() {
+      getNotificationListApi().then(res => {
+        this.unread = res.data.unread
+        this.notifications = res.data.result
+      })
     }
   }
 }
