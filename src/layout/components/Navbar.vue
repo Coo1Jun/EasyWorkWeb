@@ -72,6 +72,7 @@
     <el-drawer
       :visible.sync="notificationDrawer"
       :modal="false"
+      :modal-append-to-body="false"
     >
       <template slot="title">
         <div>
@@ -80,17 +81,78 @@
         </div>
       </template>
       <div class="n-notification-list">
-        <el-card v-for="n in notifications" :key="n.id" shadow="hover" class="n-notification-card">
-          <div class="n-notification-card-body">
-            <NotificationContent :data="n" />
-          </div>
-          <div class="n-notification-card-foot">
-            <span>2023-04-24 20:18:16</span>
-            <span style="margin-left: 20px;font-size: 14px">未读</span>
-          </div>
-        </el-card>
+        <div v-for="n in notifications" :key="n.id" class="n-notification-card" @click="handleCardClick(n)">
+          <el-card shadow="hover">
+            <div class="n-notification-card-body">
+              <NotificationContent :ref="`NotificationContent${n.id}`" :data="n" />
+            </div>
+            <div class="n-notification-card-foot">
+              <span>2023-04-24 20:18:16</span>
+              <span style="margin-left: 20px;font-size: 14px">未读</span>
+            </div>
+          </el-card>
+        </div>
       </div>
     </el-drawer>
+    <el-dialog
+      title="请求添加好友"
+      :visible.sync="friendDialogVisible"
+      width="30%"
+      :modal-append-to-body="false"
+    >
+      <div class="n-friend-dialog">
+        <div style="margin-right: 20px">
+          <el-avatar :src="friendDialog.fromAvatar" />
+        </div>
+        <div>
+          <div style="margin-bottom: 10px">{{ friendDialog.fromName }}</div>
+          <div>{{ friendDialog.fromEmail }}</div>
+        </div>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <div v-if="friendDialog.isHandle === 0">
+          <el-button @click="handleDisagreeAdd">拒 绝</el-button>
+          <el-button type="primary" @click="handleAgreeAddFriend">同 意</el-button>
+        </div>
+        <div v-if="friendDialog.isHandle === 1">
+          <el-button disabled type="info" plain>已 拒 绝</el-button>
+        </div>
+        <div v-if="friendDialog.isHandle === 2">
+          <el-button disabled type="success" plain>已 同 意</el-button>
+        </div>
+      </span>
+    </el-dialog>
+    <el-dialog
+      title="邀请进入项目组"
+      :visible.sync="groupDialogVisible"
+      width="30%"
+      :modal-append-to-body="false"
+    >
+      <div class="n-friend-dialog">
+        <div style="margin-right: 20px">
+          <el-avatar :src="groupDialog.fromAvatar" />
+        </div>
+        <div>
+          <div style="margin-bottom: 10px">{{ groupDialog.fromName }}</div>
+          <div>{{ groupDialog.fromEmail }}</div>
+        </div>
+      </div>
+      <div style="margin-top: 20px">
+        邀请你进入<span style="color: #409eff;margin: 0 10px">{{ groupDialog && groupDialog.group && groupDialog.group.name }}</span>项目组
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <div v-if="groupDialog.isHandle === 0">
+          <el-button @click="handleAgreeJoin">拒 绝</el-button>
+          <el-button type="primary" @click="handleDisagreeJoin">同 意</el-button>
+        </div>
+        <div v-if="groupDialog.isHandle === 1">
+          <el-button disabled type="info" plain>已 拒 绝</el-button>
+        </div>
+        <div v-if="groupDialog.isHandle === 2">
+          <el-button disabled type="success" plain>已 同 意</el-button>
+        </div>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -109,12 +171,19 @@ export default {
   data() {
     return {
       visible: false,
+      friendDialogVisible: false,
+      groupDialogVisible: false,
       notificationDrawer: false,
+      clickId: '',
+      friendDialog: {},
+      groupDialog: {},
       notifications: [
         {
           id: '1',
           type: 'friend',
           fromName: '某某某',
+          fromAvatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/d534b989bc074da0b190f2a9e87c9e45.png',
+          fromEmail: '14223423@qq.com',
           workItem: {
             id: '1',
             title: '我是工作项标题'
@@ -123,16 +192,20 @@ export default {
             id: '1',
             name: '我是项目组'
           },
-          isRead: 0
+          isRead: 0,
+          isHandle: 2
         },
         {
           id: '5',
           type: 'work',
           fromName: '某某某',
+          fromAvatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/d534b989bc074da0b190f2a9e87c9e45.png',
           workItem: {
             id: '1',
             title: '我是工作项标题',
-            number: 22
+            number: 22,
+            epicId: '1644568941284655105',
+            projectId: '1643912347064541186'
           },
           projectTab: 'EW',
           group: {
@@ -145,6 +218,8 @@ export default {
           id: '2',
           type: 'group',
           fromName: '某某某',
+          fromAvatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/d534b989bc074da0b190f2a9e87c9e45.png',
+          fromEmail: '14223423@qq.com',
           workItem: {
             id: '1',
             title: '我是工作项标题'
@@ -153,12 +228,14 @@ export default {
             id: '1',
             name: '我是项目组'
           },
-          isRead: 1
+          isRead: 1,
+          isHandle: 0
         },
         {
           id: '3',
           type: 'warn',
           fromName: '某某某',
+          fromAvatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/d534b989bc074da0b190f2a9e87c9e45.png',
           workItem: {
             id: '1',
             title: '我是工作项标题',
@@ -175,6 +252,8 @@ export default {
           id: '4',
           type: 'friend',
           fromName: '我是某某某',
+          fromAvatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/d534b989bc074da0b190f2a9e87c9e45.png',
+          fromEmail: '14223423@qq.com',
           workItem: {
             id: '1',
             title: '我是工作项标题'
@@ -183,7 +262,8 @@ export default {
             id: '1',
             name: '我是项目组'
           },
-          isRead: 1
+          isRead: 1,
+          isHandle: 1
         }
       ]
     }
@@ -201,6 +281,33 @@ export default {
     },
     toNotification() {
       this.$router.push({ path: '/console/notification' })
+    },
+    handleCardClick(data) {
+      if (data.type === 'friend') {
+        this.friendDialog = data
+        this.friendDialogVisible = true
+      } else if (data.type === 'work' || data.type === 'warn') {
+        this.$router.push({ path: '/mission/projects/details', query: { projectId: data.workItem.projectId, epicId: data.workItem.epicId }})
+      } else if (data.type === 'group') {
+        this.groupDialog = data
+        this.groupDialogVisible = true
+      }
+    },
+    handleAgreeAddFriend() {
+      console.log('同意加好友')
+      this.friendDialogVisible = false
+    },
+    handleDisagreeAdd() {
+      console.log('不同意加好友')
+      this.friendDialogVisible = false
+    },
+    handleAgreeJoin() {
+      console.log('同意加入')
+      this.groupDialogVisible = false
+    },
+    handleDisagreeJoin() {
+      console.log('不同意加入')
+      this.groupDialogVisible = false
     }
   }
 }
@@ -335,6 +442,9 @@ $bg-image: url("../../assets/background/user_bg.jpg");
   cursor: pointer;
   height: 8em;
 }
+::v-deep .n-notification-card:hover .el-card__body{
+  background-color: #eeeeee;
+}
 .n-notification-card-body {
   height: 74px;
   display: -webkit-box;
@@ -352,5 +462,8 @@ $bg-image: url("../../assets/background/user_bg.jpg");
   margin-bottom: 0;
   padding-bottom: 32px;
   border-bottom: 1px solid #eee
+}
+.n-friend-dialog {
+  display: flex;
 }
 </style>
