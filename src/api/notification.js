@@ -24,3 +24,15 @@ export function getNotificationListApi() {
   })
 }
 
+/**
+ * 修改通知（设置已读或已处理）
+ * @returns
+ */
+export function editNotificationApi(data) {
+  return request({
+    url: '/api/ew-communication/notification',
+    method: 'put',
+    data
+  })
+}
+

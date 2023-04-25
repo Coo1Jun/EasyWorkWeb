@@ -221,6 +221,7 @@ export default {
 .ab-title-name {
   font-size: 25px;
   color: #333333;
+  margin: 30px 0;
 }
 .ab-operation {
   float: right;

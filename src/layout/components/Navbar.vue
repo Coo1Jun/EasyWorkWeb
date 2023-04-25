@@ -11,7 +11,7 @@
       <el-tooltip content="通知" placement="bottom" effect="light" :hide-after="1000">
         <div class="n-notification">
           <i class="el-icon-bell" @click="openNotificationDrawer" />
-          <el-badge is-dot class="item" :hidden="unread === 0" />
+          <el-badge is-dot class="item" :hidden="unread <= 0" />
         </div>
       </el-tooltip>
       <el-popover
@@ -161,7 +161,7 @@ import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
 import NotificationContent from '@/components/NotificationContent'
-import { getNotificationListApi } from '@/api/notification'
+import { getNotificationListApi, editNotificationApi } from '@/api/notification'
 
 export default {
   components: {
@@ -204,6 +204,12 @@ export default {
       this.refreshNotification()
     },
     handleCardClick(data) {
+      editNotificationApi({
+        id: data.id,
+        isRead: 1
+      })
+      data.isRead = 1
+      this.unread--
       if (data.type === 'friend') {
         this.friendDialog = data
         this.friendDialogVisible = true
@@ -214,12 +220,22 @@ export default {
         this.groupDialogVisible = true
       }
     },
-    handleAgreeAddFriend() {
-      console.log('同意加好友')
+    async handleAgreeAddFriend() {
+      // console.log('同意加好友')
+      await editNotificationApi({
+        id: this.friendDialog.id,
+        isHandle: 2
+      })
+      this.refreshNotification()
       this.friendDialogVisible = false
     },
-    handleDisagreeAdd() {
-      console.log('不同意加好友')
+    async handleDisagreeAdd() {
+      // console.log('不同意加好友')
+      await editNotificationApi({
+        id: this.friendDialog.id,
+        isHandle: 1
+      })
+      this.refreshNotification()
       this.friendDialogVisible = false
     },
     handleAgreeJoin() {
