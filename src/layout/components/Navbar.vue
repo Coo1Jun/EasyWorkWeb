@@ -142,8 +142,8 @@
       </div>
       <span slot="footer" class="dialog-footer">
         <div v-if="groupDialog.isHandle === 0">
-          <el-button @click="handleAgreeJoin">拒 绝</el-button>
-          <el-button type="primary" @click="handleDisagreeJoin">同 意</el-button>
+          <el-button @click="handleDisagreeJoin">拒 绝</el-button>
+          <el-button type="primary" @click="handleAgreeJoin">同 意</el-button>
         </div>
         <div v-if="groupDialog.isHandle === 1">
           <el-button disabled type="info" plain>已 拒 绝</el-button>
@@ -238,12 +238,22 @@ export default {
       this.refreshNotification()
       this.friendDialogVisible = false
     },
-    handleAgreeJoin() {
-      console.log('同意加入')
+    async handleAgreeJoin() {
+      // console.log('同意加入')
+      await editNotificationApi({
+        id: this.groupDialog.id,
+        isHandle: 2
+      })
+      this.refreshNotification()
       this.groupDialogVisible = false
     },
-    handleDisagreeJoin() {
-      console.log('不同意加入')
+    async handleDisagreeJoin() {
+      // console.log('不同意加入')
+      await editNotificationApi({
+        id: this.groupDialog.id,
+        isHandle: 1
+      })
+      this.refreshNotification()
       this.groupDialogVisible = false
     },
     refreshNotification() {

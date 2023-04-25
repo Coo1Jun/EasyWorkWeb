@@ -112,6 +112,7 @@
 <script>
 
 import { getMemberListApi } from '@/api/group'
+import { groupInviteApi } from '@/api/notification'
 
 export default {
   name: 'GroupMember',
@@ -172,9 +173,18 @@ export default {
     addGroupMember() {
       this.$refs.emailInvite.validate((valid) => {
         if (valid) {
-          console.log(this.emailInvite)
-          // todo 发请求
-
+          // console.log(this.emailInvite)
+          groupInviteApi({
+            groupId: this.$route.params.groupInfo.id,
+            emails: this.emailInvite.emails
+          }).then(res => {
+            if (res.success) {
+              this.$message({
+                type: 'success',
+                message: '成功发送邀请'
+              })
+            }
+          })
           this.addGroupMemberVisible = false
           // 初始化emailInvite
           this.emailInvite = { emails: [] }

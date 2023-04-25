@@ -36,3 +36,15 @@ export function editNotificationApi(data) {
   })
 }
 
+/**
+ * 邀请成员进入项目组
+ * @returns
+ */
+export function groupInviteApi(data) {
+  return request({
+    url: '/api/ew-communication/notification/group/invite',
+    method: 'post',
+    data
+  })
+}
+
