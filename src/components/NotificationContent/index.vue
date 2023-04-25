@@ -7,7 +7,7 @@
       <span class="nc-from-name">{{ data.fromName }}</span>
       在工作项
       <span class="nc-work-item-title">
-        [ {{ data.projectTab }}-{{ data.workItem.number }} ]
+        [ {{ data.projectTab }} - {{ data.workItem.number }} ]
         {{ data.workItem.title }}
       </span>
       中将你添加为负责人
