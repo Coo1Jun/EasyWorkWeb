@@ -18,7 +18,7 @@
     <div v-if="data.type === 'warn'"><el-badge style="margin-right: 5px" is-dot class="item" :hidden="data.isRead === 1" />
       <span>工作项</span>
       <span class="nc-work-item-title">
-        [ {{ data.projectTab }}-{{ data.workItem.number }} ]
+        [ {{ data.projectTab }} - {{ data.workItem.number }} ]
         {{ data.workItem.title }}
       </span>
       即将截止，请尽快完成
