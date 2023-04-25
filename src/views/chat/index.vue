@@ -747,4 +747,14 @@ label#switch-label:active:after {
 ::v-deep .lemon-drawer {
   z-index: 7;
 }
+::v-deep .lemon-editor__emoji-item {
+  width: 30px;
+}
+::v-deep .lemon-message-text .lemon-message__content img {
+  width: 25px;
+  height: 21px;
+}
+::v-deep .lemon-editor__input {
+  padding: 10px 10px;
+}
 </style>
