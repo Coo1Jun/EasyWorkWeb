@@ -124,7 +124,7 @@ export const constantRoutes = [
       {
         path: 'my',
         name: 'My',
-        component: () => import('@/views/404'),
+        component: () => import('@/views/calendar/index'),
         meta: { title: '日历', icon: 'el-icon-date' }
       }
     ]

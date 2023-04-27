@@ -18,6 +18,7 @@
     "@wangeditor/editor-for-vue": "^1.0.2",
     "axios": "0.18.1",
     "core-js": "3.6.5",
+    "dayjs": "^1.11.7",
     "element-ui": "2.13.2",
     "js-base64": "^3.7.5",
     "js-cookie": "2.2.0",
