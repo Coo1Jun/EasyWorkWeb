@@ -21,7 +21,7 @@
                 <span>日程 <span>{{ getTime(d.startTime) }} {{ d.title }}</span></span>
               </div>
               <div v-if="d.type === 'todo' && data.day === getDate(d.endTime) && (calendarDataMap.get(data.day).length <= 3 ? index <= 2 : index < 2)" :class="d.type === 'todo' ? 'calendar-color-green' : ''">
-                <span>待办 <span>{{ getTime(d.endTime) }} {{ d.title }}</span></span>
+                <span v-if="d.isEnd === 1">✔️</span><span>待办 <span>{{ getTime(d.endTime) }} {{ d.title }}</span></span>
               </div>
               <div v-if="calendarDataMap.get(data.day).length <= 3 ? false : index === 2" :class="d.type === 'todo' ? 'calendar-color-gray' : ''">
                 <span>+{{ calendarDataMap.get(data.day).length - 2 }} more</span>
@@ -175,6 +175,69 @@
         <el-button type="primary" @click="confirmAddTodoList">确 定</el-button>
       </span>
     </el-dialog>
+    <div class="calendar-cell-dialog">
+      <el-dialog
+        :title="calendarCellTitle"
+        :visible.sync="calendarCellDialog"
+        width="50%"
+        top="5vh"
+      >
+        <div class="calendar-cell-dialog-body">
+          <el-tabs v-model="calendarCellActiveName" stretch>
+            <el-tab-pane label="日程" name="schedule">
+              <div v-if="calendarCellScheduleData.length === 0">
+                暂无数据
+              </div>
+              <el-collapse v-else v-model="collapseScheduleActiveName" accordion>
+                <el-collapse-item v-for="data in calendarCellScheduleData" :key="data.id" :title="getTime(data.startTime) + ' 【 ' + data.title + ' 】'" :name="data.id">
+                  <div>
+                    <div class="calendar-cell-dialog-body-item-title"><span style="">{{ data.title }}</span><span style="float: right"><el-button>编辑</el-button></span></div>
+                    <div class="calendar-cell-dialog-body-item-time">{{ getTime(data.startTime) }} - {{ getTime(data.endTime) }}</div>
+                    <div style="font-size: 14px;margin: 5px 0">参与人员</div>
+                    <el-tooltip v-for="p in data.participants" :key="p.id" effect="dark" :content="p.name" placement="top">
+                      <img class="calendar-avatar" :src="p.avatar">
+                    </el-tooltip>
+                    <div style="font-size: 14px;margin: 5px 0">描述</div>
+                    <div v-if="data.description && data.description !== ''" style="font-size: 14px;color: #9eacc4">{{ data.description }}</div>
+                    <div v-else style="font-size: 14px;color: #9eacc4;">暂无详细描述</div>
+                  </div>
+                </el-collapse-item>
+              </el-collapse>
+            </el-tab-pane>
+            <el-tab-pane label="待办" name="todo">
+              <div v-if="calendarCellTodoListData.length === 0">
+                暂无数据
+              </div>
+              <el-collapse v-else v-model="collapseTodoListActiveName" accordion>
+                <el-collapse-item v-for="data in calendarCellTodoListData" :key="data.id" :title="getTime(data.endTime) + ' 【 ' + data.title + ' 】'" :name="data.id">
+                  <div>
+                    <div class="calendar-cell-dialog-body-item-title"><span style="">{{ data.title }}</span>
+                      <span style="float: right">
+                        <el-button v-if="data.isEnd === 0" type="info" plain>标记结束</el-button>
+                        <el-button v-else type="info" plain disabled>已结束</el-button>
+                        <el-button>编辑</el-button>
+                      </span>
+                    </div>
+                    <div style="font-size: 14px;margin: 5px 0">截止时间</div>
+                    <div class="calendar-cell-dialog-body-item-time">{{ getTime(data.endTime) }}</div>
+                    <div style="font-size: 14px;margin: 5px 0">
+                      提醒时间：截止时间前<span> {{ 30 }} 分钟</span>
+                      <span style="margin-left: 10px">
+                        <span v-if="data.emailReminder === 1">已启动邮件提醒</span>
+                        <span v-else>已关闭邮件提醒</span>
+                      </span>
+                    </div>
+                    <div style="font-size: 14px;margin: 5px 0">描述</div>
+                    <div v-if="data.description && data.description !== ''" style="font-size: 14px;color: #9eacc4">{{ data.description }}</div>
+                    <div v-else style="font-size: 14px;color: #9eacc4;">暂无详细描述</div>
+                  </div>
+                </el-collapse-item>
+              </el-collapse>
+            </el-tab-pane>
+          </el-tabs>
+        </div>
+      </el-dialog>
+    </div>
   </div>
 </template>
 
@@ -191,6 +254,13 @@ export default {
       scheduleDialog: false,
       todoListDlalog: false,
       addressBookTransfer: false, // 选参与成员的列表dialog
+      calendarCellDialog: false,
+      calendarCellActiveName: 'schedule',
+      calendarCellTitle: '',
+      collapseScheduleActiveName: '',
+      collapseTodoListActiveName: '',
+      calendarCellScheduleData: [],
+      calendarCellTodoListData: [],
       scheduleAdd: {
         title: '',
         duration: [],
@@ -233,8 +303,19 @@ export default {
           startTime: '2023-04-29 12:00',
           endTime: '2023-04-29 17:12',
           title: '11',
-          description: '描述描述描述描述描述描述描述描述描述描述描述',
-          participants: []
+          description: '',
+          participants: [
+            {
+              id: '1',
+              name: '李正帆测试1',
+              avatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/d534b989bc074da0b190f2a9e87c9e45.png'
+            },
+            {
+              id: '2',
+              name: '小明',
+              avatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/db02c8745a314524b18cbf5b9e310730.png'
+            }
+          ]
         },
         {
           id: '2',
@@ -258,19 +339,21 @@ export default {
           id: '4',
           type: 'todo', // 'schedule' or 'todo'
           startTime: '',
-          endTime: '2023-04-29 22:11',
+          endTime: '2023-04-28 12:11',
           title: '待办事项2',
           description: '描述描述描述描述描述描述描述描述描述描述',
-          participants: []
+          participants: [],
+          isEnd: 0
         },
         {
           id: '5',
           type: 'todo', // 'schedule' or 'todo'
           startTime: '',
-          endTime: '2023-04-28 22:11',
+          endTime: '2023-04-29 22:11',
           title: '待办事项2',
           description: '描述描述描述描述描述描述描述描述描述描述',
-          participants: []
+          participants: [],
+          isEnd: 1
         }
       ]
     }
@@ -314,7 +397,8 @@ export default {
       this.addressBooks.forEach(addressBook => {
         this.memberData.push({
           label: addressBook.name,
-          key: addressBook.id
+          key: addressBook.id,
+          disabled: addressBook.id === this.userInfo.userid
         })
         this.addressBooksMap.set(addressBook.id, addressBook)
       })
@@ -322,8 +406,41 @@ export default {
   },
   methods: {
     handleCellClick(date, data) {
-      console.log(data)
-      console.log(this.calendarDataMap)
+      // console.log(data)
+      // console.log(this.calendarDataMap)
+      this.calendarCellTitle = data.day
+      this.calendarCellScheduleData = []
+      this.calendarCellTodoListData = []
+      // 赋值日程和待办的数据
+      if (this.calendarDataMap.get(data.day)) {
+        this.calendarDataMap.get(data.day).forEach(d => {
+          if (d.type === 'schedule') {
+            this.calendarCellScheduleData.push(d)
+          } else if (d.type === 'todo') {
+            this.calendarCellTodoListData.push(d)
+          }
+        })
+      }
+      // 排序
+      this.calendarCellScheduleData.sort((a, b) => {
+        if (a.startTime < b.startTime) {
+          return -1
+        } else if (a.startTime > b.startTime) {
+          return 1
+        } else {
+          return 0
+        }
+      })
+      this.calendarCellTodoListData.sort((a, b) => {
+        if (a.endTime < b.endTime) {
+          return -1
+        } else if (a.endTime > b.endTime) {
+          return 1
+        } else {
+          return 0
+        }
+      })
+      this.calendarCellDialog = true
     },
     openNewSchedule() {
       this.scheduleDialog = true
@@ -460,5 +577,23 @@ export default {
   color: #2A344B;
   width: 100%;
   padding: 1px 1px;
+}
+.calendar-cell-dialog ::v-deep .el-dialog__body{
+  padding: 0 20px 30px;
+}
+.calendar-cell-dialog-body {
+  height: 75vh;
+  font-size: 14px;
+}
+.calendar-cell-dialog-body-item-title {
+  font-size: 24px;
+  color: #2A344b;
+}
+.calendar-cell-dialog-body-item-time {
+  font-size: 48px;
+  color: #6698FF;
+}
+.calendar-cell-dialog-body ::v-deep .el-collapse-item__header {
+  font-size: 16px;
 }
 </style>
