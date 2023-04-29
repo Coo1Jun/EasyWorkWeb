@@ -3,7 +3,7 @@
     <div class="calendar-btn">
       <el-button-group>
         <el-button type="primary" icon="el-icon-plus" size="mini" @click="openNewSchedule">新建日程</el-button>
-        <el-button type="primary" icon="el-icon-plus" size="mini">新建待办</el-button>
+        <el-button type="primary" icon="el-icon-plus" size="mini" @click="openNewTodoList">新建待办</el-button>
       </el-button-group>
     </div>
     <el-calendar>
@@ -31,6 +31,7 @@
       :visible.sync="scheduleDialog"
       width="50%"
       top="5vh"
+      @closed="scheduleAddDialogClose"
     >
       <div class="calendar-schedule-dialog">
         <el-form
@@ -99,6 +100,76 @@
         :data="memberData"
       />
     </el-dialog>
+    <el-dialog
+      title="新建待办"
+      :visible.sync="todoListDlalog"
+      width="40%"
+      top="5vh"
+      @closed="todoListAddDialogClose"
+    >
+      <div class="calendar-schedule-dialog">
+        <el-form
+          ref="todoListAdd"
+          label-position="top"
+          label-width="80px"
+          :model="todoListAdd"
+          :rules="todoListRules"
+        >
+          <el-form-item label="标题" prop="title">
+            <el-input v-model="todoListAdd.title" placeholder="请输入待办标题" />
+          </el-form-item>
+          <el-form-item label="截止时间" prop="endTime">
+            <el-date-picker
+              v-model="todoListAdd.endTime"
+              format="yyyy-MM-dd HH:mm"
+              value-format="yyyy-MM-dd HH:mm"
+              type="datetime"
+              placeholder="选择日期时间"
+            />
+            <el-switch
+              v-model="todoListAdd.emailReminder"
+              style="margin-left: 30px"
+              :active-value="1"
+              active-text="邮件提醒"
+              :inactive-value="0"
+            />
+          </el-form-item>
+          <el-form-item label="提醒：截止时间前">
+            <el-radio v-model="todoListAdd.reminderTimeType" label="1">
+              <el-select v-model="todoListAdd.reminderTime1" :disabled="todoListAdd.reminderTimeType !== '1'">
+                <el-option label="0.5 小时" :value="30" />
+                <el-option label="1 小时" :value="60" />
+                <el-option label="1.5 小时" :value="90" />
+                <el-option label="2 小时" :value="120" />
+                <el-option label="2.5 小时" :value="150" />
+              </el-select>
+            </el-radio>
+            <el-radio v-model="todoListAdd.reminderTimeType" label="2">
+              <el-input-number
+                v-model="todoListAdd.reminderTime2"
+                :min="1"
+                :max="1440"
+                :disabled="todoListAdd.reminderTimeType !== '2'"
+                @blur="reminderTimeBlur"
+              />
+              <span style="margin-left: 5px">分钟</span>
+            </el-radio>
+          </el-form-item>
+          <el-form-item label="描述" prop="description">
+            <el-input
+              v-model="todoListAdd.description"
+              type="textarea"
+              :autosize="{ minRows: 4, maxRows: 10}"
+              placeholder="请输入待办描述"
+            />
+          </el-form-item>
+        </el-form>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="cancelAddTodoList">取 消</el-button>
+        <el-button type="primary" @click="confirmAddTodoList">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -113,6 +184,7 @@ export default {
     return {
       now: dayjs(new Date()).format('YYYY-MM-DD'),
       scheduleDialog: false,
+      todoListDlalog: false,
       addressBookTransfer: false, // 选参与成员的列表dialog
       scheduleAdd: {
         title: '',
@@ -127,6 +199,23 @@ export default {
         ],
         duration: [
           { type: 'array', required: true, message: '请选择时间段', trigger: 'change' }
+        ]
+      },
+      todoListAdd: {
+        title: '',
+        endTime: '',
+        emailReminder: 1, // 邮箱提醒
+        reminderTime1: 30, // 截止时间前多少分钟提醒
+        reminderTime2: 30, // 截止时间前多少分钟提醒
+        description: '',
+        reminderTimeType: '1'
+      },
+      todoListRules: {
+        title: [
+          { required: true, message: '请输入标题', trigger: 'blur' }
+        ],
+        endTime: [
+          { required: true, message: '请选择截止时间', trigger: 'change' }
         ]
       },
       addressBooks: [],
@@ -163,6 +252,7 @@ export default {
     },
     openNewSchedule() {
       this.scheduleDialog = true
+      this.scheduleAdd.participants = []
       this.scheduleAdd.participants.push(this.userInfo.userid)
     },
     filterMethod(query, item) {
@@ -188,6 +278,39 @@ export default {
           return false
         }
       })
+    },
+    scheduleAddDialogClose() {
+      this.cancelAddShedule()
+    },
+    openNewTodoList() {
+      this.todoListDlalog = true
+    },
+    reminderTimeBlur() {
+      if (!this.todoListAdd.reminderTime2) {
+        this.todoListAdd.reminderTime2 = 1
+      }
+    },
+    cancelAddTodoList() {
+      this.todoListDlalog = false
+      this.$refs.todoListAdd.resetFields()
+      this.todoListAdd.emailReminder = 1 // 邮箱提醒
+      this.todoListAdd.reminderTime1 = 30 // 截止时间前多少分钟提醒
+      this.todoListAdd.reminderTime2 = 30 // 截止时间前多少分钟提醒
+    },
+    confirmAddTodoList() {
+      this.$refs.todoListAdd.validate((valid) => {
+        if (valid) {
+          console.log(this.todoListAdd)
+          // todo 发请求
+
+          this.cancelAddTodoList() // 这里调用并不是取消添加，而是初始化表单
+        } else {
+          return false
+        }
+      })
+    },
+    todoListAddDialogClose() {
+      this.cancelAddTodoList()
     }
   }
 }
@@ -224,6 +347,9 @@ export default {
 .calendar-schedule-dialog {
   height: 65vh;
   overflow: auto;
+}
+.calendar-schedule-dialog .el-form-item__content .el-input-group {
+  vertical-align: unset;
 }
 .calendar-avatar {
   height: 35px;
