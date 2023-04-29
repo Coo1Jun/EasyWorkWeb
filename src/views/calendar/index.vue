@@ -16,11 +16,16 @@
             {{ data.day.split('-')[2] }}
           </div>
           <div style="overflow: hidden;">
-            <div class="calendar-cell-item">
-              hell12345678901234567890
-            </div>
-            <div>
-              hell
+            <div v-for="(d, index) in calendarDataMap.get(data.day)" :key="d.id" class="calendar-cell-item-schedule">
+              <div v-if="d.type === 'schedule' && data.day === getDate(d.startTime) && (calendarDataMap.get(data.day).length <= 3 ? index <= 2 : index < 2)" :class="d.type === 'schedule' ? 'calendar-color-pink' : ''">
+                <span>日程 <span>{{ getTime(d.startTime) }} {{ d.title }}</span></span>
+              </div>
+              <div v-if="d.type === 'todo' && data.day === getDate(d.endTime) && (calendarDataMap.get(data.day).length <= 3 ? index <= 2 : index < 2)" :class="d.type === 'todo' ? 'calendar-color-green' : ''">
+                <span>待办 <span>{{ getTime(d.endTime) }} {{ d.title }}</span></span>
+              </div>
+              <div v-if="calendarDataMap.get(data.day).length <= 3 ? false : index === 2" :class="d.type === 'todo' ? 'calendar-color-gray' : ''">
+                <span>+{{ calendarDataMap.get(data.day).length - 2 }} more</span>
+              </div>
             </div>
           </div>
         </div>
@@ -220,7 +225,54 @@ export default {
       },
       addressBooks: [],
       addressBooksMap: [],
-      memberData: []
+      memberData: [],
+      calendarData: [
+        {
+          id: '1',
+          type: 'schedule', // 'schedule' or 'todo'
+          startTime: '2023-04-29 12:00',
+          endTime: '2023-04-29 17:12',
+          title: '11',
+          description: '描述描述描述描述描述描述描述描述描述描述描述',
+          participants: []
+        },
+        {
+          id: '2',
+          type: 'schedule', // 'schedule' or 'todo'
+          startTime: '2023-04-29 14:00',
+          endTime: '2023-04-29 17:12',
+          title: '日程22222',
+          description: '描述描述描述描述描述描述描述描述描述描述',
+          participants: []
+        },
+        {
+          id: '3',
+          type: 'todo', // 'schedule' or 'todo'
+          startTime: '',
+          endTime: '2023-04-29 17:11',
+          title: '待办事项1',
+          description: '描述描述描述描述描述描述描述描述描述描述描述描述',
+          participants: []
+        },
+        {
+          id: '4',
+          type: 'todo', // 'schedule' or 'todo'
+          startTime: '',
+          endTime: '2023-04-29 22:11',
+          title: '待办事项2',
+          description: '描述描述描述描述描述描述描述描述描述描述',
+          participants: []
+        },
+        {
+          id: '5',
+          type: 'todo', // 'schedule' or 'todo'
+          startTime: '',
+          endTime: '2023-04-28 22:11',
+          title: '待办事项2',
+          description: '描述描述描述描述描述描述描述描述描述描述',
+          participants: []
+        }
+      ]
     }
   },
   computed: {
@@ -229,6 +281,28 @@ export default {
       const res = []
       this.scheduleAdd.participants.forEach(data => {
         res.push(this.addressBooksMap.get(data))
+      })
+      return res
+    },
+    calendarShowData() {
+      const res = []
+      return res
+    },
+    calendarDataMap() {
+      const res = new Map()
+      this.calendarData.forEach(data => {
+        let time
+        if (data.type === 'schedule') {
+          time = this.getDate(data.startTime)
+        } else if (data.type === 'todo') {
+          time = this.getDate(data.endTime)
+        }
+        let list = res.get(time)
+        if (!list) {
+          list = []
+        }
+        list.push(data)
+        res.set(time, list)
       })
       return res
     }
@@ -249,6 +323,7 @@ export default {
   methods: {
     handleCellClick(date, data) {
       console.log(data)
+      console.log(this.calendarDataMap)
     },
     openNewSchedule() {
       this.scheduleDialog = true
@@ -311,6 +386,12 @@ export default {
     },
     todoListAddDialogClose() {
       this.cancelAddTodoList()
+    },
+    getDate(dateTime) {
+      return dateTime.split(' ')[0]
+    },
+    getTime(dateTime) {
+      return dateTime.split(' ')[1]
     }
   }
 }
@@ -339,10 +420,14 @@ export default {
   margin-top: 10px;
   margin-left: 20px;
 }
-.calendar-cell-item {
+.calendar-cell-item-schedule {
   width: 100%;
+  /* 不换行 */
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 13px;
+  margin: 2px 0;
 }
 .calendar-schedule-dialog {
   height: 65vh;
@@ -357,5 +442,23 @@ export default {
   border-radius: 50%;
   cursor: pointer;
   margin: 5px;
+}
+.calendar-color-pink {
+  background-color: #fb7fb7;
+  color: #2A344B;
+  padding: 1px 1px;
+  width: 100%;
+}
+.calendar-color-green {
+  background-color: #73d897;
+  color: #2A344B;
+  width: 100%;
+  padding: 1px 1px;
+}
+.calendar-color-gray {
+  background-color: #e5e5e5;
+  color: #2A344B;
+  width: 100%;
+  padding: 1px 1px;
 }
 </style>
