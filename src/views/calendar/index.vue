@@ -213,7 +213,7 @@
                 暂无数据
               </div>
               <el-collapse v-else v-model="collapseTodoListActiveName" accordion>
-                <el-collapse-item v-for="data in calendarCellTodoListData" :key="data.id" :title="getTime(data.endTime) + ' 【 ' + data.title + ' 】'" :name="data.id">
+                <el-collapse-item v-for="data in calendarCellTodoListData" :key="data.id" :title="getTime(data.endTime) + ' 【 ' + (data.isEnd ? '✔️' : '') + data.title + ' 】'" :name="data.id">
                   <div>
                     <div class="calendar-cell-dialog-body-item-title"><span style="">{{ data.title }}</span>
                       <span style="float: right">
