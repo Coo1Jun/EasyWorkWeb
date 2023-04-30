@@ -4,10 +4,11 @@ import request from '@/utils/request'
  * 获取日历列表
  * @returns
  */
-export function getCalendarListApi() {
+export function getCalendarListApi(params) {
   return request({
     url: '/api/ew-communication/calendar/list',
-    method: 'get'
+    method: 'get',
+    params
   })
 }
 

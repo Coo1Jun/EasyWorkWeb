@@ -31,7 +31,25 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="10"><div class="grid-content bg-purple" /></el-col>
+      <el-col :span="10">
+        <el-card>
+          <div slot="header">
+            <span>我的日程</span>
+          </div>
+          <div class="db-schedule">
+            <CalendarList :data="calendarCellScheduleData" :type="'schedule'" />
+          </div>
+        </el-card>
+        <div style="margin: 10px 0" />
+        <el-card>
+          <div slot="header">
+            <span>我的待办</span>
+          </div>
+          <div class="db-todo-list">
+            <CalendarList :data="calendarCellTodoListData" :type="'todo'" />
+          </div>
+        </el-card>
+      </el-col>
     </el-row>
   </div>
 </template>
@@ -39,23 +57,66 @@
 <script>
 import { mapGetters } from 'vuex'
 import WorkItemList from '@/components/WorkItemList'
+import CalendarList from '@/components/CalendarList'
 import { getNearDelayWorkItemApi, getDelayedWorkItemApi, getOtherWorkItemApi } from '@/api/workitem'
+import { getCalendarListApi } from '@/api/calendar'
 
 export default {
   name: 'Dashboard',
-  components: { WorkItemList },
+  components: { WorkItemList, CalendarList },
   data() {
     return {
       workActiveNames: ['delayed', 'nearDelay', 'other'],
       delayedWorkItem: [],
       nearDelayWorkItem: [],
-      otherWorkItem: []
+      otherWorkItem: [],
+      calendarData: []
     }
   },
   computed: {
     ...mapGetters([
       'userInfo'
-    ])
+    ]),
+    calendarCellScheduleData() {
+      const res = []
+      // 赋值日程数据
+      this.calendarData.forEach(d => {
+        if (d.type === 'schedule') {
+          res.push(d)
+        }
+      })
+      // 排序
+      res.sort((a, b) => {
+        if (a.startTime < b.startTime) {
+          return -1
+        } else if (a.startTime > b.startTime) {
+          return 1
+        } else {
+          return 0
+        }
+      })
+      return res
+    },
+    calendarCellTodoListData() {
+      const res = []
+      // 赋值待办的数据
+      this.calendarData.forEach(d => {
+        if (d.type === 'todo') {
+          res.push(d)
+        }
+      })
+      // 排序
+      res.sort((a, b) => {
+        if (a.endTime < b.endTime) {
+          return -1
+        } else if (a.endTime > b.endTime) {
+          return 1
+        } else {
+          return 0
+        }
+      })
+      return res
+    }
   },
   mounted() {
     // 获取用户已经延期的工作项
@@ -69,6 +130,10 @@ export default {
     // 获取还未延期，并且截止日期大于三天，还没完成的工作项
     getOtherWorkItemApi().then(res => {
       this.otherWorkItem = res.data
+    })
+    // 获取日历信息
+    getCalendarListApi({ home: '1' }).then(res => {
+      this.calendarData = res.data
     })
   }
 }
@@ -96,4 +161,12 @@ export default {
     border-radius: 4px;
     min-height: 36px;
   }
+.db-schedule {
+  overflow: auto;
+  height: 250px;
+}
+.db-todo-list {
+  overflow: auto;
+  height: 250px;
+}
 </style>

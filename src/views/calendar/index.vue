@@ -412,6 +412,8 @@ export default {
     }
   },
   mounted() {
+    // 获取日历信息列表
+    this.refreshData()
     // 获取用户信息列表
     getAllAddressBookListApi().then(res => {
       this.addressBooks = res.data
@@ -425,8 +427,13 @@ export default {
         this.addressBooksMap.set(addressBook.id, addressBook)
       })
     }).catch(() => {})
-    // 获取日历信息列表
-    this.refreshData()
+    // 判断是否有路由参数，如果有，说明是由【工作台】页面跳转而来
+    if (this.$route.query.date) {
+      if (this.$route.query.active) {
+        this.calendarCellActiveName = this.$route.query.active
+      }
+      this.handleCellClick(null, { day: this.$route.query.date })
+    }
   },
   methods: {
     handleCellClick(date, data) {
