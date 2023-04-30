@@ -200,7 +200,22 @@
                         <el-button type="danger" @click="deleteSchedule(data.id)">删除</el-button>
                       </span>
                     </div>
-                    <div class="calendar-cell-dialog-body-item-time">{{ getTime(data.startTime) }} - {{ getTime(data.endTime) }}</div>
+                    <div class="calendar-cell-dialog-body-item-datetime">
+                      <div>
+                        <div class="calendar-cell-dialog-body-item-date">{{ getDate(data.startTime) }}</div>
+                        <div class="calendar-cell-dialog-body-item-time">{{ getTime(data.startTime) }}</div>
+                      </div>
+                      <div>
+                        <div style="height: 15px" />
+                        <div class="calendar-cell-dialog-body-item-time" style="margin: 0 10px"> - </div>
+                      </div>
+                      <div>
+                        <div>
+                          <div class="calendar-cell-dialog-body-item-date">{{ getDate(data.endTime) }}</div>
+                          <div class="calendar-cell-dialog-body-item-time">{{ getTime(data.endTime) }}</div>
+                        </div>
+                      </div>
+                    </div>
                     <div style="font-size: 14px;margin: 5px 0">参与人员</div>
                     <el-tooltip v-for="p in data.participants" :key="p.id" effect="dark" :content="p.name" placement="top">
                       <img class="calendar-avatar" :src="p.avatar">
@@ -708,5 +723,14 @@ export default {
 }
 .calendar-cell-dialog-body ::v-deep .el-collapse-item__header {
   font-size: 16px;
+}
+.calendar-cell-dialog-body-item-datetime {
+  display: flex;
+}
+.calendar-cell-dialog-body-item-date {
+  color: #6698FF;
+  height: 15px;
+  font-size: 14px;
+  margin-left: 5px;
 }
 </style>
