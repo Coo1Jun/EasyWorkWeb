@@ -194,7 +194,11 @@
                 <el-collapse-item v-for="data in calendarCellScheduleData" :key="data.id" :title="getTime(data.startTime) + ' 【 ' + data.title + ' 】'" :name="data.id">
                   <div>
                     <div class="calendar-cell-dialog-body-item-title">
-                      <span style="">{{ data.title }}</span><span style="float: right"><el-button @click="editSchedule(data)">编辑</el-button></span>
+                      <span style="">{{ data.title }}</span>
+                      <span style="float: right">
+                        <el-button @click="editSchedule(data)">编辑</el-button>
+                        <el-button type="danger" @click="deleteSchedule(data.id)">删除</el-button>
+                      </span>
                     </div>
                     <div class="calendar-cell-dialog-body-item-time">{{ getTime(data.startTime) }} - {{ getTime(data.endTime) }}</div>
                     <div style="font-size: 14px;margin: 5px 0">参与人员</div>
@@ -220,6 +224,7 @@
                         <el-button v-if="data.isEnd === 0" type="info" plain @click="setTodoListEnd(data,1)">标记结束</el-button>
                         <el-button v-else type="info" plain @click="setTodoListEnd(data,0)">取消标记结束</el-button>
                         <el-button @click="editTodoList(data)">编辑</el-button>
+                        <el-button type="danger" @click="deleteTodoList(data.id)">删除</el-button>
                       </span>
                     </div>
                     <div style="font-size: 14px;margin: 5px 0">截止时间</div>
@@ -249,7 +254,16 @@
 import dayjs from 'dayjs'
 import { getAllAddressBookListApi } from '@/api/addressbook'
 import { mapGetters } from 'vuex'
-import { getCalendarListApi, addScheduleApi, editScheduleApi, addTodoListApi, editTodoListApi, setTodoListEndApi } from '@/api/calendar'
+import {
+  getCalendarListApi,
+  addScheduleApi,
+  editScheduleApi,
+  addTodoListApi,
+  editTodoListApi,
+  setTodoListEndApi,
+  deleteScheduleApi,
+  deleteTodoListApi
+} from '@/api/calendar'
 
 export default {
   name: 'Calendar',
@@ -590,6 +604,20 @@ export default {
         id: data.id,
         isEnd
       }).then(res => {
+        if (res.success) {
+          this.refreshData()
+        }
+      })
+    },
+    deleteSchedule(id) {
+      deleteScheduleApi(id).then(res => {
+        if (res.success) {
+          this.refreshData()
+        }
+      })
+    },
+    deleteTodoList(id) {
+      deleteTodoListApi(id).then(res => {
         if (res.success) {
           this.refreshData()
         }
