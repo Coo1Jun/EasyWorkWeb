@@ -25,6 +25,19 @@ export function addScheduleApi(data) {
 }
 
 /**
+ * 修改日程信息
+ * @param {} data
+ * @returns
+ */
+export function editScheduleApi(data) {
+  return request({
+    url: '/api/ew-communication/schedule',
+    method: 'put',
+    data
+  })
+}
+
+/**
  * 添加待办信息
  * @param {} data
  * @returns
@@ -33,6 +46,32 @@ export function addTodoListApi(data) {
   return request({
     url: '/api/ew-communication/todolist',
     method: 'post',
+    data
+  })
+}
+
+/**
+ * 编辑待办信息
+ * @param {} data
+ * @returns
+ */
+export function editTodoListApi(data) {
+  return request({
+    url: '/api/ew-communication/todolist',
+    method: 'put',
+    data
+  })
+}
+
+/**
+ * 设置待办结束信息
+ * @param {} data
+ * @returns
+ */
+export function setTodoListEndApi(data) {
+  return request({
+    url: '/api/ew-communication/todolist/end',
+    method: 'put',
     data
   })
 }

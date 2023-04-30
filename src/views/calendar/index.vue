@@ -32,7 +32,7 @@
       </template>
     </el-calendar>
     <el-dialog
-      title="新建日程"
+      :title="isScheduleEdit ? '编辑日程' : '新建日程'"
       :visible.sync="scheduleDialog"
       width="50%"
       top="5vh"
@@ -88,7 +88,8 @@
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button @click="cancelAddShedule">取 消</el-button>
-        <el-button type="primary" @click="confirmAddShedule">确 定</el-button>
+        <el-button v-if="!isScheduleEdit" type="primary" @click="confirmAddShedule">确 定</el-button>
+        <el-button v-else type="primary" @click="confirmEditSchedule">保 存</el-button>
       </span>
     </el-dialog>
     <el-dialog
@@ -106,7 +107,7 @@
       />
     </el-dialog>
     <el-dialog
-      title="新建待办"
+      :title="isTodoListEdit ? '编辑待办' : '新建待办'"
       :visible.sync="todoListDlalog"
       width="40%"
       top="5vh"
@@ -172,7 +173,8 @@
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button @click="cancelAddTodoList">取 消</el-button>
-        <el-button type="primary" @click="confirmAddTodoList">确 定</el-button>
+        <el-button v-if="!isTodoListEdit" type="primary" @click="confirmAddTodoList">确 定</el-button>
+        <el-button v-else type="primary" @click="confirmEditTodoList">保 存</el-button>
       </span>
     </el-dialog>
     <div class="calendar-cell-dialog">
@@ -191,7 +193,9 @@
               <el-collapse v-else v-model="collapseScheduleActiveName" accordion>
                 <el-collapse-item v-for="data in calendarCellScheduleData" :key="data.id" :title="getTime(data.startTime) + ' 【 ' + data.title + ' 】'" :name="data.id">
                   <div>
-                    <div class="calendar-cell-dialog-body-item-title"><span style="">{{ data.title }}</span><span style="float: right"><el-button>编辑</el-button></span></div>
+                    <div class="calendar-cell-dialog-body-item-title">
+                      <span style="">{{ data.title }}</span><span style="float: right"><el-button @click="editSchedule(data)">编辑</el-button></span>
+                    </div>
                     <div class="calendar-cell-dialog-body-item-time">{{ getTime(data.startTime) }} - {{ getTime(data.endTime) }}</div>
                     <div style="font-size: 14px;margin: 5px 0">参与人员</div>
                     <el-tooltip v-for="p in data.participants" :key="p.id" effect="dark" :content="p.name" placement="top">
@@ -213,9 +217,9 @@
                   <div>
                     <div class="calendar-cell-dialog-body-item-title"><span style="">{{ data.title }}</span>
                       <span style="float: right">
-                        <el-button v-if="data.isEnd === 0" type="info" plain>标记结束</el-button>
-                        <el-button v-else type="info" plain disabled>已结束</el-button>
-                        <el-button>编辑</el-button>
+                        <el-button v-if="data.isEnd === 0" type="info" plain @click="setTodoListEnd(data,1)">标记结束</el-button>
+                        <el-button v-else type="info" plain @click="setTodoListEnd(data,0)">取消标记结束</el-button>
+                        <el-button @click="editTodoList(data)">编辑</el-button>
                       </span>
                     </div>
                     <div style="font-size: 14px;margin: 5px 0">截止时间</div>
@@ -245,7 +249,7 @@
 import dayjs from 'dayjs'
 import { getAllAddressBookListApi } from '@/api/addressbook'
 import { mapGetters } from 'vuex'
-import { getCalendarListApi, addScheduleApi, addTodoListApi } from '@/api/calendar'
+import { getCalendarListApi, addScheduleApi, editScheduleApi, addTodoListApi, editTodoListApi, setTodoListEndApi } from '@/api/calendar'
 
 export default {
   name: 'Calendar',
@@ -254,14 +258,16 @@ export default {
       now: dayjs(new Date()).format('YYYY-MM-DD'),
       scheduleDialog: false,
       todoListDlalog: false,
+      isScheduleEdit: false,
+      isTodoListEdit: false,
       addressBookTransfer: false, // 选参与成员的列表dialog
       calendarCellDialog: false,
       calendarCellActiveName: 'schedule',
       calendarCellTitle: '',
       collapseScheduleActiveName: '',
       collapseTodoListActiveName: '',
-      calendarCellScheduleData: [],
-      calendarCellTodoListData: [],
+      // calendarCellScheduleData: [],
+      // calendarCellTodoListData: [],
       scheduleAdd: {
         title: '',
         duration: [],
@@ -330,6 +336,50 @@ export default {
         res.set(time, list)
       })
       return res
+    },
+    calendarCellScheduleData() {
+      const res = []
+      // 赋值日程数据
+      if (this.calendarDataMap.get(this.calendarCellTitle)) {
+        this.calendarDataMap.get(this.calendarCellTitle).forEach(d => {
+          if (d.type === 'schedule') {
+            res.push(d)
+          }
+        })
+      }
+      // 排序
+      res.sort((a, b) => {
+        if (a.startTime < b.startTime) {
+          return -1
+        } else if (a.startTime > b.startTime) {
+          return 1
+        } else {
+          return 0
+        }
+      })
+      return res
+    },
+    calendarCellTodoListData() {
+      const res = []
+      // 赋值待办的数据
+      if (this.calendarDataMap.get(this.calendarCellTitle)) {
+        this.calendarDataMap.get(this.calendarCellTitle).forEach(d => {
+          if (d.type === 'todo') {
+            res.push(d)
+          }
+        })
+      }
+      // 排序
+      res.sort((a, b) => {
+        if (a.endTime < b.endTime) {
+          return -1
+        } else if (a.endTime > b.endTime) {
+          return 1
+        } else {
+          return 0
+        }
+      })
+      return res
     }
   },
   mounted() {
@@ -354,37 +404,6 @@ export default {
       // console.log(data)
       // console.log(this.calendarDataMap)
       this.calendarCellTitle = data.day
-      this.calendarCellScheduleData = []
-      this.calendarCellTodoListData = []
-      // 赋值日程和待办的数据
-      if (this.calendarDataMap.get(data.day)) {
-        this.calendarDataMap.get(data.day).forEach(d => {
-          if (d.type === 'schedule') {
-            this.calendarCellScheduleData.push(d)
-          } else if (d.type === 'todo') {
-            this.calendarCellTodoListData.push(d)
-          }
-        })
-      }
-      // 排序
-      this.calendarCellScheduleData.sort((a, b) => {
-        if (a.startTime < b.startTime) {
-          return -1
-        } else if (a.startTime > b.startTime) {
-          return 1
-        } else {
-          return 0
-        }
-      })
-      this.calendarCellTodoListData.sort((a, b) => {
-        if (a.endTime < b.endTime) {
-          return -1
-        } else if (a.endTime > b.endTime) {
-          return 1
-        } else {
-          return 0
-        }
-      })
       this.calendarCellDialog = true
     },
     openNewSchedule() {
@@ -401,8 +420,13 @@ export default {
     cancelAddShedule() {
       this.scheduleDialog = false
       this.$refs.scheduleAdd.resetFields()
-      this.scheduleAdd.participants = [] // 因为属性不在表单中，所以要单独初始化
-      this.scheduleAdd.emailReminder = 1
+      this.scheduleAdd = {
+        title: '',
+        duration: [],
+        participants: [], // 参与人
+        emailReminder: 1, // 邮箱提醒
+        description: ''
+      }
     },
     confirmAddShedule() {
       this.$refs.scheduleAdd.validate(async(valid) => {
@@ -426,7 +450,9 @@ export default {
       })
     },
     scheduleAddDialogClose() {
+      this.isScheduleEdit = false
       this.cancelAddShedule()
+      // this.refreshData()
     },
     openNewTodoList() {
       this.todoListDlalog = true
@@ -439,9 +465,15 @@ export default {
     cancelAddTodoList() {
       this.todoListDlalog = false
       this.$refs.todoListAdd.resetFields()
-      this.todoListAdd.emailReminder = 1 // 邮箱提醒
-      this.todoListAdd.reminderTime1 = 30 // 截止时间前多少分钟提醒
-      this.todoListAdd.reminderTime2 = 30 // 截止时间前多少分钟提醒
+      this.todoListAdd = {
+        title: '',
+        endTime: '',
+        emailReminder: 1, // 邮箱提醒
+        reminderTime1: 30, // 截止时间前多少分钟提醒
+        reminderTime2: 30, // 截止时间前多少分钟提醒
+        description: '',
+        reminderTimeType: '1'
+      }
     },
     confirmAddTodoList() {
       this.$refs.todoListAdd.validate(async(valid) => {
@@ -469,7 +501,9 @@ export default {
       })
     },
     todoListAddDialogClose() {
+      this.isTodoListEdit = false
       this.cancelAddTodoList()
+      // console.log(this.todoListAdd)
     },
     getDate(dateTime) {
       return dateTime.split(' ')[0]
@@ -481,6 +515,85 @@ export default {
       getCalendarListApi().then(res => {
         this.calendarData = res.data
       }).catch(() => {})
+    },
+    editSchedule(sourceData) {
+      Object.assign(this.scheduleAdd, sourceData)
+      this.isScheduleEdit = true
+      this.scheduleDialog = true
+      this.scheduleAdd.duration = []
+      this.scheduleAdd.duration.push(sourceData.startTime)
+      this.scheduleAdd.duration.push(sourceData.endTime)
+      this.scheduleAdd.participants = []
+      sourceData.participants.forEach(data => {
+        this.scheduleAdd.participants.push(data.id)
+      })
+    },
+    confirmEditSchedule() {
+      this.$refs.scheduleAdd.validate(async(valid) => {
+        if (valid) {
+          // console.log(this.scheduleAdd)
+          const res = await editScheduleApi({
+            id: this.scheduleAdd.id,
+            title: this.scheduleAdd.title,
+            startTime: this.scheduleAdd.duration[0],
+            endTime: this.scheduleAdd.duration[1],
+            emailReminder: this.scheduleAdd.emailReminder,
+            description: this.scheduleAdd.description,
+            participants: this.scheduleAdd.participants
+          })
+          if (res.success) {
+            this.refreshData()
+            this.cancelAddShedule() // 这里调用并不是取消添加，而是初始化表单
+          }
+        } else {
+          return false
+        }
+      })
+    },
+    editTodoList(sourceData) {
+      Object.assign(this.todoListAdd, sourceData)
+      this.todoListAdd.reminderTimeType = '2'
+      this.todoListAdd.reminderTime2 = sourceData.reminderTime
+      this.todoListAdd.reminderTime1 = 30
+      console.log(this.todoListAdd)
+      this.isTodoListEdit = true
+      this.todoListDlalog = true
+    },
+    confirmEditTodoList() {
+      this.$refs.todoListAdd.validate(async(valid) => {
+        if (valid) {
+          // console.log(this.todoListAdd)
+          const data = {
+            id: this.todoListAdd.id,
+            title: this.todoListAdd.title,
+            endTime: this.todoListAdd.endTime,
+            emailReminder: this.todoListAdd.emailReminder,
+            description: this.todoListAdd.description
+          }
+          if (this.todoListAdd.reminderTimeType === '1') {
+            data.reminderTime = this.todoListAdd.reminderTime1
+          } else {
+            data.reminderTime = this.todoListAdd.reminderTime2
+          }
+          const res = await editTodoListApi(data)
+          if (res.success) {
+            this.refreshData()
+            this.cancelAddTodoList() // 这里调用并不是取消添加，而是初始化表单
+          }
+        } else {
+          return false
+        }
+      })
+    },
+    setTodoListEnd(data, isEnd) {
+      setTodoListEndApi({
+        id: data.id,
+        isEnd
+      }).then(res => {
+        if (res.success) {
+          this.refreshData()
+        }
+      })
     }
   }
 }
