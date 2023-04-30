@@ -304,7 +304,7 @@ export default {
       }
     },
     stateChange(row, value) {
-      console.log('状态修改为：', value)
+      // console.log('状态修改为：', value)
       // todo发请求
       editWorkItemApi({
         id: row.id,

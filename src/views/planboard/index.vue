@@ -864,12 +864,12 @@ export default {
       editor.destroy() // 组件销毁时，及时销毁编辑器
     },
     handlePreview(file) {
-      console.log(file)
+      // console.log(file)
       console.log(this.newWorkItem.fileIdList)
     },
     handleRemove(file, fileList) {
-      console.log(file)
-      console.log(fileList)
+      // console.log(file)
+      // console.log(fileList)
       this.newWorkItem.fileIdList = this.newWorkItem.fileIdList.filter(id => id !== file.response.data.id)
     },
     uploadSuccess(response, file, fileList) {
@@ -974,7 +974,7 @@ export default {
     },
     showEpic() {
       this.curWorkItemPreview = JSON.parse(JSON.stringify(this.curData))
-      console.log(this.curWorkItemPreview)
+      // console.log(this.curWorkItemPreview)
       this.workItemVisible = true
     },
     setWorkItemVisible(value) {

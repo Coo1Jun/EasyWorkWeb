@@ -434,7 +434,6 @@ export default {
       }
       this.handleCellClick(null, { day: this.$route.params.date })
     }
-    console.log(this.$route)
   },
   methods: {
     handleCellClick(date, data) {
@@ -592,7 +591,7 @@ export default {
       this.todoListAdd.reminderTimeType = '2'
       this.todoListAdd.reminderTime2 = sourceData.reminderTime
       this.todoListAdd.reminderTime1 = 30
-      console.log(this.todoListAdd)
+      // console.log(this.todoListAdd)
       this.isTodoListEdit = true
       this.todoListDlalog = true
     },

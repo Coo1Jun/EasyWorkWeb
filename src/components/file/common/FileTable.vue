@@ -287,9 +287,9 @@ export default {
 		 * 当表格的排序条件发生变化的时候会触发该事件
 		 */
     handleSortChange() {
-      console.log('出发')
+      // console.log('出发')
       this.sortedFileList = this.$refs.multipleTable.tableData
-      console.log(this.sortedFileList)
+      // console.log(this.sortedFileList)
     },
     /**
 		 * 表格某一行右键事件

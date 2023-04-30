@@ -427,7 +427,7 @@ export default {
       message.toContactType = this.$refs.IMUI.getCurrentContact().type
       message.id = generateRandId() // 生成雪花id
       if (file) {
-        console.log('发送的消息类型是文件', file)
+        // console.log('发送的消息类型是文件', file)
         const form = new FormData()
         form.append('file', file)
         const { data } = await uploadFileApi(form).catch(() => {
@@ -441,7 +441,7 @@ export default {
       if (!WebSocket.connectSuccess()) {
         WebSocket.reconnect() // 重新连接
         const intervalId = setInterval(() => {
-          console.log('继续连接')
+          // console.log('继续连接')
           if (WebSocket.reconnectOver()) {
             clearInterval(intervalId) // 清除定时器
             if (WebSocket.connectSuccess()) {
@@ -484,11 +484,11 @@ export default {
       }
     },
     downloadFile(file) {
-      console.log('下载文件start')
+      // console.log('下载文件start')
       this.download.url = file.content
       this.download.fileName = file.type === 'image' ? '图片' : '文件'
       this.$refs.downloadFile.click()
-      console.log('下载文件end')
+      // console.log('下载文件end')
     },
     onMessage(msg) {
       const message = JSON.parse(msg)

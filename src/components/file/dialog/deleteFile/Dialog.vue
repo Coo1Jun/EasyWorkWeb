@@ -48,7 +48,7 @@ export default {
      */
     async handleDialogSure() {
       this.sureBtnLoading = true
-      console.log(this.fileInfo)
+      // console.log(this.fileInfo)
       deleteFileApi(this.fileInfo.id).then(res => {
         if (res.success) {
           this.visible = false

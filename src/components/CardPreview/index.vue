@@ -489,8 +489,8 @@ export default {
       })
     },
     durationChange(value) {
-      console.log('当前开始时间为', this.workItem.startTime)
-      console.log('当前结束时间为', this.workItem.endTime)
+      // console.log('当前开始时间为', this.workItem.startTime)
+      // console.log('当前结束时间为', this.workItem.endTime)
       // 发请求 修改完成时间
       editWorkItemApi({
         id: this.workItem.id,
@@ -523,7 +523,7 @@ export default {
       this.oldDesc = this.workItem.description
     },
     saveDesc() {
-      console.log('描述改为：', this.workItem.description)
+      // console.log('描述改为：', this.workItem.description)
       // 发请求 修改描述
       editWorkItemApi({
         id: this.workItem.id,
@@ -579,8 +579,8 @@ export default {
       })
     },
     handleRemove(file, fileList) {
-      console.log(file)
-      console.log(fileList)
+      // console.log(file)
+      // console.log(fileList)
       this.fileIdList = []
       for (const file of fileList) {
         this.fileIdList.push(file.id)

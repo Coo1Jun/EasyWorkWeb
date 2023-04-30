@@ -243,7 +243,7 @@ const fileFunction = {
      * @param {array} fileList 文件列表
      */
   handleFileNameClick(row, currentIndex, fileList = []) {
-    console.log('点击了=====》', row.fileName)
+    // console.log('点击了=====》', row.fileName)
     // console.log('是否是文件夹', row.isDir)
     // console.log(fileList)
     // 如果当前文件在回收站中，则不允许预览
