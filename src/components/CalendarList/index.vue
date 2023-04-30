@@ -68,7 +68,8 @@ export default {
       } else {
         dateParam = this.getDate(row.endTime)
       }
-      this.$router.push({ path: '/calendar/my', query: { date: dateParam, active: this.type }})
+      // this.$router.push({ path: '/calendar/my', query: { date: dateParam, active: this.type }})
+      this.$router.push({ name: 'MyCalendar', params: { date: dateParam, active: this.type }})
     },
     getDate(dateTime) {
       return dateTime.split(' ')[0]

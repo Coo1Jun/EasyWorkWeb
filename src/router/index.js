@@ -123,7 +123,7 @@ export const constantRoutes = [
     children: [
       {
         path: 'my',
-        name: 'My',
+        name: 'MyCalendar',
         component: () => import('@/views/calendar/index'),
         meta: { title: '日历', icon: 'el-icon-date' }
       }

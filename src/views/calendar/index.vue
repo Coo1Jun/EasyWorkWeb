@@ -428,12 +428,13 @@ export default {
       })
     }).catch(() => {})
     // 判断是否有路由参数，如果有，说明是由【工作台】页面跳转而来
-    if (this.$route.query.date) {
-      if (this.$route.query.active) {
-        this.calendarCellActiveName = this.$route.query.active
+    if (this.$route.params.date) {
+      if (this.$route.params.active) {
+        this.calendarCellActiveName = this.$route.params.active
       }
-      this.handleCellClick(null, { day: this.$route.query.date })
+      this.handleCellClick(null, { day: this.$route.params.date })
     }
+    console.log(this.$route)
   },
   methods: {
     handleCellClick(date, data) {
