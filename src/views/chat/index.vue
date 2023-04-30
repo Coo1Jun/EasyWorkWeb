@@ -251,15 +251,15 @@ export default {
     }
     // 初始化websocket
     WebSocket.init(this.userInfo.userid + ',' + getTime().toString(), this.onOpen, this.onMessage)
-    // 如果query参数存在，则是由通讯录页面跳转而来，先保存联系人
-    const query = this.$route.query
-    if (query.contactId && query.type) {
+    // 如果params参数存在，则是由通讯录页面跳转而来，先保存联系人
+    const params = this.$route.params
+    if (params.contactId && params.type) {
       const data = {
-        contactId: query.contactId,
-        type: query.type
+        contactId: params.contactId,
+        type: params.type
       }
-      if (query.type === 'group') {
-        data.name = '【项目组】' + query.name
+      if (params.type === 'group') {
+        data.name = '【项目组】' + params.name
       }
       await addContactApi(data)
     }
@@ -346,8 +346,8 @@ export default {
     ])
     IMUI.initEmoji(EmojiData)
     // 如果参数存在，则定位到指定的聊天窗口
-    if (query.contactId) {
-      IMUI.changeContact(query.contactId)
+    if (params.contactId) {
+      IMUI.changeContact(params.contactId)
     }
 
     // IMUI.setLastContentRender('voice', message => {

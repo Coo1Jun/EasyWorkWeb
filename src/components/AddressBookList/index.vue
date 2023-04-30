@@ -89,7 +89,8 @@ export default {
       this.$openBox.imgPreview({ imgList, defaultIndex: 0 })
     },
     toChat(data) {
-      this.$router.push({ path: '/message/chat', query: { type: 'person', contactId: data.id }})
+      // this.$router.push({ path: '/message/chat', query: { type: 'person', contactId: data.id }})
+      this.$router.push({ name: 'Chat', params: { type: 'person', contactId: data.id }})
     },
     handleSizeChange(val) {
       this.page.pageSize = val

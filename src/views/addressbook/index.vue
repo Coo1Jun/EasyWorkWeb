@@ -162,7 +162,8 @@ export default {
       this.personAddressBookLoading = false
     },
     toGroupChat(data) {
-      this.$router.push({ path: '/message/chat', query: { type: 'group', contactId: data.id, name: data.name }})
+      // this.$router.push({ path: '/message/chat', query: { type: 'group', contactId: data.id, name: data.name }})
+      this.$router.push({ name: 'Chat', params: { type: 'group', contactId: data.id, name: data.name }})
     },
     cancelAddUser() {
       this.findUserDialogVisible = false
