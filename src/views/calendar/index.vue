@@ -221,7 +221,7 @@
                     <div style="font-size: 14px;margin: 5px 0">截止时间</div>
                     <div class="calendar-cell-dialog-body-item-time">{{ getTime(data.endTime) }}</div>
                     <div style="font-size: 14px;margin: 5px 0">
-                      提醒时间：截止时间前<span> {{ 30 }} 分钟</span>
+                      提醒时间：截止时间前<span> {{ data.reminderTime }} 分钟</span>
                       <span style="margin-left: 10px">
                         <span v-if="data.emailReminder === 1">已启动邮件提醒</span>
                         <span v-else>已关闭邮件提醒</span>
@@ -245,6 +245,7 @@
 import dayjs from 'dayjs'
 import { getAllAddressBookListApi } from '@/api/addressbook'
 import { mapGetters } from 'vuex'
+import { getCalendarListApi, addScheduleApi, addTodoListApi } from '@/api/calendar'
 
 export default {
   name: 'Calendar',
@@ -296,66 +297,7 @@ export default {
       addressBooks: [],
       addressBooksMap: [],
       memberData: [],
-      calendarData: [
-        {
-          id: '1',
-          type: 'schedule', // 'schedule' or 'todo'
-          startTime: '2023-04-29 12:00',
-          endTime: '2023-04-29 17:12',
-          title: '11',
-          description: '',
-          participants: [
-            {
-              id: '1',
-              name: '李正帆测试1',
-              avatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/d534b989bc074da0b190f2a9e87c9e45.png'
-            },
-            {
-              id: '2',
-              name: '小明',
-              avatar: 'https://easywork23.oss-cn-shenzhen.aliyuncs.com/attachment/db02c8745a314524b18cbf5b9e310730.png'
-            }
-          ]
-        },
-        {
-          id: '2',
-          type: 'schedule', // 'schedule' or 'todo'
-          startTime: '2023-04-29 14:00',
-          endTime: '2023-04-29 17:12',
-          title: '日程22222',
-          description: '描述描述描述描述描述描述描述描述描述描述',
-          participants: []
-        },
-        {
-          id: '3',
-          type: 'todo', // 'schedule' or 'todo'
-          startTime: '',
-          endTime: '2023-04-29 17:11',
-          title: '待办事项1',
-          description: '描述描述描述描述描述描述描述描述描述描述描述描述',
-          participants: []
-        },
-        {
-          id: '4',
-          type: 'todo', // 'schedule' or 'todo'
-          startTime: '',
-          endTime: '2023-04-28 12:11',
-          title: '待办事项2',
-          description: '描述描述描述描述描述描述描述描述描述描述',
-          participants: [],
-          isEnd: 0
-        },
-        {
-          id: '5',
-          type: 'todo', // 'schedule' or 'todo'
-          startTime: '',
-          endTime: '2023-04-29 22:11',
-          title: '待办事项2',
-          description: '描述描述描述描述描述描述描述描述描述描述',
-          participants: [],
-          isEnd: 1
-        }
-      ]
+      calendarData: []
     }
   },
   computed: {
@@ -391,6 +333,7 @@ export default {
     }
   },
   mounted() {
+    // 获取用户信息列表
     getAllAddressBookListApi().then(res => {
       this.addressBooks = res.data
       this.addressBooksMap = new Map()
@@ -403,6 +346,8 @@ export default {
         this.addressBooksMap.set(addressBook.id, addressBook)
       })
     }).catch(() => {})
+    // 获取日历信息列表
+    this.refreshData()
   },
   methods: {
     handleCellClick(date, data) {
@@ -460,12 +405,21 @@ export default {
       this.scheduleAdd.emailReminder = 1
     },
     confirmAddShedule() {
-      this.$refs.scheduleAdd.validate((valid) => {
+      this.$refs.scheduleAdd.validate(async(valid) => {
         if (valid) {
-          console.log(this.scheduleAdd)
-          // todo 发请求
-
-          this.cancelAddShedule() // 这里调用并不是取消添加，而是初始化表单
+          // console.log(this.scheduleAdd)
+          const res = await addScheduleApi({
+            title: this.scheduleAdd.title,
+            startTime: this.scheduleAdd.duration[0],
+            endTime: this.scheduleAdd.duration[1],
+            emailReminder: this.scheduleAdd.emailReminder,
+            description: this.scheduleAdd.description,
+            participants: this.scheduleAdd.participants
+          })
+          if (res.success) {
+            this.refreshData()
+            this.cancelAddShedule() // 这里调用并不是取消添加，而是初始化表单
+          }
         } else {
           return false
         }
@@ -490,12 +444,25 @@ export default {
       this.todoListAdd.reminderTime2 = 30 // 截止时间前多少分钟提醒
     },
     confirmAddTodoList() {
-      this.$refs.todoListAdd.validate((valid) => {
+      this.$refs.todoListAdd.validate(async(valid) => {
         if (valid) {
-          console.log(this.todoListAdd)
-          // todo 发请求
-
-          this.cancelAddTodoList() // 这里调用并不是取消添加，而是初始化表单
+          // console.log(this.todoListAdd)
+          const data = {
+            title: this.todoListAdd.title,
+            endTime: this.todoListAdd.endTime,
+            emailReminder: this.todoListAdd.emailReminder,
+            description: this.todoListAdd.description
+          }
+          if (this.todoListAdd.reminderTimeType === '1') {
+            data.reminderTime = this.todoListAdd.reminderTime1
+          } else {
+            data.reminderTime = this.todoListAdd.reminderTime2
+          }
+          const res = await addTodoListApi(data)
+          if (res.success) {
+            this.refreshData()
+            this.cancelAddTodoList() // 这里调用并不是取消添加，而是初始化表单
+          }
         } else {
           return false
         }
@@ -509,6 +476,11 @@ export default {
     },
     getTime(dateTime) {
       return dateTime.split(' ')[1]
+    },
+    refreshData() {
+      getCalendarListApi().then(res => {
+        this.calendarData = res.data
+      }).catch(() => {})
     }
   }
 }
