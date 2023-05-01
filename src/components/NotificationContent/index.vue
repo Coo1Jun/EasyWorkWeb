@@ -29,10 +29,14 @@
       <span>，请及时参加</span>
     </div>
     <div v-if="data.type === 'schedule'"><el-badge style="margin-right: 5px" is-dot class="item" :hidden="data.isRead === 1" />
-      hello
+      您有一个日程<span class="nc-strong">{{ data.schedule.title }}</span>
+      <span>即将开始，时间为</span><span class="nc-strong">{{ data.schedule.startTime }} - {{ data.schedule.endTime }}</span>
+      <span>，请及时参加</span>
     </div>
     <div v-if="data.type === 'todo'"><el-badge style="margin-right: 5px" is-dot class="item" :hidden="data.isRead === 1" />
-      hello
+      您有一个待办<span class="nc-strong">{{ data.todoList.title }}</span><span>，</span>
+      <span style="color: #409eff;margin-right: 4px">{{ data.todoList.reminderTime }}</span><span>分钟后截止，截止时间为</span><span class="nc-strong">{{ data.todoList.endTime }}</span>
+      <span>，请及时完成</span>
     </div>
   </div>
 </template>

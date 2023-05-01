@@ -220,6 +220,8 @@ export default {
         this.groupDialogVisible = true
       } else if (data.type === 'new_schedule' || data.type === 'schedule') {
         this.$router.push({ name: 'MyCalendar', params: { date: this.getDate(data.schedule.startTime), active: 'schedule' }})
+      } else if (data.type === 'todo') {
+        this.$router.push({ name: 'MyCalendar', params: { date: this.getDate(data.todoList.endTime), active: 'todo' }})
       }
     },
     getDate(dateTime) {
