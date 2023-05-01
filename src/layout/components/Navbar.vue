@@ -218,7 +218,12 @@ export default {
       } else if (data.type === 'group') {
         this.groupDialog = data
         this.groupDialogVisible = true
+      } else if (data.type === 'new_schedule' || data.type === 'schedule') {
+        this.$router.push({ name: 'MyCalendar', params: { date: this.getDate(data.schedule.startTime), active: 'schedule' }})
       }
+    },
+    getDate(dateTime) {
+      return dateTime.split(' ')[0]
     },
     async handleAgreeAddFriend() {
       // console.log('同意加好友')

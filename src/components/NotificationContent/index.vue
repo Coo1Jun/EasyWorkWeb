@@ -23,6 +23,17 @@
       </span>
       即将截止，请尽快完成
     </div>
+    <div v-if="data.type === 'new_schedule'"><el-badge style="margin-right: 5px" is-dot class="item" :hidden="data.isRead === 1" />
+      <span class="nc-from-name">{{ data.fromName }}</span>创建了日程<span class="nc-strong">{{ data.schedule.title }}</span>
+      <span>，时间为</span><span class="nc-strong">{{ data.schedule.startTime }} - {{ data.schedule.endTime }}</span>
+      <span>，请及时参加</span>
+    </div>
+    <div v-if="data.type === 'schedule'"><el-badge style="margin-right: 5px" is-dot class="item" :hidden="data.isRead === 1" />
+      hello
+    </div>
+    <div v-if="data.type === 'todo'"><el-badge style="margin-right: 5px" is-dot class="item" :hidden="data.isRead === 1" />
+      hello
+    </div>
   </div>
 </template>
 
@@ -48,6 +59,10 @@ export default {
   color: #409eff
 }
 .nc-group-name {
+  margin: 0 4px;
+  color: #409eff
+}
+.nc-strong {
   margin: 0 4px;
   color: #409eff
 }

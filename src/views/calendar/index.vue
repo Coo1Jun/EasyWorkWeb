@@ -23,7 +23,7 @@
               <div v-if="d.type === 'todo' && data.day === getDate(d.endTime) && (calendarDataMap.get(data.day).length <= 3 ? index <= 2 : index < 2)" :class="d.type === 'todo' ? 'calendar-color-green' : ''">
                 <span v-if="d.isEnd === 1">✔️</span><span>待办 <span>{{ getTime(d.endTime) }} {{ d.title }}</span></span>
               </div>
-              <div v-if="calendarDataMap.get(data.day).length <= 3 ? false : index === 2" :class="d.type === 'todo' ? 'calendar-color-gray' : ''">
+              <div v-if="calendarDataMap.get(data.day).length <= 3 ? false : index === 2" class="calendar-color-gray">
                 <span>+{{ calendarDataMap.get(data.day).length - 2 }} more</span>
               </div>
             </div>
