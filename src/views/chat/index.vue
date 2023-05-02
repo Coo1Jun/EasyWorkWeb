@@ -41,12 +41,6 @@
         <p>使用 enter 快捷发送消息</p>
       </template>
     </lemon-imui>
-    <a
-      ref="downloadFile"
-      target="_blank"
-      :href="download.url"
-      :download="download.fileName"
-    />
     <el-dialog
       title="修改备注"
       :visible.sync="editRemarkVisible"
@@ -89,10 +83,6 @@ export default {
       editRemarkVisible: false,
       editRemark: '',
       CurrentContact: null,
-      download: {
-        url: '',
-        fileName: ''
-      },
       user: {},
       contextmenu: [
         // {
@@ -485,9 +475,12 @@ export default {
     },
     downloadFile(file) {
       // console.log('下载文件start')
-      this.download.url = file.content
-      this.download.fileName = file.type === 'image' ? '图片' : '文件'
-      this.$refs.downloadFile.click()
+      const a = document.createElement('a')
+      a.href = file.content
+      a.download = file.type === 'image' ? '图片' : '文件'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
       // console.log('下载文件end')
     },
     onMessage(msg) {
