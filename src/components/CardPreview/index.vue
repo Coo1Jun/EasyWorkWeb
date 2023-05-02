@@ -626,7 +626,8 @@ export default {
       // console.log('文件列表改为：', this.fileIdList)
       editWorkItemApi({
         id: this.workItem.id,
-        fileList: this.fileIdList
+        fileList: this.fileIdList,
+        updateFileList: 1
       }).then(res => {
         if (!res.success) {
           // 恢复旧值
