@@ -1,185 +1,199 @@
 <template>
-  <el-dialog
-    :title="workItem.workType"
-    :visible.sync="workItemVisible"
-    width="90%"
-    top="4vh"
-    :close-on-press-escape="false"
-    @closed="closeDialog"
-  >
-    <div class="cp-container">
-      <!-- 左边 -->
-      <div class="cp-content">
-        <div class="cp-content-input">
-          <el-input
-            ref="titleInput"
-            v-model="workItem.title"
-            placeholder="请输入标题"
-            @blur="workItemTitleBlur"
-          />
-        </div>
-        <!-- 负责人、流程状态、完成时间 -->
-        <div class="cp-content-attribute">
-          <div>
-            <div style="margin-bottom: 10px;">负责人</div>
-            <el-select
-              ref="principalSelect"
-              v-model="workItem.principalId"
-              placeholder="请选择负责人"
-              filterable
-              clearable
-              @change="principalChange"
-            >
-              <el-option
-                v-for="m in members"
-                :key="m.userId"
-                :label="m.name"
-                :value="m.userId"
-              />
-            </el-select>
-          </div>
-          <div style="margin-left: 10px;margin-right: 10px">
-            <div style="margin-bottom: 10px;">流程状态</div>
-            <el-select
-              ref="stateSelect"
-              v-model="workItem.status"
-              filterable
-              :disabled="workItem.workType === 'Epic'"
-              @change="stateChange"
-            >
-              <el-option
-                v-for="(s, index) in states"
-                :key="index"
-                :label="s"
-                :value="s"
-              />
-            </el-select>
-          </div>
-          <div>
-            <div style="margin-bottom: 10px">完成时间</div>
-            <el-date-picker
-              v-model="duration"
-              :clearable="false"
-              type="daterange"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              value-format="yyyy-MM-dd"
-              @change="durationChange"
+  <div>
+    <el-dialog
+      :title="workItem.workType"
+      :visible.sync="workItemVisible"
+      width="90%"
+      top="4vh"
+      :close-on-press-escape="false"
+      @closed="closeDialog"
+    >
+      <div class="cp-container">
+        <!-- 左边 -->
+        <div class="cp-content">
+          <div class="cp-content-input">
+            <el-input
+              ref="titleInput"
+              v-model="workItem.title"
+              placeholder="请输入标题"
+              @blur="workItemTitleBlur"
             />
-            <el-tag v-if="new Date().getTime() - new Date(workItem.endTime).getTime() > 0 && workItem.endFlag === 0" style="margin-left: 10px" type="danger">已延期</el-tag>
-            <el-tag v-else-if="workItem.status === '已完成'" style="margin-left: 10px" type="success">已完成</el-tag>
-            <el-tag v-else-if="workItem.status === '未复现' || workItem.status === '已取消' || workItem.status === '关闭'" style="margin-left: 10px" type="info">{{ workItem.status }}</el-tag>
+          </div>
+          <!-- 负责人、流程状态、完成时间 -->
+          <div class="cp-content-attribute">
+            <div>
+              <div style="margin-bottom: 10px;">负责人</div>
+              <el-select
+                ref="principalSelect"
+                v-model="workItem.principalId"
+                placeholder="请选择负责人"
+                filterable
+                clearable
+                @change="principalChange"
+              >
+                <el-option
+                  v-for="m in members"
+                  :key="m.userId"
+                  :label="m.name"
+                  :value="m.userId"
+                />
+              </el-select>
+            </div>
+            <div style="margin-left: 10px;margin-right: 10px">
+              <div style="margin-bottom: 10px;">流程状态</div>
+              <el-select
+                ref="stateSelect"
+                v-model="workItem.status"
+                filterable
+                :disabled="workItem.workType === 'Epic'"
+                @change="stateChange"
+              >
+                <el-option
+                  v-for="(s, index) in states"
+                  :key="index"
+                  :label="s"
+                  :value="s"
+                />
+              </el-select>
+            </div>
+            <div>
+              <div style="margin-bottom: 10px">完成时间</div>
+              <el-date-picker
+                v-model="duration"
+                :clearable="false"
+                type="daterange"
+                range-separator="至"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+                value-format="yyyy-MM-dd"
+                @change="durationChange"
+              />
+              <el-tag v-if="new Date().getTime() - new Date(workItem.endTime).getTime() > 0 && workItem.endFlag === 0" style="margin-left: 10px" type="danger">已延期</el-tag>
+              <el-tag v-else-if="workItem.status === '已完成'" style="margin-left: 10px" type="success">已完成</el-tag>
+              <el-tag v-else-if="workItem.status === '未复现' || workItem.status === '已取消' || workItem.status === '关闭'" style="margin-left: 10px" type="info">{{ workItem.status }}</el-tag>
+            </div>
+          </div>
+          <!--  -->
+          <div>
+            <el-tabs v-model="tabsActiveName">
+              <el-tab-pane label="基本信息" name="basicInfo">
+                <div style="margin-bottom: 10px">
+                  <span>描述</span>
+                  <el-link v-if="!editorVisable" style="color: #409eff;margin-left: 20px" @click="editDesc">编辑</el-link>
+                  <el-link v-if="editorVisable" style="color: #409eff;margin-left: 20px" @click="saveDesc">保存</el-link>
+                  <el-link v-if="workItem.description !== oldDesc" style="color: #409eff;margin-left: 20px" @click="cancelEditing">取消编辑</el-link>
+                </div>
+                <div v-if="editorVisable">
+                  <div v-if="workItemVisible" style="border: 1px solid #eee">
+                    <Toolbar
+                      style="border-bottom: 1px solid #eee"
+                      :editor="editor"
+                      :default-config="toolbarConfig"
+                      :mode="mode"
+                    />
+                    <Editor
+                      v-model="workItem.description"
+                      style="height: 300px; overflow-y: hidden"
+                      :default-config="editorConfig"
+                      :mode="mode"
+                      @onCreated="onCreated"
+                    />
+                  </div>
+                </div>
+                <div v-else class="cp-desc" v-html="workItem.description" />
+              </el-tab-pane>
+              <el-tab-pane :label="tabPaneFileLabel" name="attachment">
+                <el-upload
+                  class="upload-demo"
+                  :action="uploadUrl"
+                  :on-preview="handlePreview"
+                  :before-remove="handleBeforeRemove"
+                  :on-remove="handleRemove"
+                  :on-success="uploadSuccess"
+                  :on-error="uploadError"
+                  multiple
+                  :file-list="defaultFileList"
+                >
+                  <span>附件</span>
+                  <el-button style="margin-left: 10px" size="mini" icon="el-icon-plus" circle />
+                </el-upload>
+              </el-tab-pane>
+              <el-tab-pane v-if="workItem.workType !== 'Epic'" :label="tabPaneSubWorkLabel" name="subWorkItem">
+                <WorkItemList :work-items="workItem.children" />
+              </el-tab-pane>
+            </el-tabs>
           </div>
         </div>
-        <!--  -->
-        <div>
-          <el-tabs v-model="tabsActiveName">
-            <el-tab-pane label="基本信息" name="basicInfo">
-              <div style="margin-bottom: 10px">
-                <span>描述</span>
-                <el-link v-if="!editorVisable" style="color: #409eff;margin-left: 20px" @click="editDesc">编辑</el-link>
-                <el-link v-if="editorVisable" style="color: #409eff;margin-left: 20px" @click="saveDesc">保存</el-link>
-                <el-link v-if="workItem.description !== oldDesc" style="color: #409eff;margin-left: 20px" @click="cancelEditing">取消编辑</el-link>
+        <!-- 右边 -->
+        <div class="cp-attribute">
+          <el-button size="small" type="danger" icon="el-icon-delete" @click="deleteWorkItem">删除工作项</el-button>
+          <el-collapse v-model="collapseActiveName">
+            <el-collapse-item title="属性" name="1">
+              <div class="cp-attribute-item">
+                <div style="width: 120px;font-size: 14px">优先级</div>
+                <el-rate
+                  v-model="workItem.priority"
+                  show-text
+                  :texts="['最低', '较低', '普通', '较高', '最高']"
+                  :colors=" { 1: '#73d897', 3: { value: '#6698ff', excluded: true }, 4: { value: '#f6c659', excluded: true }, 5: { value: '#ff9f73', excluded: true }, 6: '#ff7575' }"
+                  @change="priorityCheck"
+                />
               </div>
-              <div v-if="editorVisable">
-                <div v-if="workItemVisible" style="border: 1px solid #eee">
-                  <Toolbar
-                    style="border-bottom: 1px solid #eee"
-                    :editor="editor"
-                    :default-config="toolbarConfig"
-                    :mode="mode"
-                  />
-                  <Editor
-                    v-model="workItem.description"
-                    style="height: 300px; overflow-y: hidden"
-                    :default-config="editorConfig"
-                    :mode="mode"
-                    @onCreated="onCreated"
-                  />
+              <div class="cp-attribute-item">
+                <div style="width: 120px;font-size: 14px">风险</div>
+                <el-rate
+                  v-model="workItem.risk"
+                  show-text
+                  :texts="['低', '中', '高']"
+                  :colors=" { 1: '#73d897', 3: { value: '#f6c659', excluded: true }, 4: '#ff7575' }"
+                  :max="3"
+                  @change="riskCheck"
+                />
+              </div>
+            </el-collapse-item>
+            <el-collapse-item title="基础信息" name="2">
+              <div class="basic-info">
+                <div>
+                  <span class="basic-info-item">所属项目</span>
+                  <span>{{ curProject.projectName }}</span>
+                </div>
+                <div>
+                  <span class="basic-info-item">创建人</span>
+                  <span style="margin-right: 5px"><el-avatar :size="'small'" :src="createUser && createUser.portrait" /></span>
+                  <span>{{ createUser && createUser.realName }}</span>
+                </div>
+                <div>
+                  <span class="basic-info-item">创建时间</span>
+                  <span>{{ workItem.createTime }}</span>
+                </div>
+                <div>
+                  <span class="basic-info-item">更新人</span>
+                  <span style="margin-right: 5px"><el-avatar :size="'small'" :src="updateUser && updateUser.portrait" /></span>
+                  <span>{{ updateUser && updateUser.realName }}</span>
+                </div>
+                <div>
+                  <span class="basic-info-item">更新时间</span>
+                  <span>{{ workItem.updateTime }}</span>
                 </div>
               </div>
-              <div v-else class="cp-desc" v-html="workItem.description" />
-            </el-tab-pane>
-            <el-tab-pane :label="tabPaneFileLabel" name="attachment">
-              <el-upload
-                class="upload-demo"
-                :action="uploadUrl"
-                :on-preview="handlePreview"
-                :before-remove="handleBeforeRemove"
-                :on-remove="handleRemove"
-                :on-success="uploadSuccess"
-                :on-error="uploadError"
-                multiple
-                :file-list="defaultFileList"
-              >
-                <span>附件</span>
-                <el-button style="margin-left: 10px" size="mini" icon="el-icon-plus" circle />
-              </el-upload>
-            </el-tab-pane>
-            <el-tab-pane v-if="workItem.workType !== 'Epic'" :label="tabPaneSubWorkLabel" name="subWorkItem">
-              <WorkItemList :work-items="workItem.children" />
-            </el-tab-pane>
-          </el-tabs>
+            </el-collapse-item>
+          </el-collapse>
         </div>
       </div>
-      <!-- 右边 -->
-      <div class="cp-attribute">
-        <el-button size="small" type="danger" icon="el-icon-delete" @click="deleteWorkItem">删除工作项</el-button>
-        <el-collapse v-model="collapseActiveName">
-          <el-collapse-item title="属性" name="1">
-            <div class="cp-attribute-item">
-              <div style="width: 120px;font-size: 14px">优先级</div>
-              <el-rate
-                v-model="workItem.priority"
-                show-text
-                :texts="['最低', '较低', '普通', '较高', '最高']"
-                :colors=" { 1: '#73d897', 3: { value: '#6698ff', excluded: true }, 4: { value: '#f6c659', excluded: true }, 5: { value: '#ff9f73', excluded: true }, 6: '#ff7575' }"
-                @change="priorityCheck"
-              />
-            </div>
-            <div class="cp-attribute-item">
-              <div style="width: 120px;font-size: 14px">风险</div>
-              <el-rate
-                v-model="workItem.risk"
-                show-text
-                :texts="['低', '中', '高']"
-                :colors=" { 1: '#73d897', 3: { value: '#f6c659', excluded: true }, 4: '#ff7575' }"
-                :max="3"
-                @change="riskCheck"
-              />
-            </div>
-          </el-collapse-item>
-          <el-collapse-item title="基础信息" name="2">
-            <div class="basic-info">
-              <div>
-                <span class="basic-info-item">所属项目</span>
-                <span>{{ curProject.projectName }}</span>
-              </div>
-              <div>
-                <span class="basic-info-item">创建人</span>
-                <span style="margin-right: 5px"><el-avatar :size="'small'" :src="createUser && createUser.portrait" /></span>
-                <span>{{ createUser && createUser.realName }}</span>
-              </div>
-              <div>
-                <span class="basic-info-item">创建时间</span>
-                <span>{{ workItem.createTime }}</span>
-              </div>
-              <div>
-                <span class="basic-info-item">更新人</span>
-                <span style="margin-right: 5px"><el-avatar :size="'small'" :src="updateUser && updateUser.portrait" /></span>
-                <span>{{ updateUser && updateUser.realName }}</span>
-              </div>
-              <div>
-                <span class="basic-info-item">更新时间</span>
-                <span>{{ workItem.updateTime }}</span>
-              </div>
-            </div>
-          </el-collapse-item>
-        </el-collapse>
-      </div>
-    </div>
-  </el-dialog>
+    </el-dialog>
+    <el-dialog
+      title="操作"
+      :visible.sync="fileOperationVisable"
+      width="30%"
+    >
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="filePreview(curFile)">预 览</el-button>
+        <el-button type="primary" @click="fileOperationVisable = false">
+          <a :href="`http://localhost:8020/api/ew-server/file/download/${curFile.id}`">下载</a>
+        </el-button>
+      </span>
+    </el-dialog>
+  </div>
 </template>
 
 <script>
@@ -215,6 +229,8 @@ export default {
     return {
       uploadUrl,
       defaultFileList: [],
+      fileOperationVisable: false,
+      curFile: {},
       members: [], // 团队成员
       workItemVisible: false,
       collapseActiveName: ['1', '2'], // collapse默认展开的菜单
@@ -561,6 +577,14 @@ export default {
       // console.log(file)
       // console.log(this.workItem.fileList)
       // console.log('附件预览')
+      this.fileOperationVisable = true
+      this.curFile = file
+      if (!file.id) {
+        this.curFile = file.response.data
+      }
+    },
+    filePreview(file) {
+      this.fileOperationVisable = false
       const PIC = ['png', 'jpg', 'jpeg', 'gif', 'svg']
       const fileExtension = file.name.split('.').pop().toLowerCase()
       if (PIC.includes(fileExtension)) {
