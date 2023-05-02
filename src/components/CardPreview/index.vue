@@ -119,7 +119,7 @@
                 </el-upload>
               </el-tab-pane>
               <el-tab-pane v-if="workItem.workType !== 'Epic'" :label="tabPaneSubWorkLabel" name="subWorkItem">
-                <WorkItemList :work-items="workItem.children" />
+                <WorkItemList :work-items="workItem.children ? workItem.children : []" />
               </el-tab-pane>
             </el-tabs>
           </div>
