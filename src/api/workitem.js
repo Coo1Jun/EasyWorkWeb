@@ -185,3 +185,15 @@ export function getOtherWorkItemApi() {
   })
 }
 
+/**
+ * 添加评论
+ * @returns
+ */
+export function addCommentApi(data) {
+  return request({
+    url: `/api/ew-project/workitem/comment`,
+    method: 'post',
+    data
+  })
+}
+

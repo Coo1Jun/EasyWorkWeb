@@ -76,11 +76,11 @@
           <!--  -->
           <div>
             <el-tabs v-model="tabsActiveName">
-              <el-tab-pane label="基本信息" name="basicInfo">
+              <el-tab-pane label="描述" name="basicInfo">
                 <div style="margin-bottom: 10px">
-                  <span>描述</span>
-                  <el-link v-if="!editorVisable" style="color: #409eff;margin-left: 20px" @click="editDesc">编辑</el-link>
-                  <el-link v-if="editorVisable" style="color: #409eff;margin-left: 20px" @click="saveDesc">保存</el-link>
+                  <!-- <span>描述</span> -->
+                  <el-link v-if="!editorVisable" style="color: #409eff;" @click="editDesc">编辑</el-link>
+                  <el-link v-if="editorVisable" style="color: #409eff;" @click="saveDesc">保存</el-link>
                   <el-link v-if="workItem.description !== oldDesc" style="color: #409eff;margin-left: 20px" @click="cancelEditing">取消编辑</el-link>
                 </div>
                 <div v-if="editorVisable">
@@ -101,6 +101,19 @@
                   </div>
                 </div>
                 <div v-else class="cp-desc" v-html="workItem.description" />
+              </el-tab-pane>
+              <el-tab-pane :label="tabPaneCommentLabel" name="comment">
+                <div class="cp-comment">
+                  <Comment v-for="(c,index) in workItem.comments" :key="index" :comment="c" />
+                </div>
+                <div>
+                  <el-input
+                    v-model="comment.text"
+                    placeholder="请输入内容"
+                  >
+                    <el-button slot="append" :disabled="comment.text === ''" @click="sendComment">发送</el-button>
+                  </el-input>
+                </div>
               </el-tab-pane>
               <el-tab-pane :label="tabPaneFileLabel" name="attachment">
                 <el-upload
@@ -204,12 +217,14 @@ import WorkItemList from '@/components/WorkItemList'
 import { uploadUrl } from '@/api/file'
 import { getMemberListByGroupIdApi } from '@/api/group'
 import { getUserInfoApi } from '@/api/user'
-import { editWorkItemApi, deleteWorkItemByIdApi, getSubWorkItemApi } from '@/api/workitem'
+import { editWorkItemApi, deleteWorkItemByIdApi, getSubWorkItemApi, addCommentApi } from '@/api/workitem'
 import * as base64Encode from 'js-base64'
+import Comment from '@/components/Comment'
+import dayjs from 'dayjs'
 
 export default {
   name: 'CardPreview',
-  components: { Editor, Toolbar, WorkItemList },
+  components: { Editor, Toolbar, WorkItemList, Comment },
   props: {
     visable: {
       type: Boolean,
@@ -257,7 +272,8 @@ export default {
         endTime: '', // 结束时间
         fileList: [], // 附件
         description: '', // 描述
-        children: []
+        children: [],
+        comments: []
       },
       duration: [], // 完成时间，有两个值，第一个为开始时间，第二个为结束时间
       oldDesc: '', // 描述的旧值，用于取消编辑时
@@ -269,11 +285,14 @@ export default {
       createUser: {}, // 创建人信息
       updateUser: {}, // 更新人信息
       fileIdList: [], // 附件id列表（实时）
-      oldFileIdList: [] // 附件id列表的旧值
+      oldFileIdList: [], // 附件id列表的旧值
+      comment: {
+        text: ''
+      }
     }
   },
   computed: {
-    ...mapGetters(['defaultStates', 'TaskStates', 'BugStates']),
+    ...mapGetters(['defaultStates', 'TaskStates', 'BugStates', 'userInfo']),
     tabPaneFileLabel() {
       let label = '附件'
       if (this.fileIdList && this.fileIdList.length > 0) {
@@ -287,6 +306,13 @@ export default {
         label += '(' + this.workItem.children.length + ')'
       }
       return label
+    },
+    tabPaneCommentLabel() {
+      let label = '评论'
+      if (this.workItem.comments && this.workItem.comments.length > 0) {
+        label += '(' + this.workItem.comments.length + ')'
+      }
+      return label
     }
   },
   watch: {
@@ -294,7 +320,7 @@ export default {
       this.workItemVisible = newVal
     },
     workItemPreview(value) {
-      this.workItem = value
+      Object.assign(this.workItem, value)
       // 获取子工作项
       if (!this.workItem.children) {
         getSubWorkItemApi(this.workItemPreview.id).then(res => {
@@ -676,6 +702,28 @@ export default {
           this.$emit('refreshPlanCardData')
         }
       })
+    },
+    sendComment() {
+      if (!this.workItem.comments) {
+        this.workItem.comments = []
+      }
+      this.workItem.comments.push({
+        avatar: this.userInfo.portrait,
+        userName: this.userInfo.realName,
+        content: this.comment.text,
+        createTime: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss')
+      })
+      addCommentApi({
+        content: this.comment.text,
+        workItemId: this.workItem.id
+      }).then(res => {
+        if (!res.success) {
+          this.workItem.comments.pop()
+        }
+      }).catch(() => {
+        this.workItem.comments.pop()
+      })
+      this.comment.text = ''
     }
   }
 }
@@ -730,5 +778,9 @@ export default {
 }
 ::v-deep .cp-desc img {
   width: 100%;
+}
+.cp-comment {
+  height: 285px;
+  overflow: auto;
 }
 </style>
