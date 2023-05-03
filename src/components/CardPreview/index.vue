@@ -719,6 +719,9 @@ export default {
       }).then(res => {
         if (!res.success) {
           this.workItem.comments.pop()
+        } else {
+          // 刷新数据
+          this.$emit('refreshPlanCardData')
         }
       }).catch(() => {
         this.workItem.comments.pop()
