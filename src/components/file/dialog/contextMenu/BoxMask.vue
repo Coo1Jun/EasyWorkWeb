@@ -17,7 +17,7 @@
         <i class="el-icon-view" /> 查看
       </li>
       <li
-        v-if="selectedFile && selectedFile.belongType === 1"
+        v-if="selectedFile && (selectedFile.belongType === 1 || (selectedFile.belongType === 0 && selectedFile.filePath !== '/'))"
         class="right-menu-item"
         @click="handleDeleteFileBtnClick(selectedFile)"
       >
@@ -38,14 +38,14 @@
         <i class="el-icon-copy-document" /> 复制
       </li>
       <li
-        v-if="selectedFile && selectedFile.belongType === 1"
+        v-if="selectedFile && (selectedFile.belongType === 1 || (selectedFile.belongType === 0 && selectedFile.filePath !== '/'))"
         class="right-menu-item"
         @click="handleMoveFileBtnClick(selectedFile)"
       >
         <i class="el-icon-s-promotion" /> 移动
       </li>
       <li
-        v-if="selectedFile && selectedFile.belongType === 1"
+        v-if="selectedFile && (selectedFile.belongType === 1 || (selectedFile.belongType === 0 && selectedFile.filePath !== '/'))"
         class="right-menu-item"
         @click="handleRenameFileBtnClick(selectedFile)"
       >
