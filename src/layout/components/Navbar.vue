@@ -77,7 +77,7 @@
       <template slot="title">
         <div>
           通知
-          <el-link type="primary" style="margin-left: 20px" @click="toNotification">通知中心</el-link>
+          <!-- <el-link type="primary" style="margin-left: 20px" @click="toNotification">通知中心</el-link> -->
         </div>
       </template>
       <div class="n-notification-list">
